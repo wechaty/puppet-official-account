@@ -4,20 +4,28 @@
 [![npm (tag)](https://img.shields.io/npm/v/wechaty-puppet-official-account/next.svg)](https://www.npmjs.com/package/wechaty-puppet-official-account?activeTab=versions)
 [![NPM](https://github.com/wechaty/wechaty-puppet-official-account/workflows/NPM/badge.svg)](https://github.com/wechaty/wechaty-puppet-official-account/actions?query=workflow%3ANPM)
 
-![WeChat Official Account Puppet for Wechaty](images/wechaty-puppet-official-account.png)
-
-> 
+![WeChat Official Account Puppet for Wechaty](docs/images/wechaty-puppet-official-account.png)
 
 [![Powered by Wechaty](https://img.shields.io/badge/Powered%20By-Wechaty-brightgreen.svg)](https://github.com/wechaty/wechaty)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
-Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your Official Account from <mp.weixin.qq.com>.
+Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your Official Account from <https://mp.weixin.qq.com>.
 
 ## FEATURES
 
 1. Provide web hook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel) and [Serverless.Social](https://serverless.social) )
 
 ## USAGE
+
+## ENVIRONMENTS
+
+```sh
+WECHATY_PUPPET_OA_APP_ID
+WECHATY_PUPPET_OA_APP_SECRET
+WECHATY_PUPPET_OA_PORT
+WECHATY_PUPPET_OA_TOKEN
+WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL
+```
 
 ### Puppet Official Account
 
