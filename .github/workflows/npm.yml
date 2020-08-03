@@ -43,7 +43,10 @@ jobs:
       - name: Pack Testing
         run: ./scripts/npm-pack-testing.sh
         env:
-          WECHATY_PUPPET_HOSTIE_TOKEN: ${{ secrets.WECHATY_PUPPET_HOSTIE_TOKEN }}
+          WECHATY_PUPPET_OA_APP_ID: wx436a8961645c4d49
+          WECHATY_PUPPET_OA_APP_SECRET: 198cbdc24c3b52929cf4b7e1fe5ad571
+          WECHATY_PUPPET_OA_TOKEN: test
+          WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL: https://wechaty-puppet-official-account.serverless.social
 
   publish:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/v'))
