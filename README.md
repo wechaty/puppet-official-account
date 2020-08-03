@@ -17,6 +17,41 @@ Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your
 
 ## USAGE
 
+This documentation assume that you are familiar with Wechaty already.
+
+If you are newbie to Wechaty, please read the following two links first:
+
+1. [Wechaty WebSite](https://wechaty.js.org)
+1. [Wechaty Getting Started](https://github.com/wechaty/wechaty-getting-started)
+
+In order to use `wechaty-puppet-official-account` with Wechaty, just like other puppets as well:
+
+```ts
+import { Wechaty } from 'wechaty'
+import { PuppetOA } from 'wechaty-puppet-official-account'
+
+const oa = new PuppetOA({
+  appId           : 'wx436a8961645c4d49',
+  appSecret       : '198cbdc24c3b52929cf4b7e1fe5ad571',
+  token           : 'test',
+  webhookProxyUrl : 'https://aeb082b9-14da-4b91-bdef-90a6b17a4a97.serverless.social',
+})
+
+const bot = new Wechaty({
+  name: 'oa-bot',
+  puppet: oa,
+})
+
+bot.on('message', msg => {
+  if (!msg.self() && msg.type() === bot.Message.Type.Text && /ding/i.test(msg.text())) {
+    await msg.say('dong')
+  }
+})
+await bot.start()
+```
+
+That's it!
+
 ## ENVIRONMENTS VARIABLES
 
 You can use environment variables to configure all of the WeChat Official Account Development Information.
@@ -54,37 +89,24 @@ For example, if your UUID is `aeb082b9-14da-4b91-bdef-90a6b17a4a97`, then you ca
 
 ## DEVELOPMENT
 
-### 测试号申请
+When you start developing the WeChat Official Account, it will be very helpful with the following tools provided by Tencent:
 
-由于用户体验和安全性方面的考虑，微信公众号的注册有一定门槛，某些高级接口的权限需要微信认证后才可以获取。
+1. Apply a test Official Account with full priviliedges for developing
+1. Simulate the API calls in a online simulation tool.
 
-所以，为了帮助开发者快速了解和上手微信公众号开发，熟悉各个接口的调用，我们推出了微信公众帐号测试号，通过手机微信扫描二维码即可获得测试号。
+### Apply a Official Account for developing/testing
+
+微信公众号的注册有门槛，高级接口权限在微信认证之前是不可用的。腾讯平台提供了微信公众帐号测试号，通过手机微信扫描二维码即可获得拥有所有完整高级功能的测试微信公众号，可以帮助开发者快速了解和上手微信公众号开发，熟悉各个接口的调用。
 
 [进入微信公众帐号测试号申请系统](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
 
-### 接口调试工具
+### API calls debuging tool
 
-此工具旨在帮助开发者检测调用【微信公众平台开发者API】时发送的请求参数是否正确，提交相关信息后可获得服务器的验证结果
+为了帮助开发者检测调用【微信公众平台开发者API】时发送的请求参数是否正确，腾讯公司提供了在线的 API 模拟交互工具，可以允许开发者在平台上提交信息和服务器进行交互，并得到验证结果。
 
-使用说明：
+Address: <https://mp.weixin.qq.com/debug/>
 
-1. 选择合适的接口。
-1. 系统会生成该接口的参数表，您可以直接在文本框内填入对应的参数值。（红色星号表示该字段必填）
-1. 点击检查问题按钮，即可得到相应的调试信息。
-
-<https://mp.weixin.qq.com/debug/>
-
-### Webhook.site
-
-With Webhook.site, you instantly get a unique, random URL that you can use to test and debug Webhooks and HTTP requests, as well as to create your own workflows using the Custom Actions graphical editor or WebhookScript, a simple scripting language, to transform, validate and process HTTP requests.
-
-<https://webhook.site/>
-
-### UUID Online Generator
-
-<https://uuidonline.com/>
-
-## Resources
+## RESOURCES
 
 - [nodejs+express对微信公众号进行二次开发--接收消息，自动回复文本，图片以及代码优化](https://blog.csdn.net/weixin_44729896/article/details/102525375)
 
