@@ -24,14 +24,14 @@ import {
   EventMessagePayload,
 }                         from 'wechaty-puppet'
 
-import { PuppetMock } from '../src/mod'
+import { PuppetOA } from '../src/mod'
 
 /**
  *
  * 1. Declare your Bot!
  *
  */
-const puppet = new PuppetMock()
+const puppet = new PuppetOA()
 
 /**
  *

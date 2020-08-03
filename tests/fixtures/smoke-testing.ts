@@ -1,16 +1,16 @@
 #!/usr/bin/env ts-node
 
 import {
-  PuppetMock,
+  PuppetOA,
   VERSION,
-}                 from 'wechaty-puppet-mock'
+}                 from 'wechaty-puppet-official-account'
 
 async function main () {
   if (VERSION === '0.0.0') {
     throw new Error('version should not be 0.0.0 when prepare for publishing')
   }
 
-  const puppet = new PuppetMock()
+  const puppet = new PuppetOA()
   console.info(`Puppet v${puppet.version()} smoke testing passed.`)
   return 0
 }

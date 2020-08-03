@@ -1,138 +1,72 @@
 # PUPPET-MOCK
 
-[![NPM Version](https://badge.fury.io/js/wechaty-puppet-mock.svg)](https://badge.fury.io/js/wechaty-puppet-mock)
-[![npm (tag)](https://img.shields.io/npm/v/wechaty-puppet-mock/next.svg)](https://www.npmjs.com/package/wechaty-puppet-mock?activeTab=versions)
-[![NPM](https://github.com/wechaty/wechaty-puppet-mock/workflows/NPM/badge.svg)](https://github.com/wechaty/wechaty-puppet-mock/actions?query=workflow%3ANPM)
+[![NPM Version](https://badge.fury.io/js/wechaty-puppet-official-account.svg)](https://badge.fury.io/js/wechaty-puppet-official-account)
+[![npm (tag)](https://img.shields.io/npm/v/wechaty-puppet-official-account/next.svg)](https://www.npmjs.com/package/wechaty-puppet-official-account?activeTab=versions)
+[![NPM](https://github.com/wechaty/wechaty-puppet-official-account/workflows/NPM/badge.svg)](https://github.com/wechaty/wechaty-puppet-official-account/actions?query=workflow%3ANPM)
 
-![chatie puppet](https://wechaty.github.io/wechaty-puppet-mock/images/mock.png)
+![WeChat Official Account Puppet for Wechaty](images/wechaty-puppet-official-account.png)
 
-> Picture Credit: <https://softwareautotools.com/2017/03/01/mocking-explained-in-python/>
+> 
 
 [![Powered by Wechaty](https://img.shields.io/badge/Powered%20By-Wechaty-brightgreen.svg)](https://github.com/wechaty/wechaty)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
-Puppet Mocker & Starter Template for Wechaty, it is very useful when you:
+Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your Official Account from <mp.weixin.qq.com>.
 
-1. Want to test the Wechaty framework with a mock puppet, or
-1. You want to write your own Puppet implenmentation.
+## FEATURES
 
-Then `PuppetMock` will helps you a lot.
+1. Provide web hook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel) and [Serverless.Social](https://serverless.social) )
 
 ## USAGE
 
-### Puppet Mock
+### Puppet Official Account
 
-```ts
-import { Wechaty }   from 'wechaty'
-import { PuppetMock } from 'wechaty-puppet-mock'
+## DEVELOPMENT
 
-const puppet  = new PuppetMock()
-const wechaty = new Wechaty({ puppet })
+### 测试号申请
 
-wechaty.start()
-```
+由于用户体验和安全性方面的考虑，微信公众号的注册有一定门槛，某些高级接口的权限需要微信认证后才可以获取。
 
-### Mocker & Environment
+所以，为了帮助开发者快速了解和上手微信公众号开发，熟悉各个接口的调用，我们推出了微信公众帐号测试号，通过手机微信扫描二维码即可获得测试号。
 
-```ts
-import {
-  PuppetMock,
-  Mocker,
-  SimpleEnvironment,
-}                     from 'wechaty-puppet-mock'
+[进入微信公众帐号测试号申请系统](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
 
-const mocker = new Mocker()
-mocker.use(SimpleEnvironment())
+### 接口调试工具
 
-const puppet = new PuppetMock({ mocker })
-const wechaty = new Wechaty({ puppet })
+此工具旨在帮助开发者检测调用【微信公众平台开发者API】时发送的请求参数是否正确，提交相关信息后可获得服务器的验证结果
 
-wechaty.start()
+使用说明：
 
-// The Mocker will start perform the SimpleEnvironment...
-```
+1. 选择合适的接口。
+1. 系统会生成该接口的参数表，您可以直接在文本框内填入对应的参数值。（红色星号表示该字段必填）
+1. 点击检查问题按钮，即可得到相应的调试信息。
 
-See: [SimpleEnvironment](src/mocker/environment.ts)
+<https://mp.weixin.qq.com/debug/>
 
-## API Reference
+### Webhook.site
 
-### Mocker
+With Webhook.site, you instantly get a unique, random URL that you can use to test and debug Webhooks and HTTP requests, as well as to create your own workflows using the Custom Actions graphical editor or WebhookScript, a simple scripting language, to transform, validate and process HTTP requests.
 
-```ts
-import { Wechaty }  from 'wechaty'
-import { PuppetMock, mock }   from 'wechaty-puppet-mock'
+<https://webhook.site/>
 
-const mocker = new mock.Mocker()
-const puppet = new PuppetMock({ mocker })
-const bot = new Wechaty({ puppet })
+### UUID Online Generator
 
-await bot.start()
+<https://uuidonline.com/>
 
-mocker.scan('https://github.com/wechaty', 1)
+## Resources
 
-const user = mocker.createContact()
-mocker.login(user)
-
-const contact = mocker.createContact()
-const room = mocker.createRoom()
-
-user.say('Hello').to(contact)
-contact.say('World').to(user)
-```
-
-## HELPER UTILITIES
-
-### StateSwitch
-
-```ts
-this.state.on('pending')
-this.state.on(true)
-this.state.off('pending')
-this.state.off(true)
-
-await this.state.ready('on')
-await this.state.ready('off')
-
-```
-
-### Watchdog
-
-```ts
-```
-
-### MemoryCard
-
-```ts
-await memory.set('config', { id: 1, key: 'xxx' })
-const config = await memory.get('config')
-console.log(config)
-// Output: { id: 1, key: 'xxx' }
-```
+- [nodejs+express对微信公众号进行二次开发--接收消息，自动回复文本，图片以及代码优化](https://blog.csdn.net/weixin_44729896/article/details/102525375)
 
 ## HISTORY
 
 ### master
 
-### v0.25 (July 13, 2020)
+### v0.0.1 (Aug 2, 2018)
 
-1. Rename `MockXXX` to `XXXMock` for keep the consistent naming style with `PuppetMock`.
-1. Export `mock` namespace and move all related modules under it.
+Initial version for Official Account.
 
-### v0.22 (June 4, 2020)
-
-`Mocker` Released. `Mocker` is a manager for controlling the behavior of the Puppet activities.
-
-1. Add `MockContact`, `MockRoom`, and `MockMessage` for `Mockers`
-1. Add `MockEnvironment` for mocking the server behaviors.
-1. Support `Wechaty#Contact.find()` from the `mocker.createContacts()`
-1. Support `Wechaty#Room.find()` from the `mocker.createRooms()`
-1. Support `message` event for `talker`, `listener`, and `room` of `MockMessage`
-
-### v0.0.1 (Jun 27, 2018)
-
-Initial version.
-
-`PuppetMock` is a skelton Puppet without do anything, it will make testing easy when developing Wechaty
+1. receive message from user
+1. reply message to user (passive mode)
 
 ## AUTHOR
 
@@ -144,6 +78,6 @@ Initial version.
 
 ## COPYRIGHT & LICENSE
 
-* Code & Docs © 2018 Huan LI \<zixia@zixia.net\>
-* Code released under the Apache-2.0 License
-* Docs released under Creative Commons
+- Code & Docs © 2020 Huan LI \<zixia@zixia.net\>
+- Code released under the Apache-2.0 License
+- Docs released under Creative Commons

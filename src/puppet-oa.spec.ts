@@ -3,20 +3,20 @@
 // tslint:disable:no-shadowed-variable
 import test  from 'blue-tape'
 
-import { PuppetMock } from './puppet-mock'
+import { PuppetOA } from './puppet-oa'
 
-class PuppetMockTest extends PuppetMock {
+class PuppetOATest extends PuppetOA {
 }
 
-test('PuppetMock perfect restart testing', async (t) => {
-  const puppet = new PuppetMockTest()
+test('PuppetOA perfect restart testing', async (t) => {
+  const puppet = new PuppetOATest()
   try {
     for (let i = 0; i < 3; i++) {
       await puppet.start()
       await puppet.stop()
       t.pass('start/stop-ed at #' + i)
     }
-    t.pass('PuppetMock() perfect restart pass.')
+    t.pass('PuppetOA() perfect restart pass.')
   } catch (e) {
     t.fail(e)
   }

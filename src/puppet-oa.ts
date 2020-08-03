@@ -42,102 +42,132 @@ import {
   log,
 }                           from 'wechaty-puppet'
 
+import { VERSION } from './version'
 import {
-  CHATIE_OFFICIAL_ACCOUNT_QRCODE,
   qrCodeForChatie,
-  VERSION,
+  envOptions,
 }                                   from './config'
-
-// import { Attachment } from './mock/user/types'
+import { textMessagePayload } from './official-account/payload-builder'
 
 import {
-  Mocker,
-  // ContactMock,
-}                     from './mock/mod'
-// import { UrlLink, MiniProgram } from 'wechaty'
+  OfficialAccountOptions,
+  OfficialAccount,
+}                             from './official-account/official-account'
 
-export type PuppetMockOptions = PuppetOptions & {
-  mocker?: Mocker,
-}
+export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
-class PuppetMock extends Puppet {
+class PuppetOA extends Puppet {
 
   public static readonly VERSION = VERSION
 
-  private loopTimer?: NodeJS.Timer
+  protected appId           : string
+  protected appSecret       : string
+  protected token           : string
+  protected webhookProxyUrl : string
 
-  public mocker: Mocker
+  protected oa?: OfficialAccount
 
   constructor (
-    public options: PuppetMockOptions = {},
+    options: PuppetOAOptions = {},
   ) {
-    super(options)
-    log.verbose('PuppetMock', `constructor()`)
+    super()
+    log.verbose('PuppetOA', `constructor()`)
 
-    if (options.mocker) {
-      log.verbose('PuppetMock', `constructor() use options.mocker`)
-      this.mocker = options.mocker
-    } else {
-      log.verbose('PuppetMock', `constructor() creating the default mocker`)
-      this.mocker = new Mocker()
-      // this.mocker.use(SimpleBehavior())
+    options = {
+      ...envOptions(),
+      ...options,
     }
-    this.mocker.puppet = this
+
+    if (options.appId) {
+      this.appId = options.appId
+    } else {
+      throw new Error('PupetOA: appId not found.')
+    }
+
+    if (options.appSecret) {
+      this.appSecret = options.appSecret
+    } else {
+      throw new Error('PuppetOA: appSecret not found.')
+    }
+
+    if (options.token) {
+      this.token = options.token
+    } else {
+      throw new Error('PuppetOA: token not found.')
+    }
+
+    if (options.webhookProxyUrl) {
+      this.webhookProxyUrl = options.webhookProxyUrl
+    } else {
+      throw new Error('PuppetOA: webhookProxyUrl not found.')
+    }
+
   }
 
   public async start (): Promise<void> {
-    log.verbose('PuppetMock', `start()`)
+    log.verbose('PuppetOA', `start()`)
 
     if (this.state.on()) {
-      log.warn('PuppetMock', 'start() is called on a ON puppet. await ready(on) and return.')
+      log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
       await this.state.ready('on')
       return
     }
 
-    this.state.on('pending')
+    try {
+      this.state.on('pending')
 
-    // Do some async initializing tasks
+      const oa = new OfficialAccount({
+        appId       : this.appId,
+        appSecret   : this.appSecret,
+        webhookProxyUrl : this.webhookProxyUrl,
+        token       : this.token,
+      })
+      this.bridgeEvents(oa)
 
-    this.state.on(true)
+      await oa.start()
+      this.oa = oa
 
-    /**
-     * Start mocker after the puppet fully turned ON.
-     */
-    setImmediate(() => this.mocker.start())
+      this.state.on(true)
+    } catch (e) {
+      this.state.off(true)
+    }
+
+  }
+
+  protected bridgeEvents (oa: OfficialAccount) {
+    oa.on('message', msg => this.emit('message', { messageId: msg.MsgId }))
   }
 
   public async stop (): Promise<void> {
-    log.verbose('PuppetMock', 'stop()')
+    log.verbose('PuppetOA', 'stop()')
 
     if (this.state.off()) {
-      log.warn('PuppetMock', 'stop() is called on a OFF puppet. await ready(off) and return.')
+      log.warn('PuppetOA', 'stop() is called on a OFF puppet. await ready(off) and return.')
       await this.state.ready('off')
       return
     }
 
-    this.state.off('pending')
+    try {
+      this.state.off('pending')
 
-    if (this.loopTimer) {
-      clearInterval(this.loopTimer)
+      if (this.oaManager) {
+        await this.oaManager.stop()
+        this.oaManager = undefined
+      }
+
+    } finally {
+      this.state.off(true)
     }
 
-    this.mocker.stop()
-
-    if (this.logonoff()) {
-      await this.logout()
-    }
-
-    // await some tasks...
-    this.state.off(true)
   }
 
   public login (contactId: string): Promise<void> {
-    log.verbose('PuppetMock', 'login()')
+    log.verbose('PuppetOA', 'login()')
     return super.login(contactId)
   }
 
   public async logout (): Promise<void> {
-    log.verbose('PuppetMock', 'logout()')
+    log.verbose('PuppetOA', 'logout()')
 
     if (!this.id) {
       throw new Error('logout before login?')
@@ -150,12 +180,12 @@ class PuppetMock extends Puppet {
   }
 
   public ding (data?: string): void {
-    log.silly('PuppetMock', 'ding(%s)', data || '')
+    log.silly('PuppetOA', 'ding(%s)', data || '')
     setTimeout(() => this.emit('dong', { data: data || '' }), 1000)
   }
 
   public unref (): void {
-    log.verbose('PuppetMock', 'unref()')
+    log.verbose('PuppetOA', 'unref()')
     super.unref()
     if (this.loopTimer) {
       this.loopTimer.unref()
@@ -169,16 +199,16 @@ class PuppetMock extends Puppet {
    *
    */
   public async contactSelfQRCode (): Promise<string> {
-    log.verbose('PuppetMock', 'contactSelfQRCode()')
-    return CHATIE_OFFICIAL_ACCOUNT_QRCODE
+    log.verbose('PuppetOA', 'contactSelfQRCode()')
+    return 'qrcode in the future ;^)'
   }
 
   public async contactSelfName (name: string): Promise<void> {
-    log.verbose('PuppetMock', 'contactSelfName(%s)', name)
+    log.verbose('PuppetOA', 'contactSelfName(%s)', name)
   }
 
   public async contactSelfSignature (signature: string): Promise<void> {
-    log.verbose('PuppetMock', 'contactSelfSignature(%s)', signature)
+    log.verbose('PuppetOA', 'contactSelfSignature(%s)', signature)
   }
 
   /**
@@ -190,7 +220,7 @@ class PuppetMock extends Puppet {
   public contactAlias (contactId: string, alias: string | null): Promise<void>
 
   public async contactAlias (contactId: string, alias?: string | null): Promise<void | string> {
-    log.verbose('PuppetMock', 'contactAlias(%s, %s)', contactId, alias)
+    log.verbose('PuppetOA', 'contactAlias(%s, %s)', contactId, alias)
 
     if (typeof alias === 'undefined') {
       return 'mock alias'
@@ -198,12 +228,12 @@ class PuppetMock extends Puppet {
   }
 
   public async contactList (): Promise<string[]> {
-    log.verbose('PuppetMock', 'contactList()')
+    log.verbose('PuppetOA', 'contactList()')
     return [...this.mocker.cacheContactPayload.keys()]
   }
 
   public async contactQRCode (contactId: string): Promise<string> {
-    log.verbose('PuppetMock', 'contactQRCode(%s)', contactId)
+    log.verbose('PuppetOA', 'contactQRCode(%s)', contactId)
     if (contactId !== this.selfId()) {
       throw new Error('can not set avatar for others')
     }
@@ -216,7 +246,7 @@ class PuppetMock extends Puppet {
   public async contactAvatar (contactId: string, file: FileBox) : Promise<void>
 
   public async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
-    log.verbose('PuppetMock', 'contactAvatar(%s)', contactId)
+    log.verbose('PuppetOA', 'contactAvatar(%s)', contactId)
 
     /**
      * 1. set
@@ -234,7 +264,7 @@ class PuppetMock extends Puppet {
 
   public async contactRawPayloadParser (payload: ContactPayload) { return payload }
   public async contactRawPayload (id: string): Promise<ContactPayload> {
-    log.verbose('PuppetMock', 'contactRawPayload(%s)', id)
+    log.verbose('PuppetOA', 'contactRawPayload(%s)', id)
     return this.mocker.contactPayload(id)
   }
 
@@ -246,7 +276,7 @@ class PuppetMock extends Puppet {
   public async messageContact (
     messageId: string,
   ): Promise<string> {
-    log.verbose('PuppetMock', 'messageContact(%s)', messageId)
+    log.verbose('PuppetOA', 'messageContact(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof ContactMock) {
     //   return attachment.id
@@ -258,7 +288,7 @@ class PuppetMock extends Puppet {
     messageId: string,
     imageType: ImageType,
   ) : Promise<FileBox> {
-    log.verbose('PuppetMock', 'messageImage(%s, %s[%s])',
+    log.verbose('PuppetOA', 'messageImage(%s, %s[%s])',
       messageId,
       imageType,
       ImageType[imageType],
@@ -273,7 +303,7 @@ class PuppetMock extends Puppet {
   public async messageRecall (
     messageId: string,
   ): Promise<boolean> {
-    log.verbose('PuppetMock', 'messageRecall(%s)', messageId)
+    log.verbose('PuppetOA', 'messageRecall(%s)', messageId)
     return false
   }
 
@@ -289,7 +319,7 @@ class PuppetMock extends Puppet {
   }
 
   public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
-    log.verbose('PuppetMock', 'messageUrl(%s)', messageId)
+    log.verbose('PuppetOA', 'messageUrl(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof UrlLink) {
     //   return attachment.payload
@@ -301,7 +331,7 @@ class PuppetMock extends Puppet {
   }
 
   public async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
-    log.verbose('PuppetMock', 'messageMiniProgram(%s)', messageId)
+    log.verbose('PuppetOA', 'messageMiniProgram(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof MiniProgram) {
     //   return attachment.payload
@@ -313,7 +343,7 @@ class PuppetMock extends Puppet {
 
   public async messageRawPayloadParser (payload: MessagePayload) { return payload }
   public async messageRawPayload (id: string): Promise<MessagePayload> {
-    log.verbose('PuppetMock', 'messageRawPayload(%s)', id)
+    log.verbose('PuppetOA', 'messageRawPayload(%s)', id)
     return this.mocker.messagePayload(id)
   }
 
@@ -321,21 +351,21 @@ class PuppetMock extends Puppet {
     conversationId: string,
     something: string | FileBox, // | Attachment
   ): Promise<void> {
-    log.verbose('PuppetMock', 'messageSend(%s, %s)', conversationId, something)
+    log.verbose('PuppetOA', 'messageSend(%s, %s)', conversationId, something)
     if (!this.id) {
       throw new Error('no this.id')
     }
 
-    const user = this.mocker.ContactMock.load(this.id)
-    let conversation
+    if (typeof something === 'string') {
+      const payload = textMessagePayload({
+        content      : something,
+        fromUserName : this.id!,
+        toUserName   : conversationId,
+      })
 
-    if (/@/.test(conversationId)) {
-      // FIXME: extend a new puppet method messageRoomSendText, etc, for Room message?
-      conversation = this.mocker.RoomMock.load(conversationId)
-    } else {
-      conversation = this.mocker.ContactMock.load(conversationId)
+
     }
-    user.say(something).to(conversation)
+
   }
 
   public async messageSendText (
@@ -356,7 +386,7 @@ class PuppetMock extends Puppet {
     conversationId: string,
     contactId : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'messageSendUrl(%s, %s)', conversationId, contactId)
+    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, contactId)
 
     // const contact = this.mocker.MockContact.load(contactId)
     // return this.messageSend(conversationId, contact)
@@ -366,7 +396,7 @@ class PuppetMock extends Puppet {
     conversationId: string,
     urlLinkPayload: UrlLinkPayload,
   ) : Promise<void> {
-    log.verbose('PuppetMock', 'messageSendUrl(%s, %s)', conversationId, JSON.stringify(urlLinkPayload))
+    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, JSON.stringify(urlLinkPayload))
 
     // const url = new UrlLink(urlLinkPayload)
     // return this.messageSend(conversationId, url)
@@ -376,7 +406,7 @@ class PuppetMock extends Puppet {
     conversationId: string,
     miniProgramPayload: MiniProgramPayload,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
+    log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
     // const miniProgram = new MiniProgram(miniProgramPayload)
     // return this.messageSend(conversationId, miniProgram)
   }
@@ -385,7 +415,7 @@ class PuppetMock extends Puppet {
     conversationId: string,
     messageId : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'messageForward(%s, %s)',
+    log.verbose('PuppetOA', 'messageForward(%s, %s)',
       conversationId,
       messageId,
     )
@@ -398,12 +428,12 @@ class PuppetMock extends Puppet {
    */
   public async roomRawPayloadParser (payload: RoomPayload) { return payload }
   public async roomRawPayload (id: string): Promise<RoomPayload> {
-    log.verbose('PuppetMock', 'roomRawPayload(%s)', id)
+    log.verbose('PuppetOA', 'roomRawPayload(%s)', id)
     return this.mocker.roomPayload(id)
   }
 
   public async roomList (): Promise<string[]> {
-    log.verbose('PuppetMock', 'roomList()')
+    log.verbose('PuppetOA', 'roomList()')
     return [...this.mocker.cacheRoomPayload.keys()]
   }
 
@@ -411,18 +441,18 @@ class PuppetMock extends Puppet {
     roomId    : string,
     contactId : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'roomDel(%s, %s)', roomId, contactId)
+    log.verbose('PuppetOA', 'roomDel(%s, %s)', roomId, contactId)
   }
 
   public async roomAvatar (roomId: string): Promise<FileBox> {
-    log.verbose('PuppetMock', 'roomAvatar(%s)', roomId)
+    log.verbose('PuppetOA', 'roomAvatar(%s)', roomId)
 
     const payload = await this.roomPayload(roomId)
 
     if (payload.avatar) {
       return FileBox.fromUrl(payload.avatar)
     }
-    log.warn('PuppetMock', 'roomAvatar() avatar not found, use the chatie default.')
+    log.warn('PuppetOA', 'roomAvatar() avatar not found, use the chatie default.')
     return qrCodeForChatie()
   }
 
@@ -430,7 +460,7 @@ class PuppetMock extends Puppet {
     roomId    : string,
     contactId : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'roomAdd(%s, %s)', roomId, contactId)
+    log.verbose('PuppetOA', 'roomAdd(%s, %s)', roomId, contactId)
   }
 
   public async roomTopic (roomId: string)                : Promise<string>
@@ -440,7 +470,7 @@ class PuppetMock extends Puppet {
     roomId: string,
     topic?: string,
   ): Promise<void | string> {
-    log.verbose('PuppetMock', 'roomTopic(%s, %s)', roomId, topic)
+    log.verbose('PuppetOA', 'roomTopic(%s, %s)', roomId, topic)
 
     if (typeof topic === 'undefined') {
       return 'mock room topic'
@@ -453,27 +483,27 @@ class PuppetMock extends Puppet {
     contactIdList : string[],
     topic         : string,
   ): Promise<string> {
-    log.verbose('PuppetMock', 'roomCreate(%s, %s)', contactIdList, topic)
+    log.verbose('PuppetOA', 'roomCreate(%s, %s)', contactIdList, topic)
 
     return 'mock_room_id'
   }
 
   public async roomQuit (roomId: string): Promise<void> {
-    log.verbose('PuppetMock', 'roomQuit(%s)', roomId)
+    log.verbose('PuppetOA', 'roomQuit(%s)', roomId)
   }
 
   public async roomQRCode (roomId: string): Promise<string> {
-    log.verbose('PuppetMock', 'roomQRCode(%s)', roomId)
+    log.verbose('PuppetOA', 'roomQRCode(%s)', roomId)
     return roomId + ' mock qrcode'
   }
 
   public async roomMemberList (roomId: string) : Promise<string[]> {
-    log.verbose('PuppetMock', 'roomMemberList(%s)', roomId)
+    log.verbose('PuppetOA', 'roomMemberList(%s)', roomId)
     return []
   }
 
   public async roomMemberRawPayload (roomId: string, contactId: string): Promise<RoomMemberPayload>  {
-    log.verbose('PuppetMock', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
+    log.verbose('PuppetOA', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
     return {
       avatar    : 'mock-avatar-data',
       id        : 'xx',
@@ -483,7 +513,7 @@ class PuppetMock extends Puppet {
   }
 
   public async roomMemberRawPayloadParser (rawPayload: RoomMemberPayload): Promise<RoomMemberPayload>  {
-    log.verbose('PuppetMock', 'roomMemberRawPayloadParser(%s)', rawPayload)
+    log.verbose('PuppetOA', 'roomMemberRawPayloadParser(%s)', rawPayload)
     return rawPayload
   }
 
@@ -503,15 +533,15 @@ class PuppetMock extends Puppet {
    *
    */
   public async roomInvitationAccept (roomInvitationId: string): Promise<void> {
-    log.verbose('PuppetMock', 'roomInvitationAccept(%s)', roomInvitationId)
+    log.verbose('PuppetOA', 'roomInvitationAccept(%s)', roomInvitationId)
   }
 
   public async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
-    log.verbose('PuppetMock', 'roomInvitationRawPayload(%s)', roomInvitationId)
+    log.verbose('PuppetOA', 'roomInvitationRawPayload(%s)', roomInvitationId)
   }
 
   public async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
-    log.verbose('PuppetMock', 'roomInvitationRawPayloadParser(%s)', JSON.stringify(rawPayload))
+    log.verbose('PuppetOA', 'roomInvitationRawPayloadParser(%s)', JSON.stringify(rawPayload))
     return rawPayload
   }
 
@@ -530,14 +560,14 @@ class PuppetMock extends Puppet {
   public async friendshipSearchPhone (
     phone: string,
   ): Promise<null | string> {
-    log.verbose('PuppetMock', 'friendshipSearchPhone(%s)', phone)
+    log.verbose('PuppetOA', 'friendshipSearchPhone(%s)', phone)
     return null
   }
 
   public async friendshipSearchWeixin (
     weixin: string,
   ): Promise<null | string> {
-    log.verbose('PuppetMock', 'friendshipSearchWeixin(%s)', weixin)
+    log.verbose('PuppetOA', 'friendshipSearchWeixin(%s)', weixin)
     return null
   }
 
@@ -545,13 +575,13 @@ class PuppetMock extends Puppet {
     contactId : string,
     hello     : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'friendshipAdd(%s, %s)', contactId, hello)
+    log.verbose('PuppetOA', 'friendshipAdd(%s, %s)', contactId, hello)
   }
 
   public async friendshipAccept (
     friendshipId : string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'friendshipAccept(%s)', friendshipId)
+    log.verbose('PuppetOA', 'friendshipAccept(%s)', friendshipId)
   }
 
   /**
@@ -563,30 +593,30 @@ class PuppetMock extends Puppet {
     tagId: string,
     contactId: string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'tagContactAdd(%s)', tagId, contactId)
+    log.verbose('PuppetOA', 'tagContactAdd(%s)', tagId, contactId)
   }
 
   public async tagContactRemove (
     tagId: string,
     contactId: string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'tagContactRemove(%s)', tagId, contactId)
+    log.verbose('PuppetOA', 'tagContactRemove(%s)', tagId, contactId)
   }
 
   public async tagContactDelete (
     tagId: string,
   ): Promise<void> {
-    log.verbose('PuppetMock', 'tagContactDelete(%s)', tagId)
+    log.verbose('PuppetOA', 'tagContactDelete(%s)', tagId)
   }
 
   public async tagContactList (
     contactId?: string,
   ): Promise<string[]> {
-    log.verbose('PuppetMock', 'tagContactList(%s)', contactId)
+    log.verbose('PuppetOA', 'tagContactList(%s)', contactId)
     return []
   }
 
 }
 
-export { PuppetMock }
-export default PuppetMock
+export { PuppetOA }
+export default PuppetOA

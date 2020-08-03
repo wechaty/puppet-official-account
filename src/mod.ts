@@ -1,11 +1,8 @@
 import { VERSION }    from './version'
-import { PuppetMock } from './puppet-mock'
-
-import * as mock from './mock/mod'
+import { PuppetOA }   from './puppet-oa'
 
 export {
   VERSION,
-  PuppetMock,
-  mock,
+  PuppetOA,
 }
-export default PuppetMock
+export default PuppetOA

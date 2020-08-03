@@ -1,7 +1,6 @@
 #!/usr/bin/env ts-node
 
-// tslint:disable:no-shadowed-variable
-import test  from 'blue-tape'
+import test from 'blue-tape'
 import cuid from 'cuid'
 
 import { OfficialAccount } from './official-account'
@@ -41,7 +40,7 @@ test('OfficialAccount smoke testing', async (t) => {
   t.equal(response.body, 'success', 'should get success response')
 
   await future
-  t.pass('should get a message emit event from future')
+  t.pass('should get a message emit event from oa instane')
 
   await oa.stop()
 })
