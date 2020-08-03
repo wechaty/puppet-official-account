@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-official-account",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Wechaty Puppet for WeChat Official Accounts",
   "directories": {
     "test": "tests"
