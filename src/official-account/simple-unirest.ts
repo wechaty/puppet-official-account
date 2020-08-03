@@ -8,10 +8,7 @@ export interface FileInfo {
 
 type RequestType = 'json' | 'html'
 
-interface UnirestRequest<T> {
-  then (cb: (result: { body: T }) => any) : Promise<any>
-  catch(cb: (e: Error) => void)           : Promise<any>
-
+interface UnirestRequest<T> extends Promise<{ body: T }> {
   attach : (formName: string, buf: Buffer, info?: FileInfo) => UnirestRequest<T>
   type   : (t: RequestType) => UnirestRequest<T>
   field  : (payload: Object) => UnirestRequest<T>

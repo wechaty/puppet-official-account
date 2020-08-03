@@ -36,8 +36,7 @@ class Webhook extends WebhookEventEmitter {
   protected server? : http.Server
   protected tunnel? : localtunnel.Tunnel
 
-  protected port       : number
-  protected subdomain? : string
+  public readonly subdomain? : string
 
   constructor (
     protected options: WebhookOptions,
@@ -45,23 +44,18 @@ class Webhook extends WebhookEventEmitter {
     super()
     log.verbose('Webhook', 'constructor(%s)', JSON.stringify(options))
 
-    if (options.port && options.webhookProxyUrl) {
+    if (typeof options.port !== 'undefined' && options.webhookProxyUrl) {
       throw new Error('Please only provide either `port` or `webhookProxyUrl` for Webhook')
     }
-    if (!options.port && !options.webhookProxyUrl) {
+    if (typeof options.port === 'undefined' && !options.webhookProxyUrl) {
       throw new Error('Please provide either `port` or `webhookProxyUrl` for Webhook')
     }
 
-    this.port = options.port ?? 0 // fall back to auto location free port
     if (options.webhookProxyUrl) {
       this.subdomain = this.parseSubDomain(options.webhookProxyUrl)
       if (!this.subdomain) {
         throw new Error(`Webhook: invalid webhookProxyUrl ${options.webhookProxyUrl}`)
       }
-    }
-
-    if (!this.port && !this.subdomain) {
-      throw new Error('Webhook can not get a port or subdomain for construction')
     }
   }
 
@@ -103,8 +97,8 @@ class Webhook extends WebhookEventEmitter {
       /**
        * 1. for local port
        */
-      if (this.port) {
-        server.listen(this.port, resolve)
+      if (typeof this.options.port !== 'undefined') {
+        server.listen(this.options.port, resolve)
         return
       }
 
@@ -206,6 +200,7 @@ class Webhook extends WebhookEventEmitter {
     if (knownTypeList.includes(payload.MsgType)) {
       this.emit('message', payload)
     }
+    // console.info(payload)
 
     /**
      * 假如服务器无法保证在五秒内处理并回复，必须做出下述回复，这样微信服务器才不会对此作任何处理，

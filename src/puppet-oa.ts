@@ -47,7 +47,6 @@ import {
   qrCodeForChatie,
   envOptions,
 }                                   from './config'
-import { textMessagePayload } from './official-account/payload-builder'
 
 import {
   OfficialAccountOptions,
@@ -71,7 +70,7 @@ class PuppetOA extends Puppet {
     options: PuppetOAOptions = {},
   ) {
     super()
-    log.verbose('PuppetOA', `constructor()`)
+    log.verbose('PuppetOA', 'constructor()')
 
     options = {
       ...envOptions(),
@@ -105,7 +104,7 @@ class PuppetOA extends Puppet {
   }
 
   public async start (): Promise<void> {
-    log.verbose('PuppetOA', `start()`)
+    log.verbose('PuppetOA', 'start()')
 
     if (this.state.on()) {
       log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
@@ -117,10 +116,10 @@ class PuppetOA extends Puppet {
       this.state.on('pending')
 
       const oa = new OfficialAccount({
-        appId       : this.appId,
-        appSecret   : this.appSecret,
+        appId           : this.appId,
+        appSecret       : this.appSecret,
+        token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
-        token       : this.token,
       })
       this.bridgeEvents(oa)
 
@@ -150,9 +149,10 @@ class PuppetOA extends Puppet {
     try {
       this.state.off('pending')
 
-      if (this.oaManager) {
-        await this.oaManager.stop()
-        this.oaManager = undefined
+      if (this.oa) {
+        this.oa.removeAllListeners()
+        await this.oa.stop()
+        this.oa = undefined
       }
 
     } finally {
@@ -187,9 +187,6 @@ class PuppetOA extends Puppet {
   public unref (): void {
     log.verbose('PuppetOA', 'unref()')
     super.unref()
-    if (this.loopTimer) {
-      this.loopTimer.unref()
-    }
   }
 
   /**
@@ -229,7 +226,7 @@ class PuppetOA extends Puppet {
 
   public async contactList (): Promise<string[]> {
     log.verbose('PuppetOA', 'contactList()')
-    return [...this.mocker.cacheContactPayload.keys()]
+    return []
   }
 
   public async contactQRCode (contactId: string): Promise<string> {
@@ -265,7 +262,7 @@ class PuppetOA extends Puppet {
   public async contactRawPayloadParser (payload: ContactPayload) { return payload }
   public async contactRawPayload (id: string): Promise<ContactPayload> {
     log.verbose('PuppetOA', 'contactRawPayload(%s)', id)
-    return this.mocker.contactPayload(id)
+    return {} as any
   }
 
   /**
@@ -344,7 +341,7 @@ class PuppetOA extends Puppet {
   public async messageRawPayloadParser (payload: MessagePayload) { return payload }
   public async messageRawPayload (id: string): Promise<MessagePayload> {
     log.verbose('PuppetOA', 'messageRawPayload(%s)', id)
-    return this.mocker.messagePayload(id)
+    return {} as any
   }
 
   private async messageSend (
@@ -357,13 +354,12 @@ class PuppetOA extends Puppet {
     }
 
     if (typeof something === 'string') {
-      const payload = textMessagePayload({
-        content      : something,
-        fromUserName : this.id!,
-        toUserName   : conversationId,
-      })
-
-
+      const payload = {
+        content: something,
+        msgtype: 'text' as const,
+        touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
+      }
+      await this.oa?.sendCustomMessage(payload)
     }
 
   }
@@ -429,12 +425,12 @@ class PuppetOA extends Puppet {
   public async roomRawPayloadParser (payload: RoomPayload) { return payload }
   public async roomRawPayload (id: string): Promise<RoomPayload> {
     log.verbose('PuppetOA', 'roomRawPayload(%s)', id)
-    return this.mocker.roomPayload(id)
+    return {} as any
   }
 
   public async roomList (): Promise<string[]> {
     log.verbose('PuppetOA', 'roomList()')
-    return [...this.mocker.cacheRoomPayload.keys()]
+    return []
   }
 
   public async roomDel (
@@ -553,6 +549,7 @@ class PuppetOA extends Puppet {
   public async friendshipRawPayload (id: string): Promise<any> {
     return { id } as any
   }
+
   public async friendshipRawPayloadParser (rawPayload: any): Promise<FriendshipPayload> {
     return rawPayload
   }

@@ -11,7 +11,7 @@ import {
 import {
   getSimpleUnirest,
   SimpleUnirest,
-}                     from './unirest'
+}                     from './simple-unirest'
 import {
   OAMessageType,
 }                     from './schema'
@@ -30,6 +30,11 @@ interface AccessToken {
   expiresIn: number,
 }
 
+interface ErrorPayload {
+  errcode : number,
+  errmsg  : string,
+}
+
 class OfficialAccount extends EventEmitter {
 
   webhook       : Webhook
@@ -43,9 +48,14 @@ class OfficialAccount extends EventEmitter {
 
     if (outdated()) {
       this.updateAccessToken()
+        .catch(e => log.warn('OfficialAccount', 'accessToken() this.updateAccessToken() rejection: %s', e))
     }
 
-    return this._accessToken!.token
+    if (!this._accessToken) {
+      throw new Error('accessToken() this._accessToken initialized!')
+    }
+
+    return this._accessToken.token
   }
 
   constructor (
@@ -83,9 +93,12 @@ class OfficialAccount extends EventEmitter {
   async start () {
     log.verbose('OfficialAccount', 'start()')
 
+    const future = this.updateAccessToken()
+
     this.webhook.on('message', message => this.emit('message', message))
 
     await this.webhook.start()
+    await future
   }
 
   async stop () {
@@ -98,32 +111,39 @@ class OfficialAccount extends EventEmitter {
   /**
    *  https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html
    */
-  protected updateAccessToken () {
+  protected async updateAccessToken (): Promise<string> {
     log.verbose('OfficialAccount', 'updateAccessToken()')
 
-    if (this._accessTokenUpdating) {
+    if (this._accessToken && this._accessTokenUpdating) {
       log.verbose('OfficialAccount', 'updateAccessToken() another update task is running.')
-      return
+      return this._accessToken.token
     }
 
     this._accessTokenUpdating = true
 
-    this.simpleUnirest
-      .get<{
-        access_token : string
-        expires_in   : number
-      }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
-      .then(ret => {
-        log.verbose('OfficialAccount', 'updateAccessToken() %s', JSON.stringify(ret.body))
-        this._accessToken = {
-          expiresIn : ret.body.expires_in,
-          timestamp : Date.now(),
-          token     : ret.body.access_token,
-        }
-        return this._accessToken
-      })
-      .finally(() => { this._accessTokenUpdating = false })
-      .catch(e => log.warn('OfficialAccount', 'updateAccessToken() rejection: %s', e))
+    try {
+      const ret = await this.simpleUnirest
+        .get<{
+          access_token : string
+          expires_in   : number
+        }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
+
+      log.verbose('OfficialAccount', 'updateAccessToken() %s', JSON.stringify(ret.body))
+
+      this._accessToken = {
+        expiresIn : ret.body.expires_in,
+        timestamp : Date.now(),
+        token     : ret.body.access_token,
+      }
+
+      return this._accessToken.token
+
+    } catch (e) {
+      log.warn('OfficialAccount', 'updateAccessToken() rejection: %s', e)
+      throw e
+    } finally {
+      this._accessTokenUpdating = false
+    }
   }
 
   /**
@@ -134,14 +154,11 @@ class OfficialAccount extends EventEmitter {
     touser: string,
     msgtype: OAMessageType,
     content: string,
-  }) {
+  }): Promise<ErrorPayload> {
     log.verbose('OfficialAccount', 'sendCustomMessage(%s)', JSON.stringify(args))
 
     const ret = await this.simpleUnirest
-      .post<{
-        errcode : number,
-        errmsg  : string,
-      }>(`message/custom/send?access_token=${this.accessToken}`)
+      .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
       .type('json')
       .send({
         msgtype: args.msgtype,
@@ -152,7 +169,7 @@ class OfficialAccount extends EventEmitter {
         touser: args.touser,
       })
 
-    console.info(ret.body)
+    return ret.body
   }
 
 }
