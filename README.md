@@ -96,13 +96,13 @@ When you start developing the WeChat Official Account, it will be very helpful w
 1. Apply a test Official Account with full priviliedges for developing
 1. Simulate the API calls in a online simulation tool.
 
-### Apply a Official Account for developing/testing
+### 1 Apply a Official Account for developing/testing
 
 测试号是扫码即可获得的微信公众号，拥有所有完整高级接口权限，测试专用。
 
 [进入微信公众帐号测试号申请系统](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
 
-### API calls debuging tool
+### 2 API calls debuging tool
 
 允许开发者在平台上提交信息和服务器进行交互，并得到验证结果的在线 API 调试工具。
 
