@@ -150,12 +150,17 @@ class OfficialAccount extends EventEmitter {
 
     try {
       const ret = await this.simpleUnirest
-        .get<{
+        .get<Partial<ErrorPayload> & {
           access_token : string
           expires_in   : number
         }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
 
       log.verbose('OfficialAccount', 'updateAccessToken() updated: %s', JSON.stringify(ret.body))
+
+      if (ret.body.errcode && ret.body.errcode > 0) {
+        // {"errcode":40164,"errmsg":"invalid ip 111.199.187.71 ipv6 ::ffff:111.199.187.71, not in whitelist hint: [H.BDtZFFE-Q7bNKA] rid: 5f283869-46321ea1-07d7260c"}
+        throw new Error(`Official Account updateAccessToken() Error ${ret.body.errcode}: ${ret.body.errmsg}`)
+      }
 
       this._accessToken = {
         expiresIn : ret.body.expires_in,
