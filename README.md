@@ -17,17 +17,40 @@ Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your
 
 ## USAGE
 
-## ENVIRONMENTS
+## ENVIRONMENTS VARIABLES
 
-```sh
-WECHATY_PUPPET_OA_APP_ID
-WECHATY_PUPPET_OA_APP_SECRET
-WECHATY_PUPPET_OA_PORT
-WECHATY_PUPPET_OA_TOKEN
-WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL
-```
+You can use environment variables to configure all of the WeChat Official Account Development Information.
 
-### Puppet Official Account
+### `WECHATY_PUPPET_OA_APP_ID`: `appId`
+
+Developer ID(AppID) is the developer ID, Official Account identification code, which can call Official Account API with developer's password.
+
+### `WECHATY_PUPPET_OA_APP_SECRET`: `appSecret`
+
+Developer Password(AppSecret) is the one with high security to verify the identity of Official Account developer.
+
+### `WECHATY_PUPPET_OA_TOKEN`: `token`
+
+Token is set by you for your server(URL) configuration.
+
+### `WECHATY_PUPPET_OA_PORT`
+
+Set `WECHATY_PUPPET_OA_PORT` to your local HTTP Server port number if you have a public server that can be visit from the internet.
+
+After set ``WECHATY_PUPPET_OA_PORT`, the puppet will expose itself to the internet with this port for providing the HTTP service.
+
+### `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
+
+Set `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL` to a `localtunnel` supported address so that you will be able to provide the Server Address(URL) for WebHook usage with this URL.
+
+This is the most convenience way to use this puppet, because you can always provide the same URL to WeChat Official Account platform no matter where your program are running of.
+
+Currently, you can generate this URL by yourself by:
+
+1. Generate a UUIDv4 use a generator like [UUID Online Generator](https://uuidonline.com)
+1. Insert your $UUID to `https://${UUID}.serverless.social`
+
+For example, if your UUID is `aeb082b9-14da-4b91-bdef-90a6b17a4a97`, then you can use `https://aeb082b9-14da-4b91-bdef-90a6b17a4a97.serverless.social` as `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
 
 ## DEVELOPMENT
 
@@ -69,7 +92,7 @@ With Webhook.site, you instantly get a unique, random URL that you can use to te
 
 ### master
 
-### v0.1 (Aug 2, 2018)
+### v0.2 (Aug 2, 2018)
 
 Initial version for Official Account.
 
