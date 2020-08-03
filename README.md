@@ -1,4 +1,4 @@
-# PUPPET-MOCK
+# PUPPET-OFFICIAL-ACCOUNT
 
 [![NPM Version](https://badge.fury.io/js/wechaty-puppet-official-account.svg)](https://badge.fury.io/js/wechaty-puppet-official-account)
 [![npm (tag)](https://img.shields.io/npm/v/wechaty-puppet-official-account/next.svg)](https://www.npmjs.com/package/wechaty-puppet-official-account?activeTab=versions)
