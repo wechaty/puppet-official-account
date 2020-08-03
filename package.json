@@ -64,11 +64,14 @@
     "wechaty-puppet": "*"
   },
   "dependencies": {
+    "@types/lru-cache": "^5.1.0",
     "crypto": "^1.0.1",
     "cuid": "^2.1.8",
     "express": "^4.17.1",
     "express-xml-bodyparser": "^0.3.0",
+    "flash-store": "^0.20.4",
     "localtunnel": "^2.0.0",
+    "lru-cache": "^6.0.0",
     "normalize-package-data": "^2.5.0",
     "quick-lru": "^5.1.0",
     "state-switch": "^0.6.18",

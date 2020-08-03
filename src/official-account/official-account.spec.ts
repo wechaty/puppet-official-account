@@ -14,8 +14,8 @@ test('OfficialAccount smoke testing', async (t) => {
   const WEBHOOK_PROXY_URL = [
     'https://',
     'wechaty-puppet-official-account',
-    // '-',
-    // cuid(),
+    '-',
+    cuid(),
     '.serverless.social',
   ].join('')
 

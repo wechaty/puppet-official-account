@@ -1,20 +1,21 @@
 /* eslint-disable camelcase */
 import { EventEmitter } from 'events'
 
-import crypto from 'crypto'
-import { log } from 'wechaty-puppet'
+import crypto   from 'crypto'
+import { log }  from 'wechaty-puppet'
 
 import {
   Webhook,
   VerifyArgs,
-}             from './webhook'
+}                      from './webhook'
+import { PayloadStore } from './payload-store'
 import {
   getSimpleUnirest,
   SimpleUnirest,
-}                     from './simple-unirest'
+}                       from './simple-unirest'
 import {
   OAMessageType,
-}                     from './schema'
+}                       from './schema'
 
 export interface OfficialAccountOptions {
   appId            : string,
@@ -37,8 +38,10 @@ interface ErrorPayload {
 
 class OfficialAccount extends EventEmitter {
 
-  webhook       : Webhook
-  simpleUnirest : SimpleUnirest
+  payloadStore: PayloadStore
+
+  protected webhook       : Webhook
+  protected simpleUnirest : SimpleUnirest
 
   protected _accessToken?         : AccessToken
   protected _accessTokenUpdating? : boolean
@@ -71,6 +74,8 @@ class OfficialAccount extends EventEmitter {
     })
 
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
+
+    this.payloadStore = new PayloadStore()
   }
 
   verify (args: VerifyArgs): boolean {
@@ -93,12 +98,18 @@ class OfficialAccount extends EventEmitter {
   async start () {
     log.verbose('OfficialAccount', 'start()')
 
-    const future = this.updateAccessToken()
+    const futureList = [
+      this.updateAccessToken(),
+      this.payloadStore.start(),
+    ] as Promise<any>[]
 
-    this.webhook.on('message', message => this.emit('message', message))
+    this.webhook.on('message', async message => {
+      await this.payloadStore.setMessagePayload(message.MsgId, message)
+      this.emit('message', message)
+    })
 
     await this.webhook.start()
-    await future
+    await Promise.all(futureList)
   }
 
   async stop () {
@@ -106,6 +117,7 @@ class OfficialAccount extends EventEmitter {
     if (this.webhook) {
       await this.webhook.stop()
     }
+    await this.payloadStore.stop()
   }
 
   /**
@@ -171,6 +183,31 @@ class OfficialAccount extends EventEmitter {
 
     return ret.body
   }
+
+  /**
+   * 获取授权方的帐号基本信息
+   *  该 API 用于获取授权方的基本信息，包括头像、昵称、帐号类型、认证类型、微信号、原始ID和二维码图片URL。
+   *  https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/api/api_get_authorizer_info.html
+   */
+  // async getInfo () {
+  //   log.verbose('OfficialAccount', 'sendCustomMessage(%s)', JSON.stringify(args))
+
+  //   const ret = await this.simpleUnirest
+  //     .post<ErrorPayload>(`component/api_get_authorizer_info?component_access_token=${this.accessToken}`)
+  //     .type('json')
+  //     .send({
+  //       msgtype: args.msgtype,
+  //       text:
+  //       {
+  //         content: args.content,
+  //       },
+  //       touser: args.touser,
+  //     })
+
+  //   return ret.body
+  //   POST https://api.weixin.qq.com/cgi-bin/
+
+  // }
 
 }
 

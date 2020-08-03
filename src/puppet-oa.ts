@@ -40,6 +40,7 @@ import {
   MiniProgramPayload,
 
   log,
+  MessageType,
 }                           from 'wechaty-puppet'
 
 import { VERSION } from './version'
@@ -52,6 +53,7 @@ import {
   OfficialAccountOptions,
   OfficialAccount,
 }                             from './official-account/official-account'
+import { OAMessagePayload } from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -81,19 +83,25 @@ class PuppetOA extends Puppet {
     if (options.appId) {
       this.appId = options.appId
     } else {
-      throw new Error('PupetOA: appId not found.')
+      throw new Error(`
+        PupetOA: appId not found. Please either set the WECHATY_PUPPET_OA_APP_ID environment variable, or set 'appId' optoins for PuppetOA.
+      `)
     }
 
     if (options.appSecret) {
       this.appSecret = options.appSecret
     } else {
-      throw new Error('PuppetOA: appSecret not found.')
+      throw new Error(`
+        PuppetOA: appSecret not found. Please either set the WECHATY_PUPPET_OA_APP_SECRET environment variable, or set 'appSecret' options for PuppetOA.
+      `)
     }
 
     if (options.token) {
       this.token = options.token
     } else {
-      throw new Error('PuppetOA: token not found.')
+      throw new Error(`
+        PuppetOA: token not found. Please either set WECHATY_PUPPET_OA_TOKEN environment variabnle, or set 'token' options for PuppetOA.
+      `)
     }
 
     this.port            = options.port
@@ -123,6 +131,10 @@ class PuppetOA extends Puppet {
 
       await oa.start()
       this.oa = oa
+
+      // FIXME: find a way to get the bot user information
+      this.id = 'wechaty-puppet-official-account'
+      await this.oa.payloadStore.setContactPayload(this.id, {})
 
       this.state.on(true)
     } catch (e) {
@@ -337,10 +349,27 @@ class PuppetOA extends Puppet {
     }
   }
 
-  public async messageRawPayloadParser (payload: MessagePayload) { return payload }
-  public async messageRawPayload (id: string): Promise<MessagePayload> {
+  public async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<MessagePayload> {
+    const payload: MessagePayload = {
+      fromId    : rawPayload.FromUserName,
+      id        : rawPayload.MsgId,
+      text      : rawPayload.Content,
+      timestamp : parseInt(rawPayload.CreateTime),
+      toId      : rawPayload.ToUserName,
+      type      : MessageType.Text,
+    }
+    return payload
+  }
+
+  public async messageRawPayload (id: string): Promise<OAMessagePayload> {
     log.verbose('PuppetOA', 'messageRawPayload(%s)', id)
-    return {} as any
+
+    const payload = await this.oa?.payloadStore.getMessagePayload(id)
+
+    if (!payload) {
+      throw new Error('payload not found from oa store')
+    }
+    return payload
   }
 
   private async messageSend (

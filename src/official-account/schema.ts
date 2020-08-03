@@ -14,3 +14,7 @@ export interface OAMessagePayload {
   Content      : string
   MsgId        : string
 }
+
+export interface OAContactPayload {
+
+}

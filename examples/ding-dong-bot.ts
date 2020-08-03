@@ -109,7 +109,10 @@ function onError (payload: EventErrorPayload) {
  */
 async function onMessage (payload: EventMessagePayload) {
   const msgPayload = await puppet.messagePayload(payload.messageId)
-  console.info(JSON.stringify(msgPayload))
+  console.info('onMessage:', JSON.stringify(msgPayload))
+  if (/ding/i.test(msgPayload.text || '')) {
+    await puppet.messageSendText(msgPayload.fromId!, 'dong')
+  }
 }
 
 /**
