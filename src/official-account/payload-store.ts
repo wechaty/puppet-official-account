@@ -75,7 +75,7 @@ class PayloadStore {
   }
 
   async setMessagePayload (id: string, payload: OAMessagePayload): Promise<void> {
-    log.verbose('PayloadStore', 'setMessagePayload(%s, payload)', id, JSON.stringify(payload))
+    log.verbose('PayloadStore', 'setMessagePayload(%s, %s)', id, JSON.stringify(payload))
     await this.cacheOAMessagePayload?.set(id, payload)
   }
 
@@ -85,7 +85,7 @@ class PayloadStore {
   }
 
   async setContactPayload (id: string, payload: OAContactPayload): Promise<void> {
-    log.verbose('PayloadStore', 'setContactPayload(%s, payload)', id, JSON.stringify(payload))
+    log.verbose('PayloadStore', 'setContactPayload(%s, %s)', id, JSON.stringify(payload))
     await this.cacheOAContactPayload?.set(id, payload)
   }
 
