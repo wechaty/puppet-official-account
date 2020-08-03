@@ -87,6 +87,8 @@ Currently, you can generate this URL by yourself by:
 
 For example, if your UUID is `aeb082b9-14da-4b91-bdef-90a6b17a4a97`, then you can use `https://aeb082b9-14da-4b91-bdef-90a6b17a4a97.serverless.social` as `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
 
+Learn more from: [localtunnel](https://localtunnel.github.io/www/)
+
 ## DEVELOPMENT
 
 When you start developing the WeChat Official Account, it will be very helpful with the following tools provided by Tencent:
@@ -96,13 +98,13 @@ When you start developing the WeChat Official Account, it will be very helpful w
 
 ### Apply a Official Account for developing/testing
 
-微信公众号的注册有门槛，高级接口权限在微信认证之前是不可用的。腾讯平台提供了微信公众帐号测试号，通过手机微信扫描二维码即可获得拥有所有完整高级功能的测试微信公众号，可以帮助开发者快速了解和上手微信公众号开发，熟悉各个接口的调用。
+测试号是扫码即可获得的微信公众号，拥有所有完整高级接口权限，测试专用。
 
 [进入微信公众帐号测试号申请系统](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
 
 ### API calls debuging tool
 
-为了帮助开发者检测调用【微信公众平台开发者API】时发送的请求参数是否正确，腾讯公司提供了在线的 API 模拟交互工具，可以允许开发者在平台上提交信息和服务器进行交互，并得到验证结果。
+允许开发者在平台上提交信息和服务器进行交互，并得到验证结果的在线 API 调试工具。
 
 Address: <https://mp.weixin.qq.com/debug/>
 
