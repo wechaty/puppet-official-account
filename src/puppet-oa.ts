@@ -385,7 +385,7 @@ class PuppetOA extends Puppet {
       const payload = {
         content: something,
         msgtype: 'text' as const,
-        touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
+        touser: conversationId,
       }
       await this.oa?.sendCustomMessage(payload)
     }
