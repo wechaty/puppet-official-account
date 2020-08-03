@@ -47,7 +47,22 @@ class OfficialAccount extends EventEmitter {
   protected _accessTokenUpdating? : boolean
 
   get accessToken (): string {
-    const outdated = () => !this._accessToken || (Date.now() - this._accessToken.timestamp > this._accessToken.expiresIn)
+    const outdated = () => {
+      if (!this._accessToken) {
+        return true
+      }
+
+      const durationSeconds = Math.floor(
+        (Date.now() - this._accessToken.timestamp) / 1000
+      )
+      const ttl = this._accessToken.expiresIn - durationSeconds
+
+      log.verbose('OfficialAccount', 'accessToken() outdated() token expires in %s seconds, %s minutes',
+        ttl,
+        Math.floor(ttl / 60),
+      )
+      return ttl < 0
+    }
 
     if (outdated()) {
       this.updateAccessToken()
@@ -140,7 +155,7 @@ class OfficialAccount extends EventEmitter {
           expires_in   : number
         }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
 
-      log.verbose('OfficialAccount', 'updateAccessToken() %s', JSON.stringify(ret.body))
+      log.verbose('OfficialAccount', 'updateAccessToken() updated: %s', JSON.stringify(ret.body))
 
       this._accessToken = {
         expiresIn : ret.body.expires_in,
