@@ -59,10 +59,11 @@ class PuppetOA extends Puppet {
 
   public static readonly VERSION = VERSION
 
-  protected appId           : string
-  protected appSecret       : string
-  protected token           : string
-  protected webhookProxyUrl : string
+  protected appId            : string
+  protected appSecret        : string
+  protected port?            : number
+  protected token            : string
+  protected webhookProxyUrl? : string
 
   protected oa?: OfficialAccount
 
@@ -95,12 +96,8 @@ class PuppetOA extends Puppet {
       throw new Error('PuppetOA: token not found.')
     }
 
-    if (options.webhookProxyUrl) {
-      this.webhookProxyUrl = options.webhookProxyUrl
-    } else {
-      throw new Error('PuppetOA: webhookProxyUrl not found.')
-    }
-
+    this.port            = options.port
+    this.webhookProxyUrl = options.webhookProxyUrl
   }
 
   public async start (): Promise<void> {
@@ -118,6 +115,7 @@ class PuppetOA extends Puppet {
       const oa = new OfficialAccount({
         appId           : this.appId,
         appSecret       : this.appSecret,
+        port            : this.port,
         token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
       })
@@ -128,6 +126,7 @@ class PuppetOA extends Puppet {
 
       this.state.on(true)
     } catch (e) {
+      log.error('PuppetOA', 'start() rejection: %s', e)
       this.state.off(true)
     }
 

@@ -17,11 +17,11 @@ import {
 }                     from './schema'
 
 export interface OfficialAccountOptions {
-  appId           : string,
-  appSecret       : string,
-  port?           : number,
-  token           : string,
-  webhookProxyUrl?: string,
+  appId            : string,
+  appSecret        : string,
+  port?            : number,
+  token            : string,
+  webhookProxyUrl? : string,
 }
 
 interface AccessToken {
