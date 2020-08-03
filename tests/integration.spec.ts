@@ -8,9 +8,13 @@ import {
   PuppetOA,
 }                         from '../src/mod'
 
+import { getOaOptions } from './fixtures/oa-options'
+
 test('integration testing', async t => {
-  const puppet = new PuppetOA()
+  const puppet = new PuppetOA({
+    ...getOaOptions(),
+  })
   const wechaty = new Wechaty({ puppet })
 
-  t.ok(wechaty, 'should instantiate wechaty with puppet mocker')
+  t.ok(wechaty, 'should instantiate wechaty with puppet official account')
 })
