@@ -226,7 +226,7 @@ class Webhook extends WebhookEventEmitter {
             resolve(msg.content)
           }
         })
-      })
+      }),
     ])
     if (reply) {
       return res.end(`
