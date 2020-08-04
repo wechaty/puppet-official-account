@@ -66,6 +66,7 @@ class PuppetOA extends Puppet {
   protected port?            : number
   protected token            : string
   protected webhookProxyUrl? : string
+  protected personalMode?    : boolean
 
   protected oa?: OfficialAccount
 
@@ -102,6 +103,12 @@ class PuppetOA extends Puppet {
       throw new Error(`
         PuppetOA: token not found. Please either set WECHATY_PUPPET_OA_TOKEN environment variabnle, or set 'token' options for PuppetOA.
       `)
+    }
+
+    if (options.personalMode) {
+      this.personalMode = options.personalMode
+    } else {
+      this.personalMode = false
     }
 
     this.port            = options.port
@@ -387,7 +394,11 @@ class PuppetOA extends Puppet {
         msgtype: 'text' as const,
         touser: conversationId,
       }
-      await this.oa?.sendCustomMessage(payload)
+      if (this.personalMode) {
+        await this.oa?.sendCustomMessagePersonal(payload)
+      } else {
+        await this.oa?.sendCustomMessage(payload)
+      }
     }
 
   }

@@ -23,6 +23,7 @@ export interface OfficialAccountOptions {
   port?            : number,
   token            : string,
   webhookProxyUrl? : string,
+  personalMode?    : boolean,
 }
 
 interface AccessToken {
@@ -176,6 +177,14 @@ class OfficialAccount extends EventEmitter {
     } finally {
       this._accessTokenUpdating = false
     }
+  }
+
+  async sendCustomMessagePersonal (args: {
+    touser: string,
+    msgtype: OAMessageType,
+    content: string,
+  }) {
+    this.webhook.emit('instantReply', args)
   }
 
   /**

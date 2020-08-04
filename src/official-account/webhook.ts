@@ -8,7 +8,7 @@ import TypedEventEmitter from 'typed-emitter'
 import { log } from 'wechaty-puppet'
 import { EventEmitter } from 'events'
 
-import { OAMessagePayload }   from './schema'
+import { OAMessagePayload, OAMessageType }   from './schema'
 
 const LOCAL_TUNNEL_HOST_PARTIAL_LIST = [
   'https://',
@@ -17,6 +17,11 @@ const LOCAL_TUNNEL_HOST_PARTIAL_LIST = [
 
 const WebhookEventEmitter = EventEmitter as new () => TypedEventEmitter<{
   message: (message: OAMessagePayload) => void,
+  instantReply: (message: {
+    touser: string,
+    msgtype: OAMessageType,
+    content: string,
+  }) => void,
 }>
 
 export interface VerifyArgs {
@@ -210,6 +215,30 @@ class Webhook extends WebhookEventEmitter {
      *
      *  https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html
      */
+    // res.end('success')
+    const reply: any = await Promise.race([
+      new Promise((resolve) => {
+        setTimeout(() => resolve(null), 5000)
+      }),
+      new Promise((resolve) => {
+        this.on('instantReply', (msg: any) => {
+          if (msg.msgtype === 'text') {
+            resolve(msg.content)
+          }
+        })
+      })
+    ])
+    if (reply) {
+      return res.end(`
+      <xml>
+        <ToUserName><![CDATA[${payload.FromUserName}]]></ToUserName>
+        <FromUserName><![CDATA[${payload.ToUserName}]]></FromUserName>
+        <CreateTime>${payload.CreateTime}</CreateTime>
+        <MsgType><![CDATA[text]]></MsgType>
+        <Content><![CDATA[${reply}]]></Content>
+      </xml>
+      `)
+    }
     res.end('success')
   }
 
