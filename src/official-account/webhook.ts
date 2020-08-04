@@ -31,6 +31,7 @@ export interface VerifyArgs {
 }
 
 interface WebhookOptions {
+  personalMode     : boolean,
   port?            : number
   webhookProxyUrl? : string
   verify           : (args: VerifyArgs) => boolean
@@ -40,6 +41,7 @@ class Webhook extends WebhookEventEmitter {
 
   protected server? : http.Server
   protected tunnel? : localtunnel.Tunnel
+  protected personalMode? : boolean
 
   public readonly subdomain? : string
 
@@ -55,6 +57,8 @@ class Webhook extends WebhookEventEmitter {
     if (typeof options.port === 'undefined' && !options.webhookProxyUrl) {
       throw new Error('Please provide either `port` or `webhookProxyUrl` for Webhook')
     }
+
+    this.personalMode = options.personalMode
 
     if (options.webhookProxyUrl) {
       this.subdomain = this.parseSubDomain(options.webhookProxyUrl)
@@ -216,28 +220,32 @@ class Webhook extends WebhookEventEmitter {
      *  https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html
      */
     // res.end('success')
-    const reply: any = await Promise.race([
-      new Promise((resolve) => {
-        setTimeout(() => resolve(null), 5000)
-      }),
-      new Promise((resolve) => {
-        this.on('instantReply', (msg: any) => {
-          if (msg.msgtype === 'text') {
-            resolve(msg.content)
-          }
-        })
-      }),
-    ])
-    if (reply) {
-      return res.end(`
-      <xml>
-        <ToUserName><![CDATA[${payload.FromUserName}]]></ToUserName>
-        <FromUserName><![CDATA[${payload.ToUserName}]]></FromUserName>
-        <CreateTime>${payload.CreateTime}</CreateTime>
-        <MsgType><![CDATA[text]]></MsgType>
-        <Content><![CDATA[${reply}]]></Content>
-      </xml>
-      `)
+    if (this.personalMode) {
+      const reply: null|string|any = await Promise.race([
+        new Promise((resolve) => {
+          setTimeout(() => resolve(null), 5000)
+        }),
+        new Promise((resolve) => {
+          this.on('instantReply', (msg: any) => {
+            if (msg.msgtype === 'text') {
+              resolve(msg.content)
+            } else {
+              resolve(null)
+            }
+          })
+        }),
+      ])
+      if (reply) {
+        return res.end(`
+        <xml>
+          <ToUserName><![CDATA[${payload.FromUserName}]]></ToUserName>
+          <FromUserName><![CDATA[${payload.ToUserName}]]></FromUserName>
+          <CreateTime>${payload.CreateTime}</CreateTime>
+          <MsgType><![CDATA[text]]></MsgType>
+          <Content><![CDATA[${reply}]]></Content>
+        </xml>
+        `)
+      }
     }
     res.end('success')
   }
