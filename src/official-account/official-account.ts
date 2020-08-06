@@ -196,7 +196,17 @@ class OfficialAccount extends EventEmitter {
         },
         touser: args.touser,
       })
+    /**
+     * { errcode: 0, errmsg: 'ok' }
+     */
 
+    /**
+     * TODO(huan) 202008: deal with this situation
+     * {
+        errcode: 45015,
+        errmsg: 'response out of time limit or subscription is canceled hint: [CgCD2CMre-brVPIA] rid: 5f2b8ff1-4943a9b3-70b9fe5e'
+      }
+     */
     return ret.body
   }
 
