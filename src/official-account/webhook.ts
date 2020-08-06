@@ -216,7 +216,7 @@ class Webhook extends WebhookEventEmitter {
       'text',
       'image',
     ]
-    
+
     this.userOpen[payload.FromUserName] = true
     /**
      * TODO: support more MsgType
@@ -236,7 +236,7 @@ class Webhook extends WebhookEventEmitter {
     if (this.personalMode) {
       let reply: string|null = null
       const timeout = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-      for (let i = 0; i < (4000 / 5); i ++) {
+      for (let i = 0; i < (4000 / 5); i++) {
         await timeout(5)
         if (this.messageCache[payload.FromUserName]) {
           const msg: any = this.messageCache[payload.FromUserName]
