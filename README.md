@@ -114,7 +114,9 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ## HISTORY
 
-### master
+### v0.4 master
+
+1. Support localtunnel service from chatie.io
 
 ### v0.2 (Aug 2, 2018)
 
