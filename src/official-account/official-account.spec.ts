@@ -9,15 +9,16 @@ import { getOaOptions } from '../../tests/fixtures/oa-options'
 
 const unirest = require('unirest')
 
-// FIXME(20200806): serverless.social down
-test.skip('OfficialAccount smoke testing', async (t) => {
+test('OfficialAccount smoke testing', async (t) => {
   void cuid
   const WEBHOOK_PROXY_URL = [
-    'https://',
+    'http://',
     'wechaty-puppet-official-account',
-    '-',
-    cuid(),
-    '.serverless.social',
+    // '-',
+    // cuid(),
+    // '.serverless.social',
+    '.localtunnel.chatie.io',
+    // '.test.localhost.localdomain',
   ].join('')
 
   const oa = new OfficialAccount({
