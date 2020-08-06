@@ -26,7 +26,7 @@ export interface VerifyArgs {
 }
 
 interface WebhookOptions {
-  personalMode     : boolean,
+  personalMode?    : boolean,
   port?            : number
   webhookProxyUrl? : string
   verify           : (args: VerifyArgs) => boolean
