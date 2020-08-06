@@ -209,7 +209,6 @@ class Webhook extends WebhookEventEmitter {
     if (knownTypeList.includes(payload.MsgType)) {
       this.emit('message', payload)
     }
-    // console.info(payload)
 
     /**
      * 假如服务器无法保证在五秒内处理并回复，必须做出下述回复，这样微信服务器才不会对此作任何处理，
@@ -234,7 +233,7 @@ class Webhook extends WebhookEventEmitter {
               msgtype: OAMessageType,
               content: string,
             }) => {
-            if (msg.touser !== payload.ToUserName) {
+            if (msg.touser !== payload.FromUserName) {
               return
             }
             if (isTimeout) {

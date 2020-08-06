@@ -130,6 +130,7 @@ class PuppetOA extends Puppet {
       const oa = new OfficialAccount({
         appId           : this.appId,
         appSecret       : this.appSecret,
+        personalMode    : this.personalMode,
         port            : this.port,
         token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
