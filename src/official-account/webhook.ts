@@ -8,10 +8,15 @@ import TypedEventEmitter from 'typed-emitter'
 import { log } from 'wechaty-puppet'
 import { EventEmitter } from 'events'
 
-import { OAMessagePayload }   from './schema'
+import { OAMessagePayload, OAMessageType }   from './schema'
 
 const WebhookEventEmitter = EventEmitter as new () => TypedEventEmitter<{
   message: (message: OAMessagePayload) => void,
+  instantReply: (message: {
+    touser: string,
+    msgtype: OAMessageType,
+    content: string,
+  }) => void,
 }>
 
 export interface VerifyArgs {
@@ -21,6 +26,7 @@ export interface VerifyArgs {
 }
 
 interface WebhookOptions {
+  personalMode     : boolean,
   port?            : number
   webhookProxyUrl? : string
   verify           : (args: VerifyArgs) => boolean
@@ -30,6 +36,9 @@ class Webhook extends WebhookEventEmitter {
 
   protected server? : http.Server
   protected tunnel? : localtunnel.Tunnel
+  protected personalMode? : boolean
+  protected messageCache? : any = {}
+  protected userOpen? : any = {}
 
   public readonly webhookProxyHost?      : string
   public readonly webhookProxySchema?    : string
@@ -47,6 +56,8 @@ class Webhook extends WebhookEventEmitter {
     if (typeof options.port === 'undefined' && !options.webhookProxyUrl) {
       throw new Error('Please provide either `port` or `webhookProxyUrl` for Webhook')
     }
+
+    this.personalMode = options.personalMode
 
     if (options.webhookProxyUrl) {
       const result = this.parseWebhookProxyUrl(options.webhookProxyUrl)
@@ -114,6 +125,18 @@ class Webhook extends WebhookEventEmitter {
 
     app.get('/',  this.appGet.bind(this))
     app.post('/', this.appPost.bind(this))
+
+    this.on('instantReply', (msg: {
+      msgtype: OAMessageType,
+      content: string,
+      touser: string
+    }) => {
+      if (this.userOpen[msg.touser]) {
+        this.messageCache[msg.touser] = msg
+      } else {
+        throw Error('Webhook: personal mode only allow reply once and within 4s')
+      }
+    })
 
     const server = this.server = http.createServer(app)
 
@@ -218,13 +241,13 @@ class Webhook extends WebhookEventEmitter {
       'image',
     ]
 
+    this.userOpen[payload.FromUserName] = true
     /**
      * TODO: support more MsgType
      */
     if (knownTypeList.includes(payload.MsgType)) {
       this.emit('message', payload)
     }
-    // console.info(payload)
 
     /**
      * 假如服务器无法保证在五秒内处理并回复，必须做出下述回复，这样微信服务器才不会对此作任何处理，
@@ -234,6 +257,34 @@ class Webhook extends WebhookEventEmitter {
      *
      *  https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html
      */
+    if (this.personalMode) {
+      let reply: string|null = null
+      const timeout = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+      for (let i = 0; i < (4000 / 5); i++) {
+        await timeout(5)
+        if (this.messageCache[payload.FromUserName]) {
+          const msg: any = this.messageCache[payload.FromUserName]
+          this.messageCache[payload.FromUserName] = undefined
+
+          if (msg.msgtype === 'text') {
+            reply = `<xml>
+              <ToUserName><![CDATA[${payload.FromUserName}]]></ToUserName>
+              <FromUserName><![CDATA[${payload.ToUserName}]]></FromUserName>
+              <CreateTime>${payload.CreateTime}</CreateTime>
+              <MsgType><![CDATA[text]]></MsgType>
+              <Content><![CDATA[${msg.content}]]></Content>
+            </xml>
+            `
+          }
+          break
+        }
+      }
+      if (reply) {
+        this.userOpen[payload.FromUserName] = undefined
+        return res.end(reply)
+      }
+    }
+    this.userOpen[payload.FromUserName] = undefined
     res.end('success')
   }
 

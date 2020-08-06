@@ -66,6 +66,7 @@ class PuppetOA extends Puppet {
   protected port?            : number
   protected token            : string
   protected webhookProxyUrl? : string
+  protected personalMode?    : boolean
 
   protected oa?: OfficialAccount
 
@@ -104,6 +105,12 @@ class PuppetOA extends Puppet {
       `)
     }
 
+    if (options.personalMode) {
+      this.personalMode = options.personalMode
+    } else {
+      this.personalMode = false
+    }
+
     this.port            = options.port
     this.webhookProxyUrl = options.webhookProxyUrl
   }
@@ -123,6 +130,7 @@ class PuppetOA extends Puppet {
       const oa = new OfficialAccount({
         appId           : this.appId,
         appSecret       : this.appSecret,
+        personalMode    : this.personalMode,
         port            : this.port,
         token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
@@ -387,7 +395,11 @@ class PuppetOA extends Puppet {
         msgtype: 'text' as const,
         touser: conversationId,
       }
-      await this.oa?.sendCustomMessage(payload)
+      if (this.personalMode) {
+        await this.oa?.sendCustomMessagePersonal(payload)
+      } else {
+        await this.oa?.sendCustomMessage(payload)
+      }
     }
 
   }
