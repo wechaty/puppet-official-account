@@ -219,14 +219,27 @@ class Webhook extends WebhookEventEmitter {
      *
      *  https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html
      */
-    // res.end('success')
+    let isTimeout = false
     if (this.personalMode) {
       const reply: null|string|any = await Promise.race([
         new Promise((resolve) => {
-          setTimeout(() => resolve(null), 5000)
+          setTimeout(() => {
+            isTimeout = true
+            resolve(null)
+          }, 4000)
         }),
         new Promise((resolve) => {
-          this.on('instantReply', (msg: any) => {
+          this.on('instantReply', (msg: {
+              touser: string,
+              msgtype: OAMessageType,
+              content: string,
+            }) => {
+            if (msg.touser !== payload.ToUserName) {
+              return
+            }
+            if (isTimeout) {
+              throw new Error(`Webhook: personal mode message sent timeout touser: ${msg.touser}, msgtype: ${msg.msgtype}, content: ${msg.content}`)
+            }
             if (msg.msgtype === 'text') {
               resolve(msg.content)
             } else {
@@ -235,6 +248,7 @@ class Webhook extends WebhookEventEmitter {
           })
         }),
       ])
+
       if (reply) {
         return res.end(`
         <xml>
