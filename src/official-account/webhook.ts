@@ -129,7 +129,7 @@ class Webhook extends WebhookEventEmitter {
       /**
        * 2. for tunnel helper
        */
-      server.listen(0, () => {
+      server.listen(() => {
         const listenedPort = (server.address() as { port: number }).port
         this.setupTunnel(listenedPort)
           .then(resolve)
