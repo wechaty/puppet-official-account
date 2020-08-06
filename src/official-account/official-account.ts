@@ -113,18 +113,14 @@ class OfficialAccount extends EventEmitter {
   async start () {
     log.verbose('OfficialAccount', 'start()')
 
-    const futureList = [
-      this.updateAccessToken(),
-      this.payloadStore.start(),
-    ] as Promise<any>[]
-
     this.webhook.on('message', async message => {
       await this.payloadStore.setMessagePayload(message.MsgId, message)
       this.emit('message', message)
     })
 
+    await this.payloadStore.start()
+    await this.updateAccessToken()
     await this.webhook.start()
-    await Promise.all(futureList)
   }
 
   async stop () {
