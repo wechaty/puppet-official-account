@@ -10,11 +10,6 @@ import { EventEmitter } from 'events'
 
 import { OAMessagePayload, OAMessageType }   from './schema'
 
-const LOCAL_TUNNEL_HOST_PARTIAL_LIST = [
-  'https://',
-  'serverless.social',
-]
-
 const WebhookEventEmitter = EventEmitter as new () => TypedEventEmitter<{
   message: (message: OAMessagePayload) => void,
   instantReply: (message: {
@@ -45,7 +40,9 @@ class Webhook extends WebhookEventEmitter {
   protected messageCache? : any = {}
   protected userOpen? : any = {}
 
-  public readonly subdomain? : string
+  public readonly webhookProxyHost?      : string
+  public readonly webhookProxySchema?    : string
+  public readonly webhookProxySubDomain? : string
 
   constructor (
     protected options: WebhookOptions,
@@ -63,29 +60,56 @@ class Webhook extends WebhookEventEmitter {
     this.personalMode = options.personalMode
 
     if (options.webhookProxyUrl) {
-      this.subdomain = this.parseSubDomain(options.webhookProxyUrl)
-      if (!this.subdomain) {
+      const result = this.parseWebhookProxyUrl(options.webhookProxyUrl)
+      if (!result) {
         throw new Error(`Webhook: invalid webhookProxyUrl ${options.webhookProxyUrl}`)
       }
+      this.webhookProxyHost      = result.host
+      this.webhookProxySchema    = result.schema
+      this.webhookProxySubDomain = result.name
     }
   }
 
-  parseSubDomain (
+  parseWebhookProxyUrl (
     webhookProxyUrl: string,
-  ): undefined | string {
+  ): undefined | {
+    host   : string,
+    name   : string,
+    schema : string,
+  } {
     log.verbose('Webhook', 'parseSubDomain(%s)', webhookProxyUrl)
 
-    if (!webhookProxyUrl.startsWith(LOCAL_TUNNEL_HOST_PARTIAL_LIST[0]))  { return }
-    if (!webhookProxyUrl.endsWith(LOCAL_TUNNEL_HOST_PARTIAL_LIST[1]))    { return }
+    /**
+     * Huan(20208): see webhook.spec.ts unit tests.
+     *  server: https://github.com/localtunnel/server
+     */
+    const URL_RE = /(https?):\/\/([^.]+)\.(.+)/i
 
-    const subdomain = webhookProxyUrl.slice(
-      LOCAL_TUNNEL_HOST_PARTIAL_LIST[0].length,
-      -1 /** -1 for getting rid of the dot (.)serverless.social */
-        - LOCAL_TUNNEL_HOST_PARTIAL_LIST[1].length,
+    const matches = webhookProxyUrl.match(URL_RE)
+
+    if (!matches) {
+      log.warn('Webhook', 'parseSubDomain() fail to parse %s', webhookProxyUrl)
+      return
+    }
+
+    const [
+      , // skip matches[0]
+      schema,
+      name,
+      host,
+    ]                 = matches
+
+    log.verbose('Webhook', 'parseSubDomain() schema: %s, name: %s, host: %s',
+      schema,
+      name,
+      host,
     )
-    log.verbose('Webhook', 'parseSubDomain() succeed: %s', subdomain)
 
-    return subdomain
+    return {
+      host,
+      name,
+      schema,
+    }
   }
 
   async start () {
@@ -128,7 +152,7 @@ class Webhook extends WebhookEventEmitter {
       /**
        * 2. for tunnel helper
        */
-      server.listen(0, () => {
+      server.listen(() => {
         const listenedPort = (server.address() as { port: number }).port
         this.setupTunnel(listenedPort)
           .then(resolve)
@@ -153,12 +177,12 @@ class Webhook extends WebhookEventEmitter {
   async setupTunnel (port: number) {
     log.verbose('Webhook', 'setupTunnel(%s)', port)
 
-    const host = LOCAL_TUNNEL_HOST_PARTIAL_LIST.join('')
+    const host = `${this.webhookProxySchema}://${this.webhookProxyHost}`
 
     const tunnel = await localtunnel({
       host,
       port,
-      subdomain: this.subdomain,
+      subdomain: this.webhookProxySubDomain,
     })
 
     log.verbose('Webhook', 'setupTunnel() created at %s', tunnel.url)

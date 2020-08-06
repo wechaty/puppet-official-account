@@ -20,7 +20,7 @@ async function main () {
 
   const server = http.createServer(app)
 
-  server.listen(0, async () => {
+  server.listen(async () => {
     const listenedPort = (server.address() as { port: number }).port
     console.info('listen on port', listenedPort)
 

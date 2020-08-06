@@ -18,3 +18,28 @@ test('integration testing', async t => {
 
   t.ok(wechaty, 'should instantiate wechaty with puppet official account')
 })
+
+test('PuppetOA perfect restart testing', async (t) => {
+  const puppet = new PuppetOA({
+    ...getOaOptions(),
+    port            : 0,
+    webhookProxyUrl : undefined,
+  })
+  try {
+
+    for (let i = 0; i < 3; i++) {
+
+      await puppet.start()
+      t.true(puppet.state.on())
+
+      await puppet.stop()
+      t.true(puppet.state.off())
+
+      t.pass('start/stop-ed at #' + i)
+    }
+
+    t.pass('PuppetOA() perfect restart pass.')
+  } catch (e) {
+    t.fail(e)
+  }
+})

@@ -12,11 +12,13 @@ const unirest = require('unirest')
 test('OfficialAccount smoke testing', async (t) => {
   void cuid
   const WEBHOOK_PROXY_URL = [
-    'https://',
+    'http://',
     'wechaty-puppet-official-account',
-    '-',
-    cuid(),
-    '.serverless.social',
+    // '-',
+    // cuid(),
+    // '.serverless.social',
+    '.localtunnel.chatie.io',
+    // '.test.localhost.localdomain',
   ].join('')
 
   const oa = new OfficialAccount({
@@ -82,7 +84,7 @@ test('sendCustomMessage()', async t => {
   await oa.start()
 
   const ret = await oa.sendCustomMessage({
-    content: 'hello',
+    content: 'wechaty-puppet-official-account CI testing',
     msgtype: 'text',
     touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
   })
