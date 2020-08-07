@@ -26,16 +26,18 @@ export interface OfficialAccountOptions {
   personalMode?    : boolean,
 }
 
-interface AccessToken {
-  token: string,
-  timestamp: number,
-  expiresIn: number,
+interface AccessTokenPayload {
+  expiresIn : number,
+  timestamp : number,
+  token     : string,
 }
 
 interface ErrorPayload {
   errcode : number,
   errmsg  : string,
 }
+
+type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
 
@@ -44,37 +46,15 @@ class OfficialAccount extends EventEmitter {
   protected webhook       : Webhook
   protected simpleUnirest : SimpleUnirest
 
-  protected _accessToken?         : AccessToken
-  protected _accessTokenUpdating? : boolean
+  protected accessTokenPayload?  : AccessTokenPayload
+
+  protected stopperFnList: StopperFn[]
 
   get accessToken (): string {
-    const outdated = () => {
-      if (!this._accessToken) {
-        return true
-      }
-
-      const durationSeconds = Math.floor(
-        (Date.now() - this._accessToken.timestamp) / 1000
-      )
-      const ttl = this._accessToken.expiresIn - durationSeconds
-
-      log.verbose('OfficialAccount', 'accessToken() outdated() token expires in %s seconds, %s minutes',
-        ttl,
-        Math.floor(ttl / 60),
-      )
-      return ttl < 0
+    if (!this.accessTokenPayload) {
+      throw new Error('accessToken() this.accessTokenPayload uninitialized!')
     }
-
-    if (outdated()) {
-      this.updateAccessToken()
-        .catch(e => log.warn('OfficialAccount', 'accessToken() this.updateAccessToken() rejection: %s', e))
-    }
-
-    if (!this._accessToken) {
-      throw new Error('accessToken() this._accessToken initialized!')
-    }
-
-    return this._accessToken.token
+    return this.accessTokenPayload.token
   }
 
   constructor (
@@ -90,9 +70,9 @@ class OfficialAccount extends EventEmitter {
       webhookProxyUrl: this.options.webhookProxyUrl,
     })
 
+    this.payloadStore  = new PayloadStore()
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
-
-    this.payloadStore = new PayloadStore()
+    this.stopperFnList = []
   }
 
   verify (args: VerifyArgs): boolean {
@@ -121,12 +101,23 @@ class OfficialAccount extends EventEmitter {
     })
 
     await this.payloadStore.start()
-    await this.updateAccessToken()
+
+    const stopper = await this.updateAccessToken()
+    this.stopperFnList.push(stopper)
+
     await this.webhook.start()
   }
 
   async stop () {
     log.verbose('OfficialAccount', 'stop()')
+
+    while (this.stopperFnList.length > 0) {
+      const stopper = this.stopperFnList.pop()
+      if (stopper) {
+        await stopper()
+      }
+    }
+
     if (this.webhook) {
       await this.webhook.stop()
     }
@@ -136,17 +127,16 @@ class OfficialAccount extends EventEmitter {
   /**
    *  https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html
    */
-  protected async updateAccessToken (): Promise<string> {
+  protected async updateAccessToken (): Promise<StopperFn> {
     log.verbose('OfficialAccount', 'updateAccessToken()')
 
-    if (this._accessToken && this._accessTokenUpdating) {
-      log.verbose('OfficialAccount', 'updateAccessToken() another update task is running.')
-      return this._accessToken.token
-    }
-
-    this._accessTokenUpdating = true
-
     try {
+      /**
+       * updated: {
+       *  "access_token":"3...Q",
+       *  "expires_in":7200
+       * }
+       */
       const ret = await this.simpleUnirest
         .get<Partial<ErrorPayload> & {
           access_token : string
@@ -160,19 +150,37 @@ class OfficialAccount extends EventEmitter {
         throw new Error(`Official Account updateAccessToken() Error ${ret.body.errcode}: ${ret.body.errmsg}`)
       }
 
-      this._accessToken = {
+      this.accessTokenPayload = {
         expiresIn : ret.body.expires_in,
         timestamp : Date.now(),
         token     : ret.body.access_token,
       }
 
-      return this._accessToken.token
+      // 5 minute before expire
+      const MINUTES_BEFORE_EXPIRE = 60 * 5
+      const expireInMs = (ret.body.expires_in - MINUTES_BEFORE_EXPIRE) * 1000
+
+      log.verbose('OfficialAccount', 'updateAccessToken() setInterval() for every %s seconds',
+        Math.floor(expireInMs / 1000),
+      )
+
+      const timer = setInterval(async () => {
+        try {
+          log.verbose('OfficialAccount', 'updateAccessToken() setInterval() updating...')
+          await this.updateAccessToken()
+        } catch (e) {
+          log.warn('OfficialAccount', 'updateAccessToken() setInterval() rejection: %s', e)
+
+          log.warn('OfficialAccount', 'updateAccessToken() setInterval() retry after 1 minute')
+          setTimeout(() => this.updateAccessToken(), 60 * 1000)
+        }
+      }, expireInMs)
+
+      return () => clearInterval(timer)
 
     } catch (e) {
       log.warn('OfficialAccount', 'updateAccessToken() rejection: %s', e)
       throw e
-    } finally {
-      this._accessTokenUpdating = false
     }
   }
 

@@ -71,6 +71,10 @@
     "typescript",
   ],
   "cSpell.words": [
-    "Miniprogram"
+    "Miniprogram",
+    "Unirest",
+    "appid",
+    "errcode",
+    "errmsg"
   ],
 }
