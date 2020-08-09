@@ -180,7 +180,7 @@ class OfficialAccount extends EventEmitter {
   /**
    *  https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html
    */
-  protected startSyncingAccessToken (): StopperFn {
+  protected async startSyncingAccessToken (): Promise<StopperFn> {
     log.verbose('OfficialAccount', 'startSyncingAccessToken()')
 
     const marginSeconds = 5 * 60  // 5 minutes
@@ -199,7 +199,7 @@ class OfficialAccount extends EventEmitter {
       .catch(e => log.error('OfficialAccount', 'startSyncingAccessToken() update() rejection: %s', e))
 
     if (!this.accessTokenPayload) {
-      void update()
+      await update()
     } else {
       const seconds = this.accessTokenPayload.expiresIn - marginSeconds
       timer = setTimeout(update, seconds * 1000)

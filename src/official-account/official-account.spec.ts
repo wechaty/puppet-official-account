@@ -56,8 +56,15 @@ test('OfficialAccount smoke testing', async (t) => {
     .send(XML)
   t.equal(response.body, 'success', 'should get success response')
 
-  await future
-  t.pass('should get a message emit event from oa instance')
+  try {
+    await Promise.race([
+      future,
+      new Promise((resolve, reject) => resolve && setTimeout(reject, 15000)),
+    ])
+    t.pass('should get a message emit event from oa instance')
+  } catch (e) {
+    t.fail('should not get timeout rejection')
+  }
 
   // await new Promise(resolve => setTimeout(resolve, 100 * 1000))
   await oa.stop()
@@ -71,7 +78,11 @@ test('updateAccessToken()', async t => {
 
   await oa.start()
 
-  t.true(oa.accessToken, 'should get access token')
+  try {
+    t.true(oa.accessToken, 'should get access token')
+  } catch (e) {
+    t.fail('should not be rejected')
+  }
 
   await oa.stop()
 })
@@ -82,17 +93,21 @@ test('sendCustomMessage()', async t => {
     port: 0,
   })
 
-  await oa.start()
+  try {
+    await oa.start()
 
-  const ret = await oa.sendCustomMessage({
-    content: 'wechaty-puppet-official-account CI testing',
-    msgtype: 'text',
-    touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
-  })
-  // console.info(ret)
-  t.equal(ret.errcode, 0, 'should get errcode 0')
-
-  await oa.stop()
+    const ret = await oa.sendCustomMessage({
+      content: 'wechaty-puppet-official-account CI testing',
+      msgtype: 'text',
+      touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
+    })
+    // console.info(ret)
+    t.equal(ret.errcode, 0, 'should get errcode 0')
+  } catch (e) {
+    t.fail('should not be rejected')
+  } finally {
+    await oa.stop()
+  }
 })
 
 export { getOaOptions }
