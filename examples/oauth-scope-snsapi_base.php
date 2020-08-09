@@ -2,6 +2,9 @@
 /**
  * 微信公众平台开发——微信授权登录（OAuth2.0）
  *  https://www.cnblogs.com/0201zcr/p/5131602.html
+ *
+ * 微信网页开发 - 网页授权
+ *  https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html
  */
 // 简单展示了如何通过微信公众平台的网页静默授权取得用户的 openid
 // 你需要有一个公众号的管理权限，以做相应的设置
