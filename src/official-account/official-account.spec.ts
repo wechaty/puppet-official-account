@@ -9,13 +9,14 @@ import { getOaOptions } from '../../tests/fixtures/oa-options'
 
 const unirest = require('unirest')
 
+void cuid // for testing
+
 test('OfficialAccount smoke testing', async (t) => {
-  void cuid
   const WEBHOOK_PROXY_URL = [
     'http://',
     'wechaty-puppet-official-account',
-    // '-',
-    // cuid(),
+    '-',
+    cuid(),
     // '.serverless.social',
     '.localtunnel.chatie.io',
     // '.test.localhost.localdomain',
@@ -56,7 +57,7 @@ test('OfficialAccount smoke testing', async (t) => {
   t.equal(response.body, 'success', 'should get success response')
 
   await future
-  t.pass('should get a message emit event from oa instane')
+  t.pass('should get a message emit event from oa instance')
 
   // await new Promise(resolve => setTimeout(resolve, 100 * 1000))
   await oa.stop()

@@ -74,7 +74,12 @@
     "Miniprogram",
     "Unirest",
     "appid",
+    "bodyparser",
+    "echostr",
     "errcode",
-    "errmsg"
+    "errmsg",
+    "localdomain",
+    "msgtype",
+    "touser"
   ],
 }

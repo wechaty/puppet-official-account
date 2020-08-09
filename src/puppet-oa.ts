@@ -85,7 +85,7 @@ class PuppetOA extends Puppet {
       this.appId = options.appId
     } else {
       throw new Error(`
-        PupetOA: appId not found. Please either set the WECHATY_PUPPET_OA_APP_ID environment variable, or set 'appId' optoins for PuppetOA.
+        PuppetOA: appId not found. Please either set the WECHATY_PUPPET_OA_APP_ID environment variable, or set 'appId' optoins for PuppetOA.
       `)
     }
 
@@ -140,7 +140,7 @@ class PuppetOA extends Puppet {
       await oa.start()
       this.oa = oa
 
-      // FIXME: find a way to get the bot user information
+      // FIXME: Huan(202008) find a way to get the bot user information
       this.id = 'wechaty-puppet-official-account'
       await this.oa.payloadStore.setContactPayload(this.id, {})
 

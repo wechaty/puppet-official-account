@@ -13,7 +13,7 @@ Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your
 
 ## FEATURES
 
-1. Provide web hook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel) and [Serverless.Social](https://serverless.social) )
+1. Provide web hook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel))
 
 ## USAGE
 
@@ -27,14 +27,14 @@ If you are newbie to Wechaty, please read the following two links first:
 In order to use `wechaty-puppet-official-account` with Wechaty, just like other puppets as well:
 
 ```ts
-import { Wechaty } from 'wechaty'
+import { Wechaty }  from 'wechaty'
 import { PuppetOA } from 'wechaty-puppet-official-account'
 
 const oa = new PuppetOA({
-  appId           : 'wx436a8961645c4d49',
-  appSecret       : '198cbdc24c3b52929cf4b7e1fe5ad571',
-  token           : 'test',
-  webhookProxyUrl : 'https://aeb082b9-14da-4b91-bdef-90a6b17a4a97.serverless.social',
+  appId           : OA_APP_ID,
+  appSecret       : OA_APP_SECRET,
+  token           : OA_TOKEN,
+  webhookProxyUrl : 'https://aeb082b9-14da-4c91-bdef-90a6d17a4z98.localtunnel.me',
 })
 
 const bot = new Wechaty({
@@ -49,6 +49,8 @@ bot.on('message', msg => {
 })
 await bot.start()
 ```
+
+> For the full source code, see: <examples/ding-dong-bot.ts>
 
 That's it!
 
@@ -83,9 +85,9 @@ This is the most convenience way to use this puppet, because you can always prov
 Currently, you can generate this URL by yourself by:
 
 1. Generate a UUIDv4 use a generator like [UUID Online Generator](https://uuidonline.com)
-1. Insert your $UUID to `https://${UUID}.serverless.social`
+1. Insert your $UUID to `https://${UUID}.localtunnel.me`
 
-For example, if your UUID is `aeb082b9-14da-4b91-bdef-90a6b17a4a97`, then you can use `https://aeb082b9-14da-4b91-bdef-90a6b17a4a97.serverless.social` as `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
+For example, if your UUID is `aeb082b9-14da-4c91-bdef-90a6d17a4z98`, then you can use `https://aeb082b9-14da-4c91-bdef-90a6d17a4z98.localtunnel.me` as `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
 
 Learn more from: [localtunnel](https://localtunnel.github.io/www/)
 
@@ -93,16 +95,19 @@ Learn more from: [localtunnel](https://localtunnel.github.io/www/)
 
 When you start developing the WeChat Official Account, it will be very helpful with the following tools provided by Tencent:
 
-1. Apply a test Official Account with full priviliedges for developing
+1. Apply a test Official Account with full privileges for developing
 1. Simulate the API calls in a online simulation tool.
 
 ### 1 Apply a Official Account for developing/testing
 
 测试号是扫码即可获得的微信公众号，拥有所有完整高级接口权限，测试专用。
 
-[进入微信公众帐号测试号申请系统](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
+微信公众帐号测试号申请系统入口地址:
 
-### 2 API calls debuging tool
+- [Docs](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Requesting_an_API_Test_Account.html)
+- [Link](https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login)
+
+### 2 API calls debugging tool
 
 允许开发者在平台上提交信息和服务器进行交互，并得到验证结果的在线 API 调试工具。
 
@@ -116,7 +121,7 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ### v0.4 master
 
-1. Support localtunnel service from chatie.io
+1. Support localtunnel service from any service provider (domains).
 
 ### v0.2 (Aug 2, 2018)
 

@@ -32,16 +32,12 @@ async function main () {
     })
     // https://wechaty-puppet-official-account.serverless.social/
 
-    console.info('tunenl url', tunnel.url)
+    console.info('tunnel url', tunnel.url)
   })
 
   const simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
 
-  // lizhuohuan 测试号
-  // const appId = 'wx436a8961645c4d49'
-  // const appSecret = '198cbdc24c3b52929cf4b7e1fe5ad571'
-
-  const appId = 'wx205042975313d007'
+  const appId = process.env.APP_ID
   const appSecret = process.env.APP_SECRET
 
   const ret = await simpleUnirest
