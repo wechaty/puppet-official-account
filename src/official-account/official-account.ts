@@ -104,7 +104,7 @@ class OfficialAccount extends EventEmitter {
 
     const succeed = await this.updateAccessToken()
     if (!succeed) {
-      throw new Error('updateAccessToken failed!')
+      log.error('OfficialAccount', 'start() updateAccessToken() failed.')
     }
 
     const stopper = await this.startSyncingAccessToken()
