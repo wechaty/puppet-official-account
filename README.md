@@ -116,6 +116,7 @@ Address: <https://mp.weixin.qq.com/debug/>
 ## RESOURCES
 
 - [nodejs+express对微信公众号进行二次开发--接收消息，自动回复文本，图片以及代码优化](https://blog.csdn.net/weixin_44729896/article/details/102525375)
+- [Microsoft Azure Bot Service - Connect a bot to WeChat](https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-wechat?view=azure-bot-service-4.0)
 
 ## HISTORY
 
