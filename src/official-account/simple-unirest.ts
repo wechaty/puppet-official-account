@@ -1,3 +1,5 @@
+import { ReadStream } from 'fs'
+
 const unirest = require('unirest')
 
 export interface FileInfo {
@@ -9,7 +11,7 @@ export interface FileInfo {
 type RequestType = 'json' | 'html'
 
 interface UnirestRequest<T> extends Promise<{ body: T }> {
-  attach : (formName: string, buf: Buffer, info?: FileInfo) => UnirestRequest<T>
+  attach : (formName: string, buf: Buffer | ReadStream, info?: FileInfo) => UnirestRequest<T>
   type   : (t: RequestType) => UnirestRequest<T>
   field  : (payload: Object) => UnirestRequest<T>
   send   : (payload: Object | Buffer | string) => UnirestRequest<T>
@@ -22,11 +24,12 @@ export interface SimpleUnirest {
 }
 
 function getSimpleUnirest (
-  endpoint : string,
+  endpoint : string, headers?: object
 ): SimpleUnirest {
   // const auth = 'Basic ' + Buffer.from(apiKey + ':' + 'X').toString('base64')
-  const headers = {
+  headers = {
   //   Authorization: auth,
+    ...headers,
   }
 
   return {

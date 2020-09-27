@@ -1,8 +1,10 @@
 /* eslint-disable camelcase */
 import { EventEmitter } from 'events'
+import * as fs from 'fs'
+import * as UUID from 'uuid'
 
 import crypto   from 'crypto'
-import { log }  from 'wechaty-puppet'
+import { FileBox, log }  from 'wechaty-puppet'
 
 import {
   Webhook,
@@ -36,6 +38,8 @@ interface ErrorPayload {
   errcode : number,
   errmsg  : string,
 }
+
+export const WX_SERVER_ADDRESS = 'https://api.weixin.qq.com/cgi-bin/'
 
 type StopperFn = () => void
 
@@ -71,7 +75,7 @@ class OfficialAccount extends EventEmitter {
     })
 
     this.payloadStore  = new PayloadStore()
-    this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
+    this.simpleUnirest = getSimpleUnirest(WX_SERVER_ADDRESS)
     this.stopperFnList = []
   }
 
@@ -250,6 +254,59 @@ class OfficialAccount extends EventEmitter {
       }
      */
     return ret.body
+  }
+
+  async uploadTempFile (args: {
+    file: FileBox,
+    touser: string,
+    msgtype: OAMessageType
+  }): Promise<ErrorPayload> {
+    log.verbose('OfficialAccount', 'uploadTempFile(%s)', JSON.stringify(args))
+    const msgSet: Set<string> = new Set(['image', 'video', 'voice'])
+    if (!msgSet.has(args.msgtype)) {
+      throw Error(`msgtype <${args.msgtype}> is  not supported`)
+    }
+
+    // request header is not application/json
+    const simpleUnirest = getSimpleUnirest(WX_SERVER_ADDRESS, { 'Content-Type': 'multipart/form-data' })
+
+    // check and create cache dir to save temp file
+    const wechatyDirExist = fs.existsSync('.wechaty')
+    if (!wechatyDirExist) {
+      fs.mkdirSync('.wechaty')
+    }
+    const wechatyCacheDirExist = fs.existsSync('.wechaty/cache')
+    if (!wechatyCacheDirExist) {
+      fs.mkdirSync('.wechaty/cache')
+    }
+
+    const cacheFile = `.wechaty/cache/${UUID.v1()}-${args.file.name}`
+    await args.file.toFile(cacheFile, true)
+
+    const mediaResponse = await simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('remote file', fs.createReadStream(cacheFile))
+
+    const mediaPayload = JSON.parse(mediaResponse.body as string)
+
+    if (mediaPayload.errcode) {
+      throw Error('invalid media type')
+    }
+
+    // after upload temp file to wx server, we should delete cache file
+    fs.unlinkSync(cacheFile)
+
+    const data = {
+      image:
+      {
+        media_id: mediaPayload.media_id,
+      },
+      msgtype: args.msgtype,
+      touser: args.touser,
+    }
+    const messageReq = await this.simpleUnirest
+      .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
+      .type('json')
+      .send(data)
+    return messageReq.body
   }
 
   /**
