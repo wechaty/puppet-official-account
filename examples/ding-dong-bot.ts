@@ -22,6 +22,7 @@ import {
   EventScanPayload,
   EventErrorPayload,
   EventMessagePayload,
+  FileBox
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
@@ -112,6 +113,12 @@ async function onMessage (payload: EventMessagePayload) {
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
+  }
+  else if (/image/i.test(msgPayload.text || '')) {
+    let fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg")
+    if (msgPayload.fromId){
+      await puppet.messageSendFile(msgPayload.fromId!, fileBox)
+    }
   }
 }
 
