@@ -10,7 +10,14 @@ import {
 
 import { getOaOptions } from './fixtures/oa-options'
 
+const isPR = require('is-pr')
+
 test('integration testing', async t => {
+  if (isPR) {
+    t.skip('Skip for PR')
+    return
+  }
+
   const puppet = new PuppetOA({
     ...getOaOptions(),
   })
@@ -20,6 +27,11 @@ test('integration testing', async t => {
 })
 
 test('PuppetOA perfect restart testing', async (t) => {
+  if (isPR) {
+    t.skip('Skip for PR')
+    return
+  }
+
   const puppet = new PuppetOA({
     ...getOaOptions(),
     port            : 0,
