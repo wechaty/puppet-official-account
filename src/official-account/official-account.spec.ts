@@ -7,11 +7,18 @@ import { OfficialAccount } from './official-account'
 
 import { getOaOptions } from '../../tests/fixtures/oa-options'
 
+const isPR = require('is-pr')
+
 const unirest = require('unirest')
 
 void cuid // for testing
 
 test('OfficialAccount smoke testing', async (t) => {
+  if (isPR) {
+    t.skip('Skip for PR')
+    return
+  }
+
   const WEBHOOK_PROXY_URL = [
     'http://',
     'wechaty-puppet-official-account',
@@ -71,6 +78,11 @@ test('OfficialAccount smoke testing', async (t) => {
 })
 
 test('updateAccessToken()', async t => {
+  if (isPR) {
+    t.skip('Skip for PR')
+    return
+  }
+
   const oa = new OfficialAccount({
     ...getOaOptions(),
     port: 0,
@@ -88,6 +100,11 @@ test('updateAccessToken()', async t => {
 })
 
 test('sendCustomMessage()', async t => {
+  if (isPR) {
+    t.skip('Skip for PR')
+    return
+  }
+
   const oa = new OfficialAccount({
     ...getOaOptions(),
     port: 0,
@@ -109,5 +126,3 @@ test('sendCustomMessage()', async t => {
     await oa.stop()
   }
 })
-
-export { getOaOptions }
