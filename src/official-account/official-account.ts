@@ -39,8 +39,6 @@ interface ErrorPayload {
   errmsg  : string,
 }
 
-export const WX_SERVER_ADDRESS = 'https://api.weixin.qq.com/cgi-bin/'
-
 type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
@@ -75,7 +73,7 @@ class OfficialAccount extends EventEmitter {
     })
 
     this.payloadStore  = new PayloadStore()
-    this.simpleUnirest = getSimpleUnirest(WX_SERVER_ADDRESS)
+    this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
   }
 
@@ -267,11 +265,8 @@ class OfficialAccount extends EventEmitter {
       throw Error(`msgtype <${args.msgtype}> is  not supported`)
     }
 
-    // request header is not application/json
-    const simpleUnirest = getSimpleUnirest(WX_SERVER_ADDRESS, { 'Content-Type': 'multipart/form-data' })
-
     const { buf, info } = await normalizeFileBox(args.file)
-    const mediaResponse = await simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
+    const mediaResponse = await this.simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
     const mediaPayload = JSON.parse(mediaResponse.body as string)
 
     if (mediaPayload.errcode) {
