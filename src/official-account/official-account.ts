@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
 import { EventEmitter } from 'events'
-import * as fs from 'fs'
-import * as UUID from 'uuid'
 
 import crypto   from 'crypto'
 import { FileBox, log }  from 'wechaty-puppet'
+
+import { normalizeFileBox } from './normalize-file-box'
 
 import {
   Webhook,
@@ -270,29 +270,13 @@ class OfficialAccount extends EventEmitter {
     // request header is not application/json
     const simpleUnirest = getSimpleUnirest(WX_SERVER_ADDRESS, { 'Content-Type': 'multipart/form-data' })
 
-    // check and create cache dir to save temp file
-    const wechatyDirExist = fs.existsSync('.wechaty')
-    if (!wechatyDirExist) {
-      fs.mkdirSync('.wechaty')
-    }
-    const wechatyCacheDirExist = fs.existsSync('.wechaty/cache')
-    if (!wechatyCacheDirExist) {
-      fs.mkdirSync('.wechaty/cache')
-    }
-
-    const cacheFile = `.wechaty/cache/${UUID.v1()}-${args.file.name}`
-    await args.file.toFile(cacheFile, true)
-
-    const mediaResponse = await simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('remote file', fs.createReadStream(cacheFile))
-
+    const { buf, info } = await normalizeFileBox(args.file)
+    const mediaResponse = await simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
     const mediaPayload = JSON.parse(mediaResponse.body as string)
 
     if (mediaPayload.errcode) {
       throw Error('invalid media type')
     }
-
-    // after upload temp file to wx server, we should delete cache file
-    fs.unlinkSync(cacheFile)
 
     const data = {
       image:
