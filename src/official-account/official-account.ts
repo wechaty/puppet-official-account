@@ -17,6 +17,8 @@ import {
 }                       from './simple-unirest'
 import {
   OAMessageType,
+  OAMediaPayload,
+  OAMediaType,
 }                       from './schema'
 
 export interface OfficialAccountOptions {
@@ -254,38 +256,37 @@ class OfficialAccount extends EventEmitter {
     return ret.body
   }
 
-  async uploadTempFile (args: {
+  async sendFile (args: {
     file: FileBox,
     touser: string,
-    msgtype: OAMessageType
-  }): Promise<ErrorPayload> {
-    log.verbose('OfficialAccount', 'uploadTempFile(%s)', JSON.stringify(args))
-    const msgSet: Set<string> = new Set(['image', 'video', 'voice'])
-    if (!msgSet.has(args.msgtype)) {
-      throw Error(`msgtype <${args.msgtype}> is  not supported`)
-    }
+    msgtype: OAMediaType
+  }): Promise<void> {
+    log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
 
     const { buf, info } = await normalizeFileBox(args.file)
-    const mediaResponse = await this.simpleUnirest.post(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
-    const mediaPayload = JSON.parse(mediaResponse.body as string)
+    const mediaResponse = await this.simpleUnirest.post<ErrorPayload | OAMediaPayload>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
 
-    if (mediaPayload.errcode) {
-      throw Error('invalid media type')
+    const isErrorPayload = (message: ErrorPayload | OAMediaPayload): message is ErrorPayload => {
+      return (message as ErrorPayload).errcode !== undefined
+    }
+
+    if (isErrorPayload(mediaResponse.body)) {
+      log.error('OfficialAccount', 'SendFile() can not send file to tencent server')
+      return
     }
 
     const data = {
       image:
       {
-        media_id: mediaPayload.media_id,
+        media_id: mediaResponse.body.mediaId,
       },
       msgtype: args.msgtype,
       touser: args.touser,
     }
-    const messageReq = await this.simpleUnirest
-      .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
-      .type('json')
-      .send(data)
-    return messageReq.body
+    const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
+    if (messageResponse.body) {
+      log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
+    }
   }
 
   /**

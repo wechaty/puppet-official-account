@@ -401,7 +401,7 @@ class PuppetOA extends Puppet {
         await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
-      await this.oa?.uploadTempFile({ file: something, msgtype: 'image', touser: conversationId })
+      await this.oa?.sendFile({ file: something, msgtype: 'image', touser: conversationId })
     }
   }
 
