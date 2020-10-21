@@ -20,9 +20,3 @@ export interface OAMessagePayload {
 export interface OAContactPayload {
 
 }
-
-export interface OAMediaPayload {
-  type      : OAMediaType
-  mediaId   : string
-  createdAt : Date
-}

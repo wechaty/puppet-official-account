@@ -17,7 +17,7 @@ import {
 }                       from './simple-unirest'
 import {
   OAMessageType,
-  OAMediaPayload,
+  // OAMediaPayload,
   OAMediaType,
 }                       from './schema'
 
@@ -253,6 +253,7 @@ class OfficialAccount extends EventEmitter {
         errmsg: 'response out of time limit or subscription is canceled hint: [CgCD2CMre-brVPIA] rid: 5f2b8ff1-4943a9b3-70b9fe5e'
       }
      */
+
     return ret.body
   }
 
@@ -264,27 +265,26 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
 
     const { buf, info } = await normalizeFileBox(args.file)
-    const mediaResponse = await this.simpleUnirest.post<ErrorPayload | OAMediaPayload>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
-
-    const isErrorPayload = (message: ErrorPayload | OAMediaPayload): message is ErrorPayload => {
-      return (message as ErrorPayload).errcode !== undefined
-    }
-
-    if (isErrorPayload(mediaResponse.body)) {
-      log.error('OfficialAccount', 'SendFile() can not send file to tencent server')
-      return
+    const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+          media_id    : string
+          created_at  : string,
+          type        : string
+        }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
+    // the type of result is string
+    if (typeof mediaResponse.body === 'string') {
+      mediaResponse.body = JSON.parse(mediaResponse.body)
     }
 
     const data = {
       image:
       {
-        media_id: mediaResponse.body.mediaId,
+        media_id: mediaResponse.body.media_id,
       },
       msgtype: args.msgtype,
       touser: args.touser,
     }
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
-    if (messageResponse.body) {
+    if (messageResponse.body.errcode) {
       log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
     }
   }
