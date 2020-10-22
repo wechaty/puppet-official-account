@@ -6,6 +6,8 @@ export type OAMessageType = 'text'
               | 'location'
               | 'link'
 
+export type OAMediaType = 'image' | 'voice' | 'video' | 'thumb'
+
 export interface OAMessagePayload {
   ToUserName   : string
   FromUserName : string

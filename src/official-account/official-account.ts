@@ -2,7 +2,9 @@
 import { EventEmitter } from 'events'
 
 import crypto   from 'crypto'
-import { log }  from 'wechaty-puppet'
+import { FileBox, log }  from 'wechaty-puppet'
+
+import { normalizeFileBox } from './normalize-file-box'
 
 import {
   Webhook,
@@ -15,6 +17,8 @@ import {
 }                       from './simple-unirest'
 import {
   OAMessageType,
+  // OAMediaPayload,
+  OAMediaType,
 }                       from './schema'
 
 export interface OfficialAccountOptions {
@@ -249,7 +253,40 @@ class OfficialAccount extends EventEmitter {
         errmsg: 'response out of time limit or subscription is canceled hint: [CgCD2CMre-brVPIA] rid: 5f2b8ff1-4943a9b3-70b9fe5e'
       }
      */
+
     return ret.body
+  }
+
+  async sendFile (args: {
+    file: FileBox,
+    touser: string,
+    msgtype: OAMediaType
+  }): Promise<void> {
+    log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
+
+    const { buf, info } = await normalizeFileBox(args.file)
+    const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+          media_id    : string
+          created_at  : string,
+          type        : string
+        }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
+    // the type of result is string
+    if (typeof mediaResponse.body === 'string') {
+      mediaResponse.body = JSON.parse(mediaResponse.body)
+    }
+
+    const data = {
+      image:
+      {
+        media_id: mediaResponse.body.media_id,
+      },
+      msgtype: args.msgtype,
+      touser: args.touser,
+    }
+    const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
+    if (messageResponse.body.errcode) {
+      log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
+    }
   }
 
   /**

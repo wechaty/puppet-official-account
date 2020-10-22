@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-official-account",
-  "version": "0.5.9",
+  "version": "0.5.14",
   "description": "Wechaty Puppet for WeChat Official Accounts",
   "directories": {
     "test": "tests"
@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@types/lru-cache": "^5.1.0",
+    "@types/uuid": "^8.3.0",
     "cuid": "^2.1.8",
     "express": "^4.17.1",
     "express-xml-bodyparser": "^0.3.0",
