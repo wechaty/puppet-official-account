@@ -20,3 +20,10 @@ export interface OAMessagePayload {
 export interface OAContactPayload {
 
 }
+
+export type Language = 'zh_CN' | 'zh_TW' | 'en'
+
+export interface ErrorPayload {
+  errcode : number,
+  errmsg  : string,
+}

@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events'
 
 import crypto   from 'crypto'
-import { FileBox, log }  from 'wechaty-puppet'
+import { ContactGender, ContactPayload, ContactType, FileBox, log }  from 'wechaty-puppet'
 
 import { normalizeFileBox } from './normalize-file-box'
 
@@ -19,6 +19,8 @@ import {
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
+  ErrorPayload,
+  Language,
 }                       from './schema'
 
 export interface OfficialAccountOptions {
@@ -30,15 +32,10 @@ export interface OfficialAccountOptions {
   personalMode?    : boolean,
 }
 
-interface AccessTokenPayload {
+export interface AccessTokenPayload {
   expiresIn : number,
   timestamp : number,
   token     : string,
-}
-
-interface ErrorPayload {
-  errcode : number,
-  errmsg  : string,
 }
 
 type StopperFn = () => void
@@ -286,6 +283,96 @@ class OfficialAccount extends EventEmitter {
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
       log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
+    }
+  }
+
+  async getContactList (): Promise<string[]> {
+    log.verbose('OfficialAccount', 'getContactList')
+
+    let openIdList: string[] = []
+    let nextOpenId = ''
+
+    while (true) {
+      const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
+        total       : number,
+        count       : number,
+        data        : {
+          openid    : string[]
+        },
+        next_openid : string
+      }>(`user/get?access_token=${this.accessToken}&next_openid=${nextOpenId}`)
+
+      if (req.body.errcode) {
+        log.error(`OfficialAccount', 'getContactList() ${req.body.errmsg}`)
+        return openIdList
+      }
+
+      if (!req.body.next_openid) {
+        break
+      }
+      openIdList = openIdList.concat(req.body.data.openid)
+      nextOpenId = req.body.next_openid
+    }
+    return openIdList
+  }
+
+  async getContactPayload (openId: string): Promise<void | ContactPayload> {
+    log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
+
+    const res = await this.simpleUnirest.get<Partial<ErrorPayload> & {
+      subscribe         : number,
+      openid            : string,
+      nickname          : string,
+      sex               : ContactGender,
+      language          : Language,
+      city              : string,
+      province          : string,
+      country           : string,
+      headimgurl        : string,
+      subscribe_time    : number,
+      unionid           : string,
+      remark            : string,
+      groupid           : number,
+      tagid_list        : Array<number>,
+      subscribe_scene   : string,
+      qr_scene          : number,
+      qr_scene_str      : string,
+    }>(`user/info?access_token=${this.accessToken}&openid=${openId}&lang=zh_CN`)
+
+    if (res.body.errcode) {
+      log.error(`OfficialAccount', 'getContactPayload() ${res.body.errmsg}`)
+      return
+    }
+
+    const payload: ContactPayload = {
+      alias     : res.body.remark,
+      avatar    : res.body.headimgurl,
+      city      : res.body.city,
+      friend    : true,
+      gender    : res.body.sex,
+      id        : res.body.openid,
+      name      : res.body.nickname,
+      province  : res.body.province,
+      signature : '',
+      star      : false,
+      type      : ContactType.Individual,
+      weixin    : res.body.unionid,
+    }
+
+    /*
+    * wj-Mcat: What kind of the ContactType should be ?
+    * TODO -> there are some data can be feed into ContactPayload
+    */
+    return payload
+  }
+
+  async updateContactRemark (openId: string, remark: string): Promise<void> {
+    log.verbose('OfficialAccount', 'setContactRemark(%s)', JSON.stringify({ openId, remark }))
+
+    const res = await this.simpleUnirest.post<ErrorPayload>(`user/info/updateremark?access_token=${this.accessToken}`)
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'setContactRemark() can update contact remark (%s)', res.body.errmsg)
     }
   }
 
