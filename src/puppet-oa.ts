@@ -40,6 +40,7 @@ import {
 
   log,
   MessageType,
+  ContactType,
 }                           from 'wechaty-puppet'
 
 import { VERSION } from './version'
@@ -52,7 +53,7 @@ import {
   OfficialAccountOptions,
   OfficialAccount,
 }                             from './official-account/official-account'
-import { OAMessagePayload } from './official-account/schema'
+import { OAContactPayload, OAMessagePayload } from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -141,7 +142,7 @@ class PuppetOA extends Puppet {
 
       // FIXME: Huan(202008) find a way to get the bot user information
       this.id = 'wechaty-puppet-official-account'
-      await this.oa.payloadStore.setContactPayload(this.id, {})
+      await this.oa.payloadStore.setContactPayload(this.id, {} as any)
 
       this.state.on(true)
     } catch (e) {
@@ -297,18 +298,31 @@ class PuppetOA extends Puppet {
     return fileBox
   }
 
-  async contactRawPayloadParser (payload: ContactPayload): Promise<ContactPayload> {
+  async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<ContactPayload> {
+    const payload: ContactPayload = {
+      alias     : oaPayload.remark,
+      avatar    : oaPayload.headimgurl,
+      city      : oaPayload.city,
+      friend    : true,
+      gender    : oaPayload.sex,
+      id        : oaPayload.openid,
+      name      : oaPayload.nickname,
+      province  : oaPayload.province,
+      signature : '',
+      star      : false,
+      type      : ContactType.Individual,
+      weixin    : oaPayload.unionid,
+    }
     return payload
   }
 
-  async contactRawPayload (id: string): Promise<ContactPayload> {
+  async contactRawPayload (id: string): Promise<OAContactPayload> {
     log.verbose('PuppetOA', 'contactRawPayload(%s)', id)
 
     const contactInfoPayload = await this.oa?.getContactPayload(id)
     if (!contactInfoPayload) {
       throw new Error(`can not get ContactPayload(${id})`)
     }
-
     return contactInfoPayload
   }
 
