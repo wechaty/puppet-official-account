@@ -16,7 +16,6 @@
  *   limitations under the License.
  *
  */
-import path  from 'path'
 
 import {
   ContactPayload,
@@ -41,6 +40,7 @@ import {
 
   log,
   MessageType,
+  ContactType,
 }                           from 'wechaty-puppet'
 
 import { VERSION } from './version'
@@ -53,7 +53,7 @@ import {
   OfficialAccountOptions,
   OfficialAccount,
 }                             from './official-account/official-account'
-import { OAMessagePayload } from './official-account/schema'
+import { OAContactPayload, OAMessagePayload } from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -142,7 +142,7 @@ class PuppetOA extends Puppet {
 
       // FIXME: Huan(202008) find a way to get the bot user information
       this.id = 'wechaty-puppet-official-account'
-      await this.oa.payloadStore.setContactPayload(this.id, {})
+      await this.oa.payloadStore.setContactPayload(this.id, {} as any)
 
       this.state.on(true)
     } catch (e) {
@@ -238,14 +238,32 @@ class PuppetOA extends Puppet {
   public async contactAlias (contactId: string, alias?: string | null): Promise<void | string> {
     log.verbose('PuppetOA', 'contactAlias(%s, %s)', contactId, alias)
 
-    if (typeof alias === 'undefined') {
-      return 'mock alias'
+    /**
+     * 1. set
+     */
+    if (alias) {
+      await this.oa?.updateContactRemark(contactId, alias)
+      return alias
     }
+
+    /**
+     * 2. get
+     */
+    const contactPayload = await this.contactPayload(contactId)
+    if (!contactPayload.alias) {
+      log.warn('Contact<%s> has no alias', contactId)
+    }
+    return contactPayload.alias
   }
 
   public async contactList (): Promise<string[]> {
     log.verbose('PuppetOA', 'contactList()')
-    return []
+    const contactIdList = await this.oa?.getContactList()
+
+    if (!contactIdList) {
+      throw new Error('contactIdList found from oa store')
+    }
+    return contactIdList
   }
 
   public async contactQRCode (contactId: string): Promise<string> {
@@ -274,14 +292,38 @@ class PuppetOA extends Puppet {
     /**
      * 2. get
      */
-    const WECHATY_ICON_PNG = path.resolve('../../docs/images/wechaty-icon.png')
-    return FileBox.fromFile(WECHATY_ICON_PNG)
+
+    const contactPayload = await this.contactPayload(contactId)
+    const fileBox = FileBox.fromUrl(contactPayload.avatar)
+    return fileBox
   }
 
-  public async contactRawPayloadParser (payload: ContactPayload) { return payload }
-  public async contactRawPayload (id: string): Promise<ContactPayload> {
+  async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<ContactPayload> {
+    const payload: ContactPayload = {
+      alias     : oaPayload.remark,
+      avatar    : oaPayload.headimgurl,
+      city      : oaPayload.city,
+      friend    : true,
+      gender    : oaPayload.sex,
+      id        : oaPayload.openid,
+      name      : oaPayload.nickname,
+      province  : oaPayload.province,
+      signature : '',
+      star      : false,
+      type      : ContactType.Individual,
+      weixin    : oaPayload.unionid,
+    }
+    return payload
+  }
+
+  async contactRawPayload (id: string): Promise<OAContactPayload> {
     log.verbose('PuppetOA', 'contactRawPayload(%s)', id)
-    return {} as any
+
+    const contactInfoPayload = await this.oa?.getContactPayload(id)
+    if (!contactInfoPayload) {
+      throw new Error(`can not get ContactPayload(${id})`)
+    }
+    return contactInfoPayload
   }
 
   /**

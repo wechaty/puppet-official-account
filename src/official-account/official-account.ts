@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events'
 
 import crypto   from 'crypto'
-import { FileBox, log }  from 'wechaty-puppet'
+import { ContactGender, FileBox, log }  from 'wechaty-puppet'
 
 import { normalizeFileBox } from './normalize-file-box'
 
@@ -19,6 +19,8 @@ import {
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
+  ErrorPayload,
+  OAContactPayload,
 }                       from './schema'
 
 export interface OfficialAccountOptions {
@@ -30,15 +32,10 @@ export interface OfficialAccountOptions {
   personalMode?    : boolean,
 }
 
-interface AccessTokenPayload {
+export interface AccessTokenPayload {
   expiresIn : number,
   timestamp : number,
   token     : string,
-}
-
-interface ErrorPayload {
-  errcode : number,
-  errmsg  : string,
 }
 
 type StopperFn = () => void
@@ -286,6 +283,103 @@ class OfficialAccount extends EventEmitter {
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
       log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
+    }
+  }
+
+  async getContactList (): Promise<string[]> {
+    log.verbose('OfficialAccount', 'getContactList')
+
+    let openIdList: string[] = []
+    let nextOpenId = ''
+
+    while (true) {
+      const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
+        total       : number,
+        count       : number,
+        data        : {
+          openid    : string[]
+        },
+        next_openid : string
+      }>(`user/get?access_token=${this.accessToken}&next_openid=${nextOpenId}`)
+
+      if (req.body.errcode) {
+        log.error(`OfficialAccount', 'getContactList() ${req.body.errmsg}`)
+        return openIdList
+      }
+
+      if (!req.body.next_openid) {
+        break
+      }
+      openIdList = openIdList.concat(req.body.data.openid)
+      nextOpenId = req.body.next_openid
+    }
+    return openIdList
+  }
+
+  async getContactPayload (openId: string): Promise<void | OAContactPayload> {
+    log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
+
+    if (openId && openId.startsWith('gh_')) {
+      // wechaty load the SelfContact object, so just return it.
+      /* eslint-disable sort-keys */
+      const selfContactPayload: OAContactPayload = {
+        subscribe         : 0,
+        openid            : openId,
+        nickname          : 'from official-account options ?',
+        sex               : ContactGender.Unknown,
+        language          : 'zh_CN',
+        city              : '北京',
+        province          : '北京',
+        country           : '中国',
+        headimgurl        : '',
+        subscribe_time    : 0,
+        unionid           : '0',
+        remark            : '微信公众号客服',
+        groupid           : 0,
+        tagid_list        : [],
+        subscribe_scene   : '',
+        qr_scene          : 0,
+        qr_scene_str      : '',
+      }
+      return selfContactPayload
+    }
+
+    const res = await this.simpleUnirest.get<OAContactPayload>(`user/info?access_token=${this.accessToken}&openid=${openId}&lang=zh_CN`)
+
+    if (res.body.errcode) {
+      log.error(`OfficialAccount', 'getContactPayload() ${res.body.errmsg}`)
+      return
+    }
+
+    // const payload: ContactPayload = {
+    //   alias     : res.body.remark,
+    //   avatar    : res.body.headimgurl,
+    //   city      : res.body.city,
+    //   friend    : true,
+    //   gender    : res.body.sex,
+    //   id        : res.body.openid,
+    //   name      : res.body.nickname,
+    //   province  : res.body.province,
+    //   signature : '',
+    //   star      : false,
+    //   type      : ContactType.Individual,
+    //   weixin    : res.body.unionid,
+    // }
+
+    /*
+    * wj-Mcat: What kind of the ContactType should be ?
+    * TODO -> there are some data can be feed into ContactPayload
+    */
+    return res.body
+  }
+
+  async updateContactRemark (openId: string, remark: string): Promise<void> {
+    log.verbose('OfficialAccount', 'setContactRemark(%s)', JSON.stringify({ openId, remark }))
+
+    const res = await this.simpleUnirest.post<ErrorPayload>(`user/info/updateremark?access_token=${this.accessToken}`)
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'setContactRemark() can update contact remark (%s)', res.body.errmsg)
     }
   }
 
