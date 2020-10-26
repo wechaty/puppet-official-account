@@ -10,10 +10,10 @@ import {
 
 import { getOaOptions } from './fixtures/oa-options'
 
-const isPR = require('is-pr')
+const ciInfo = require('ci-info')
 
 test('integration testing', async t => {
-  if (isPR) {
+  if (ciInfo.isPR) {
     t.skip('Skip for PR')
     return
   }
@@ -27,7 +27,7 @@ test('integration testing', async t => {
 })
 
 test('PuppetOA perfect restart testing', async (t) => {
-  if (isPR) {
+  if (ciInfo.isPR) {
     t.skip('Skip for PR')
     return
   }

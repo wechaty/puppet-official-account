@@ -7,14 +7,14 @@ import { OfficialAccount } from './official-account'
 
 import { getOaOptions } from '../../tests/fixtures/oa-options'
 
-const isPR = require('is-pr')
+const ciInfo = require('ci-info')
 
 const unirest = require('unirest')
 
 void cuid // for testing
 
 test('OfficialAccount smoke testing', async (t) => {
-  if (isPR) {
+  if (ciInfo.isPR) {
     t.skip('Skip for PR')
     return
   }
@@ -78,7 +78,7 @@ test('OfficialAccount smoke testing', async (t) => {
 })
 
 test('updateAccessToken()', async t => {
-  if (isPR) {
+  if (ciInfo.isPR) {
     t.skip('Skip for PR')
     return
   }
@@ -100,7 +100,7 @@ test('updateAccessToken()', async t => {
 })
 
 test('sendCustomMessage()', async t => {
-  if (isPR) {
+  if (ciInfo.isPR) {
     t.skip('Skip for PR')
     return
   }
