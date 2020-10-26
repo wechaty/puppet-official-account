@@ -41,6 +41,7 @@ import {
   log,
   MessageType,
   ContactType,
+  PayloadType,
 }                           from 'wechaty-puppet'
 
 import { VERSION } from './version'
@@ -58,6 +59,21 @@ import { OAContactPayload, OAMessagePayload } from './official-account/schema'
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
 class PuppetOA extends Puppet {
+
+  contactPhone (contactId: string, phoneList: string[]): Promise<void> {
+    log.info('contactPhone(%s, %s)', contactId, phoneList)
+    throw new Error('Method not implemented.')
+  }
+
+  contactCorporationRemark (contactId: string, corporationRemark: string | null): Promise<void> {
+    log.info('contactCorporationRemark(%s, %s)', contactId, corporationRemark)
+    throw new Error('Method not implemented.')
+  }
+
+  contactDescription (contactId: string, description: string | null): Promise<void> {
+    log.info('contactDescription(%s, %s)', contactId, description)
+    throw new Error('Method not implemented.')
+  }
 
   public static readonly VERSION = VERSION
 
@@ -307,6 +323,7 @@ class PuppetOA extends Puppet {
       gender    : oaPayload.sex,
       id        : oaPayload.openid,
       name      : oaPayload.nickname,
+      phone     : [],
       province  : oaPayload.province,
       signature : '',
       star      : false,
@@ -554,8 +571,7 @@ class PuppetOA extends Puppet {
     if (typeof topic === 'undefined') {
       return 'mock room topic'
     }
-
-    await this.roomPayloadDirty(roomId)
+    await this.dirtyPayload(PayloadType.Room, roomId)
   }
 
   public async roomCreate (
