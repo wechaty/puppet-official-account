@@ -30,6 +30,7 @@ jobs:
           WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL: https://wechaty-puppet-official-account-webhook-proxy.localtunnel.me
 
   pack:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/v'))
     name: Pack
     needs: build
     runs-on: ubuntu-latest
