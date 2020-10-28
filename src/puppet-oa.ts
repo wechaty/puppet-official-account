@@ -165,11 +165,13 @@ class PuppetOA extends Puppet {
       log.error('PuppetOA', 'start() rejection: %s', e)
       this.state.off(true)
     }
-
   }
 
   protected bridgeEvents (oa: OfficialAccount) {
     oa.on('message', msg => this.emit('message', { messageId: msg.MsgId }))
+    oa.on('login', _ => this.emit('login', { contactId: this.id || '' }))
+    oa.on('ready', _ => this.emit('ready', { data: 'ready' }))
+    oa.on('logout', _ => this.emit('logout', { contactId: this.id || '', data: 'logout' }))
   }
 
   public async stop (): Promise<void> {
@@ -193,11 +195,11 @@ class PuppetOA extends Puppet {
     } finally {
       this.state.off(true)
     }
-
   }
 
   public login (contactId: string): Promise<void> {
     log.verbose('PuppetOA', 'login()')
+    // developer can set contactId
     return super.login(contactId)
   }
 
@@ -212,6 +214,7 @@ class PuppetOA extends Puppet {
     this.id = undefined
 
     // TODO: do the logout job
+    await this.oa?.stop()
   }
 
   public ding (data?: string): void {
