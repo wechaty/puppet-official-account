@@ -11,10 +11,16 @@ const ciInfo = require('ci-info')
 
 const unirest = require('unirest')
 
+/*
+ * refer to : https://github.com/wechaty/wechaty-puppet-official-account/issues/8
+ * try to fix global pr runtime test
+ */
+const isPR: boolean = ciInfo.isPR
+
 void cuid // for testing
 
 test('OfficialAccount smoke testing', async (t) => {
-  if (ciInfo.isPR) {
+  if (isPR) {
     t.skip('Skip for PR')
     return
   }
@@ -78,7 +84,7 @@ test('OfficialAccount smoke testing', async (t) => {
 })
 
 test('updateAccessToken()', async t => {
-  if (ciInfo.isPR) {
+  if (isPR) {
     t.skip('Skip for PR')
     return
   }
@@ -100,7 +106,7 @@ test('updateAccessToken()', async t => {
 })
 
 test('sendCustomMessage()', async t => {
-  if (ciInfo.isPR) {
+  if (isPR) {
     t.skip('Skip for PR')
     return
   }
