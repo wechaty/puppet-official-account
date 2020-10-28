@@ -4,7 +4,7 @@ import {
 }               from 'file-box'
 import {
   log,
-}               from 'wechaty'
+}               from 'wechaty-puppet'
 
 import {
   FileInfo,
