@@ -112,7 +112,7 @@ class OfficialAccount extends EventEmitter {
     this.stopperFnList.push(stopper)
 
     await this.webhook.start()
-    
+
     // emit login & ready event
     this.emit('login')
     this.emit('ready')
