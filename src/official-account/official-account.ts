@@ -1,8 +1,9 @@
 /* eslint-disable camelcase */
 import { EventEmitter } from 'events'
 
-import crypto   from 'crypto'
+import crypto from 'crypto'
 import { ContactGender, FileBox, log }  from 'wechaty-puppet'
+import { FileBoxType } from 'file-box'
 
 import { normalizeFileBox } from './normalize-file-box'
 
@@ -265,11 +266,21 @@ class OfficialAccount extends EventEmitter {
   }): Promise<void> {
     log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
 
+    await args.file.ready()
     const { buf, info } = await normalizeFileBox(args.file)
+
+    // all of the image file are compressed into image/jpeg type
+    // and fetched fileBox has no name, which will cause error in upload file process.
+    // this works for all of the image file
+    // TODO -> should be improved later.
+    if (args.file.type() === FileBoxType.Url && args.file.mimeType === 'image/jpeg') {
+      info.filename = `${args.file.name}.jpeg`
+    }
+
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-          media_id    : string
+          media_id    : string,
           created_at  : string,
-          type        : string
+          type        : string,
         }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
     // the type of result is string
     if (typeof mediaResponse.body === 'string') {
@@ -286,7 +297,7 @@ class OfficialAccount extends EventEmitter {
     }
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
-      log.error('OfficialAccount', 'SendFile() can not send file to wechat user .')
+      log.error('OfficialAccount', 'SendFile() can not send file to wechat user .<%s>', messageResponse.body.errmsg)
     }
   }
 
@@ -324,6 +335,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
 
     if (openId && openId.startsWith('gh_')) {
+
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */
       const selfContactPayload: OAContactPayload = {

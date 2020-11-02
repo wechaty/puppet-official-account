@@ -143,7 +143,7 @@ class PuppetOA extends Puppet {
     try {
       this.state.on('pending')
 
-      const oa = new OfficialAccount({
+      this.oa = new OfficialAccount({
         appId           : this.appId,
         appSecret       : this.appSecret,
         personalMode    : this.personalMode,
@@ -151,14 +151,15 @@ class PuppetOA extends Puppet {
         token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
       })
-      this.bridgeEvents(oa)
-
-      await oa.start()
-      this.oa = oa
 
       // FIXME: Huan(202008) find a way to get the bot user information
-      this.id = 'wechaty-puppet-official-account'
+      // set gh_ prefix to identify the official-account
+      this.id = 'gh_wechaty-puppet-official-account'
       await this.oa.payloadStore.setContactPayload(this.id, {} as any)
+
+      this.bridgeEvents(this.oa)
+
+      await this.oa.start()
 
       this.state.on(true)
     } catch (e) {
@@ -390,10 +391,18 @@ class PuppetOA extends Puppet {
     // if (attachment instanceof FileBox) {
     //   return attachment
     // }
-    return FileBox.fromBase64(
-      'cRH9qeL3XyVnaXJkppBuH20tf5JlcG9uFX1lL2IvdHRRRS9kMMQxOPLKNYIzQQ==',
-      'mock-file' + id + '.txt',
-    )
+    log.verbose('PuppetOA', 'messageFile(%s)', id)
+    const payload: MessagePayload = await this.messagePayload(id)
+    let fileBox: FileBox
+    if (payload.type === MessageType.Image) {
+      if (!payload.filename) {
+        throw Error(`image message type must have filename file. <${payload}>`)
+      }
+      fileBox = FileBox.fromUrl(payload.filename)
+    } else {
+      throw Error('can"t get file from the message')
+    }
+    return fileBox
   }
 
   public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
@@ -423,10 +432,22 @@ class PuppetOA extends Puppet {
     const payload: MessagePayload = {
       fromId    : rawPayload.FromUserName,
       id        : rawPayload.MsgId,
-      text      : rawPayload.Content,
       timestamp : parseInt(rawPayload.CreateTime),
       toId      : rawPayload.ToUserName,
       type      : MessageType.Text,
+    }
+    if (rawPayload.MsgType === 'image') {
+      payload.type = MessageType.Image
+      if (!rawPayload.PicUrl) {
+        throw Error(`Image Payload must has PicUrl field :<${JSON.stringify(rawPayload)}>`)
+      }
+      payload.filename = rawPayload.PicUrl
+    } else if (rawPayload.MsgType === 'video') {
+      payload.type = MessageType.Video
+    } else if (rawPayload.MsgType === 'location') {
+      payload.type = MessageType.Location
+    } else if (rawPayload.MsgType === 'text') {
+      payload.text = rawPayload.Content
     }
     return payload
   }
