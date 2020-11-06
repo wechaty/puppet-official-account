@@ -155,7 +155,7 @@ class PuppetOA extends Puppet {
       // FIXME: Huan(202008) find a way to get the bot user information
       // set gh_ prefix to identify the official-account
       this.id = 'gh_wechaty-puppet-official-account'
-      await this.oa.payloadStore.setContactPayload(this.id, {} as any)
+      await this.oa.payloadStore.setContactPayload(this.id, { openid: this.id } as any)
 
       this.bridgeEvents(this.oa)
 
