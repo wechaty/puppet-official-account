@@ -29,33 +29,33 @@ import {
 import { getTimeStampString } from './utils'
 
 export interface OfficialAccountOptions {
-  appId: string,
-  appSecret: string,
-  port?: number,
-  token: string,
-  webhookProxyUrl?: string,
-  personalMode?: boolean,
+  appId             : string,
+  appSecret         : string,
+  port?             : number,
+  token             : string,
+  webhookProxyUrl?  : string,
+  personalMode?     : boolean,
 }
 
 export interface AccessTokenPayload {
-  expiresIn: number,
-  timestamp: number,
-  token: string,
+  expiresIn : number,
+  timestamp : number,
+  token     : string,
 }
 
 type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
 
-  payloadStore: PayloadStore
+  payloadStore                  : PayloadStore
 
-  protected webhook: Webhook
-  protected simpleUnirest: SimpleUnirest
+  protected webhook             : Webhook
+  protected simpleUnirest       : SimpleUnirest
 
-  protected accessTokenPayload?: AccessTokenPayload
+  protected accessTokenPayload? : AccessTokenPayload
 
-  protected stopperFnList: StopperFn[]
-  protected oaId: string
+  protected stopperFnList       : StopperFn[]
+  protected oaId                : string
 
   get accessToken (): string {
     if (!this.accessTokenPayload) {
