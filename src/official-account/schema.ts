@@ -48,3 +48,9 @@ export interface ErrorPayload {
   errcode : number,
   errmsg  : string,
 }
+
+export interface OATagPayload {
+  id    : number,
+  name  : string,
+  count : number,
+}
