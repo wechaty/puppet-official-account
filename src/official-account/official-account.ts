@@ -1,8 +1,9 @@
 /* eslint-disable camelcase */
 import { EventEmitter } from 'events'
+import { v4 } from 'uuid'
 
 import crypto from 'crypto'
-import { ContactGender, FileBox, log }  from 'wechaty-puppet'
+import { ContactGender, FileBox, log } from 'wechaty-puppet'
 import { FileBoxType } from 'file-box'
 
 import { normalizeFileBox } from './normalize-file-box'
@@ -10,33 +11,36 @@ import { normalizeFileBox } from './normalize-file-box'
 import {
   Webhook,
   VerifyArgs,
-}                      from './webhook'
+} from './webhook'
 import { PayloadStore } from './payload-store'
 import {
   getSimpleUnirest,
   SimpleUnirest,
-}                       from './simple-unirest'
+} from './simple-unirest'
 import {
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
   ErrorPayload,
   OAContactPayload,
-}                       from './schema'
+  OATagPayload,
+  OAMessagePayload,
+} from './schema'
+import { getTimeStampString } from './utils'
 
 export interface OfficialAccountOptions {
-  appId            : string,
-  appSecret        : string,
-  port?            : number,
-  token            : string,
-  webhookProxyUrl? : string,
-  personalMode?    : boolean,
+  appId: string,
+  appSecret: string,
+  port?: number,
+  token: string,
+  webhookProxyUrl?: string,
+  personalMode?: boolean,
 }
 
 export interface AccessTokenPayload {
-  expiresIn : number,
-  timestamp : number,
-  token     : string,
+  expiresIn: number,
+  timestamp: number,
+  token: string,
 }
 
 type StopperFn = () => void
@@ -45,12 +49,13 @@ class OfficialAccount extends EventEmitter {
 
   payloadStore: PayloadStore
 
-  protected webhook       : Webhook
-  protected simpleUnirest : SimpleUnirest
+  protected webhook: Webhook
+  protected simpleUnirest: SimpleUnirest
 
-  protected accessTokenPayload?  : AccessTokenPayload
+  protected accessTokenPayload?: AccessTokenPayload
 
   protected stopperFnList: StopperFn[]
+  protected oaId: string
 
   get accessToken (): string {
     if (!this.accessTokenPayload) {
@@ -65,6 +70,9 @@ class OfficialAccount extends EventEmitter {
     super()
     log.verbose('OfficialAccount', 'constructor(%s)', JSON.stringify(options))
 
+    // keep the official account id consist with puppet-oa
+    this.oaId = `gh_${options.appId}`
+
     this.webhook = new Webhook({
       personalMode: !!this.options.personalMode,
       port: this.options.port,
@@ -72,7 +80,7 @@ class OfficialAccount extends EventEmitter {
       webhookProxyUrl: this.options.webhookProxyUrl,
     })
 
-    this.payloadStore  = new PayloadStore()
+    this.payloadStore = new PayloadStore()
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
   }
@@ -146,8 +154,8 @@ class OfficialAccount extends EventEmitter {
      */
     const ret = await this.simpleUnirest
       .get<Partial<ErrorPayload> & {
-        access_token : string
-        expires_in   : number
+        access_token: string
+        expires_in: number
       }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
 
     log.verbose('OfficialAccount', 'updateAccessToken() %s', JSON.stringify(ret.body))
@@ -171,9 +179,9 @@ class OfficialAccount extends EventEmitter {
     }
 
     this.accessTokenPayload = {
-      expiresIn : ret.body.expires_in,
-      timestamp : Date.now(),
-      token     : ret.body.access_token,
+      expiresIn: ret.body.expires_in,
+      timestamp: Date.now(),
+      token: ret.body.access_token,
     }
 
     log.verbose('OfficialAccount', 'updateAccessToken() synced. New token will expiredIn %s seconds',
@@ -215,11 +223,12 @@ class OfficialAccount extends EventEmitter {
   }
 
   async sendCustomMessagePersonal (args: {
-    touser  : string,
-    msgtype : OAMessageType,
-    content : string,
-  }) {
+    touser: string,
+    msgtype: OAMessageType,
+    content: string,
+  }): Promise<string> {
     this.webhook.emit('instantReply', args)
+    return 'default-custome-message-id'
   }
 
   /**
@@ -230,7 +239,7 @@ class OfficialAccount extends EventEmitter {
     touser: string,
     msgtype: OAMessageType,
     content: string,
-  }): Promise<ErrorPayload> {
+  }): Promise<string> {
     log.verbose('OfficialAccount', 'sendCustomMessage(%s)', JSON.stringify(args))
 
     const ret = await this.simpleUnirest
@@ -256,14 +265,27 @@ class OfficialAccount extends EventEmitter {
       }
      */
 
-    return ret.body
+    // save the official-account payload
+    if (ret.body.errcode) {
+      throw new Error(`OfficialAccount sendCustomMessage() can send message <${JSON.stringify(args)}>`)
+    }
+
+    const uuid: string = v4()
+    await this.payloadStore.setMessagePayload(uuid, {
+      CreateTime: getTimeStampString(),
+      FromUserName: this.oaId,
+      MsgId: uuid,
+      MsgType: 'text',
+      ToUserName: args.touser,
+    })
+    return uuid
   }
 
   async sendFile (args: {
     file: FileBox,
     touser: string,
     msgtype: OAMediaType
-  }): Promise<void> {
+  }): Promise<string> {
     log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
 
     await args.file.ready()
@@ -278,10 +300,10 @@ class OfficialAccount extends EventEmitter {
     }
 
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-          media_id    : string,
-          created_at  : string,
-          type        : string,
-        }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
+      media_id: string,
+      created_at: string,
+      type: string,
+    }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
     // the type of result is string
     if (typeof mediaResponse.body === 'string') {
       mediaResponse.body = JSON.parse(mediaResponse.body)
@@ -298,7 +320,20 @@ class OfficialAccount extends EventEmitter {
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
       log.error('OfficialAccount', 'SendFile() can not send file to wechat user .<%s>', messageResponse.body.errmsg)
+      throw new Error(`OfficialAccount', 'SendFile() can not send file to wechat user .<${messageResponse.body.errmsg}>'`)
     }
+
+    // now only support uploading image
+    const messagePayload: OAMessagePayload = {
+      CreateTime: getTimeStampString(),
+      FromUserName: this.oaId,
+      MediaId: mediaResponse.body.media_id,
+      MsgId: v4(),
+      MsgType: 'image',
+      ToUserName: args.touser,
+    }
+    await this.payloadStore.setMessagePayload(messagePayload.MsgId, messagePayload)
+    return messagePayload.MsgId
   }
 
   async getContactList (): Promise<string[]> {
@@ -309,12 +344,12 @@ class OfficialAccount extends EventEmitter {
 
     while (true) {
       const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
-        total       : number,
-        count       : number,
-        data        : {
-          openid    : string[]
+        total: number,
+        count: number,
+        data: {
+          openid: string[]
         },
-        next_openid : string
+        next_openid: string
       }>(`user/get?access_token=${this.accessToken}&next_openid=${nextOpenId}`)
 
       if (req.body.errcode) {
@@ -339,23 +374,23 @@ class OfficialAccount extends EventEmitter {
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */
       const selfContactPayload: OAContactPayload = {
-        subscribe         : 0,
-        openid            : openId,
-        nickname          : 'from official-account options ?',
-        sex               : ContactGender.Unknown,
-        language          : 'zh_CN',
-        city              : '北京',
-        province          : '北京',
-        country           : '中国',
-        headimgurl        : '',
-        subscribe_time    : 0,
-        unionid           : '0',
-        remark            : '微信公众号客服',
-        groupid           : 0,
-        tagid_list        : [],
-        subscribe_scene   : '',
-        qr_scene          : 0,
-        qr_scene_str      : '',
+        subscribe: 0,
+        openid: openId,
+        nickname: 'from official-account options ?',
+        sex: ContactGender.Unknown,
+        language: 'zh_CN',
+        city: '北京',
+        province: '北京',
+        country: '中国',
+        headimgurl: '',
+        subscribe_time: 0,
+        unionid: '0',
+        remark: '微信公众号客服',
+        groupid: 0,
+        tagid_list: [],
+        subscribe_scene: '',
+        qr_scene: 0,
+        qr_scene_str: '',
       }
       return selfContactPayload
     }
@@ -396,6 +431,146 @@ class OfficialAccount extends EventEmitter {
 
     if (res.body.errcode) {
       log.error('OfficialAccount', 'setContactRemark() can update contact remark (%s)', res.body.errmsg)
+    }
+  }
+
+  async createTag (name: string): Promise<void | string> {
+    log.verbose('OfficialAccount', 'createTag(%s)', name)
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+      tag?: {
+        id: string,
+      }
+    }>(`tags/create?access_token=${this.accessToken}`)
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'createTag(%s) error code : %s', name, res.body.errcode)
+    } else {
+      return res.body.tag?.id
+    }
+  }
+
+  async getTagList (): Promise<OATagPayload[]> {
+    log.verbose('OfficialAccount', 'getTagList()')
+
+    const res = await this.simpleUnirest.get<Partial<ErrorPayload> & {
+      tags?: OATagPayload[]
+    }>(`tags/get?access_token=${this.accessToken}`)
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'getTagList() error code : %s', res.body.errcode)
+      return []
+    }
+
+    if (!res.body.tags || res.body.tags.length === 0) {
+      log.warn('OfficialAccount', 'getTagList() get empty tag list')
+      return []
+    }
+    return res.body.tags
+  }
+
+  async deleteTag (tagId: number): Promise<void> {
+    log.verbose('OfficialAccount', 'deleteTag(%s)', tagId)
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/delete?access_token=${this.accessToken}`).send({
+      tag: {
+        id: tagId,
+      },
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
+    }
+  }
+
+  async addTagToMembers (tagId: number, openIdList: string[]): Promise<void> {
+    log.verbose('OfficialAccount', 'addTagToMembers(%s)', JSON.stringify({ tagId, openIdList }))
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchtagging?access_token=${this.accessToken}`).send({
+      opeid_list: openIdList,
+      tag_id: tagId,
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'addTagToMembers() error code : %s', res.body.errcode)
+    }
+  }
+
+  async removeTagFromMembers (tagId: number, openIdList: string[]): Promise<void> {
+    log.verbose('OfficialAccount', 'removeTagFromMembers(%s)', JSON.stringify({ tagId, openIdList }))
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchuntagging?access_token=${this.accessToken}`).send({
+      opeid_list: openIdList,
+      tag_id: tagId,
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'removeTagFromMembers() error code : %s', res.body.errcode)
+    }
+  }
+
+  async getMemberTag (openid: string): Promise<void> {
+    log.verbose('OfficialAccount', 'getMemberTag(%s)', openid)
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+      tagid_list: number[]
+    }>(`tags/getidlist?access_token=${this.accessToken}`).send({
+      openid: openid,
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
+    }
+  }
+
+  async setMemberRemark (openid: string, remark: string): Promise<void> {
+    log.verbose('OfficialAccount', 'setMemberRemark(%s)', openid)
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`user/info/updateremark?access_token=${this.accessToken}`).send({
+      openid: openid,
+      remark: remark,
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
+    }
+  }
+
+  async sendBatchTextMessageByTagId (tagId: number, msg: string): Promise<void> {
+    log.verbose('OfficialAccount', 'sendBatchTextMessageByTagId(%s)', JSON.stringify({ tagId, msg }))
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+      msg_id: number,
+      msg_data_id: number,
+    }>(`message/mass/sendall?access_token=${this.accessToken}`).send({
+      filter: {
+        is_to_all: false,
+        tag_id: tagId,
+      },
+      text: {
+        content: msg,
+      },
+      msgtype: 'text',
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
+    }
+  }
+
+  async sendBatchTextMessageByOpenidList (openidList: string[], msg: string): Promise<void> {
+    log.verbose('OfficialAccount', 'sendBatchTextMessageByOpenidList(%s)', JSON.stringify({ openidList, msg }))
+
+    const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
+      msg_id: number,
+      msg_data_id: number,
+    }>(`message/mass/send?access_token=${this.accessToken}`).send({
+      touser: openidList,
+      msgtype: 'text',
+      text: { content: msg },
+    })
+
+    if (res.body.errcode) {
+      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
     }
   }
 
