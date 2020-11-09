@@ -44,17 +44,20 @@ import {
   PayloadType,
 }                           from 'wechaty-puppet'
 
-import { VERSION } from './version'
+import { VERSION }  from './version'
 import {
   qrCodeForChatie,
   envOptions,
-}                                   from './config'
+}                   from './config'
 
 import {
   OfficialAccountOptions,
   OfficialAccount,
-}                             from './official-account/official-account'
-import { OAContactPayload, OAMessagePayload } from './official-account/schema'
+}                   from './official-account/official-account'
+import {
+  OAContactPayload,
+  OAMessagePayload,
+}                   from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -84,7 +87,7 @@ class PuppetOA extends Puppet {
   protected webhookProxyUrl? : string
   protected personalMode?    : boolean
 
-  protected oa?: OfficialAccount
+  protected oa? : OfficialAccount
 
   constructor (
     options: PuppetOAOptions = {},

@@ -3,19 +3,21 @@ import express      from 'express'
 import xmlParser    from 'express-xml-bodyparser'
 import localtunnel  from 'localtunnel'
 
-import TypedEventEmitter from 'typed-emitter'
+import { log }            from 'wechaty-puppet'
+import { EventEmitter }   from 'events'
+import TypedEventEmitter  from 'typed-emitter'
 
-import { log } from 'wechaty-puppet'
-import { EventEmitter } from 'events'
-
-import { OAMessagePayload, OAMessageType }   from './schema'
+import {
+  OAMessagePayload,
+  OAMessageType,
+}     from './schema'
 
 const WebhookEventEmitter = EventEmitter as new () => TypedEventEmitter<{
   message: (message: OAMessagePayload) => void,
   instantReply: (message: {
-    touser: string,
-    msgtype: OAMessageType,
-    content: string,
+    touser  : string,
+    msgtype : OAMessageType,
+    content : string,
   }) => void,
 }>
 
@@ -27,18 +29,18 @@ export interface VerifyArgs {
 
 interface WebhookOptions {
   personalMode?    : boolean,
-  port?            : number
-  webhookProxyUrl? : string
-  verify           : (args: VerifyArgs) => boolean
+  port?            : number,
+  webhookProxyUrl? : string,
+  verify           : (args: VerifyArgs) => boolean,
 }
 
 class Webhook extends WebhookEventEmitter {
 
-  protected server? : http.Server
-  protected tunnel? : localtunnel.Tunnel
+  protected server?       : http.Server
+  protected tunnel?       : localtunnel.Tunnel
   protected personalMode? : boolean
   protected messageCache? : any = {}
-  protected userOpen? : any = {}
+  protected userOpen?     : any = {}
 
   public readonly webhookProxyHost?      : string
   public readonly webhookProxySchema?    : string
@@ -201,8 +203,8 @@ class Webhook extends WebhookEventEmitter {
   }
 
   async appGet (
-    req: express.Request,
-    res: express.Response,
+    req : express.Request,
+    res : express.Response,
   ): Promise<void> {
     log.verbose('Webhook', 'appGet({url: %s})', req.url)
 
@@ -227,8 +229,8 @@ class Webhook extends WebhookEventEmitter {
   }
 
   async appPost (
-    req: express.Request,
-    res: express.Response,
+    req : express.Request,
+    res : express.Response,
   ): Promise<void> {
     const payload = req.body.xml as OAMessagePayload
     log.verbose('Webhook', 'appPost({url: %s} with payload: %s',
