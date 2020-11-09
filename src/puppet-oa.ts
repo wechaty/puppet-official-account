@@ -44,17 +44,20 @@ import {
   PayloadType,
 }                           from 'wechaty-puppet'
 
-import { VERSION } from './version'
+import { VERSION }  from './version'
 import {
   qrCodeForChatie,
   envOptions,
-}                                   from './config'
+}                   from './config'
 
 import {
   OfficialAccountOptions,
   OfficialAccount,
-}                             from './official-account/official-account'
-import { OAContactPayload, OAMessagePayload } from './official-account/schema'
+}                   from './official-account/official-account'
+import {
+  OAContactPayload,
+  OAMessagePayload,
+}                   from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -84,7 +87,7 @@ class PuppetOA extends Puppet {
   protected webhookProxyUrl? : string
   protected personalMode?    : boolean
 
-  protected oa?: OfficialAccount
+  protected oa? : OfficialAccount
 
   constructor (
     options: PuppetOAOptions = {},
@@ -153,8 +156,10 @@ class PuppetOA extends Puppet {
       })
 
       // FIXME: Huan(202008) find a way to get the bot user information
+      // Official Account Info can be customized by user, so It should be
+      // configured by environment variable.
       // set gh_ prefix to identify the official-account
-      this.id = 'gh_wechaty-puppet-official-account'
+      this.id = `gh_${this.appId}`
       await this.oa.payloadStore.setContactPayload(this.id, { openid: this.id } as any)
 
       this.bridgeEvents(this.oa)
@@ -466,12 +471,12 @@ class PuppetOA extends Puppet {
   private async messageSend (
     conversationId: string,
     something: string | FileBox, // | Attachment
-  ): Promise<void> {
+  ): Promise<string> {
     log.verbose('PuppetOA', 'messageSend(%s, %s)', conversationId, something)
     if (!this.id) {
       throw new Error('no this.id')
     }
-
+    let msgId = null
     if (typeof something === 'string') {
       const payload = {
         content: something,
@@ -479,26 +484,33 @@ class PuppetOA extends Puppet {
         touser: conversationId,
       }
       if (this.personalMode) {
-        await this.oa?.sendCustomMessagePersonal(payload)
+        msgId = await this.oa?.sendCustomMessagePersonal(payload)
+        if (!msgId) {
+          throw new Error('can"t send personal CustomeMessage')
+        }
       } else {
-        await this.oa?.sendCustomMessage(payload)
+        msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
       await this.oa?.sendFile({ file: something, msgtype: 'image', touser: conversationId })
     }
+    if (!msgId) {
+      throw new Error('PuppetOA messageSend() can"t get msgId response')
+    }
+    return msgId
   }
 
   public async messageSendText (
     conversationId: string,
     text     : string,
-  ): Promise<void> {
+  ): Promise<string> {
     return this.messageSend(conversationId, text)
   }
 
   public async messageSendFile (
     conversationId: string,
     file     : FileBox,
-  ): Promise<void> {
+  ): Promise<string> {
     return this.messageSend(conversationId, file)
   }
 

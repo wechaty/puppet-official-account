@@ -124,8 +124,7 @@ test('sendCustomMessage()', async t => {
       msgtype: 'text',
       touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
     })
-    // console.info(ret)
-    t.equal(ret.errcode, 0, 'should get errcode 0')
+    t.isNot(ret, null, 'should get messageId')
   } catch (e) {
     t.fail('should not be rejected')
   } finally {
