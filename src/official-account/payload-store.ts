@@ -5,7 +5,7 @@ import fs from 'fs'
 import { log } from 'wechaty-puppet'
 
 import { FlashStore } from 'flash-store'
-import LRU from 'lru-cache'
+import LRU            from 'lru-cache'
 
 import {
   OAMessagePayload,
@@ -50,8 +50,8 @@ class PayloadStore {
       dispose (key: string, val: any) {
         log.silly('PayloadStore', `constructor() lruOptions.dispose(${key}, ${JSON.stringify(val)})`)
       },
-      max:    1000,
-      maxAge: 1000 * 60 * 60,
+      max    : 1000,
+      maxAge : 1000 * 60 * 60,
     }
 
     this.cacheOAMessagePayload = new LRU<string, OAMessagePayload>(lruOptions)

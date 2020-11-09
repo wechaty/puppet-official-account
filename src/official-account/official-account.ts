@@ -1,22 +1,22 @@
 /* eslint-disable camelcase */
+import {
+  ContactGender,
+  FileBox,
+  log,
+}                       from 'wechaty-puppet'
+import { v4 }           from 'uuid'
+import crypto           from 'crypto'
 import { EventEmitter } from 'events'
-import { v4 } from 'uuid'
-
-import crypto from 'crypto'
-import { ContactGender, FileBox, log } from 'wechaty-puppet'
-import { FileBoxType } from 'file-box'
-
-import { normalizeFileBox } from './normalize-file-box'
+import { FileBoxType }  from 'file-box'
 
 import {
   Webhook,
   VerifyArgs,
-} from './webhook'
-import { PayloadStore } from './payload-store'
+}                             from './webhook'
 import {
   getSimpleUnirest,
   SimpleUnirest,
-} from './simple-unirest'
+}                             from './simple-unirest'
 import {
   OAMessageType,
   // OAMediaPayload,
@@ -25,16 +25,18 @@ import {
   OAContactPayload,
   OATagPayload,
   OAMessagePayload,
-} from './schema'
+}                             from './schema'
+import { PayloadStore }       from './payload-store'
 import { getTimeStampString } from './utils'
+import { normalizeFileBox }   from './normalize-file-box'
 
 export interface OfficialAccountOptions {
-  appId             : string,
-  appSecret         : string,
-  port?             : number,
-  token             : string,
-  webhookProxyUrl?  : string,
-  personalMode?     : boolean,
+  appId            : string,
+  appSecret        : string,
+  port?            : number,
+  token            : string,
+  webhookProxyUrl? : string,
+  personalMode?    : boolean,
 }
 
 export interface AccessTokenPayload {
@@ -47,15 +49,15 @@ type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
 
-  payloadStore                  : PayloadStore
+  payloadStore : PayloadStore
 
-  protected webhook             : Webhook
-  protected simpleUnirest       : SimpleUnirest
+  protected webhook       : Webhook
+  protected simpleUnirest : SimpleUnirest
 
   protected accessTokenPayload? : AccessTokenPayload
 
-  protected stopperFnList       : StopperFn[]
-  protected oaId                : string
+  protected stopperFnList : StopperFn[]
+  protected oaId          : string
 
   get accessToken (): string {
     if (!this.accessTokenPayload) {
@@ -74,13 +76,13 @@ class OfficialAccount extends EventEmitter {
     this.oaId = `gh_${options.appId}`
 
     this.webhook = new Webhook({
-      personalMode: !!this.options.personalMode,
-      port: this.options.port,
-      verify: this.verify.bind(this),
-      webhookProxyUrl: this.options.webhookProxyUrl,
+      personalMode    : !!this.options.personalMode,
+      port            : this.options.port,
+      verify          : this.verify.bind(this),
+      webhookProxyUrl : this.options.webhookProxyUrl,
     })
 
-    this.payloadStore = new PayloadStore()
+    this.payloadStore  = new PayloadStore()
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
   }
@@ -179,9 +181,9 @@ class OfficialAccount extends EventEmitter {
     }
 
     this.accessTokenPayload = {
-      expiresIn: ret.body.expires_in,
-      timestamp: Date.now(),
-      token: ret.body.access_token,
+      expiresIn : ret.body.expires_in,
+      timestamp : Date.now(),
+      token     : ret.body.access_token,
     }
 
     log.verbose('OfficialAccount', 'updateAccessToken() synced. New token will expiredIn %s seconds',
@@ -246,12 +248,12 @@ class OfficialAccount extends EventEmitter {
       .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
       .type('json')
       .send({
-        msgtype: args.msgtype,
-        text:
+        msgtype : args.msgtype,
+        text    :
         {
-          content: args.content,
+          content : args.content,
         },
-        touser: args.touser,
+        touser : args.touser,
       })
     /**
      * { errcode: 0, errmsg: 'ok' }
@@ -272,19 +274,19 @@ class OfficialAccount extends EventEmitter {
 
     const uuid: string = v4()
     await this.payloadStore.setMessagePayload(uuid, {
-      CreateTime: getTimeStampString(),
-      FromUserName: this.oaId,
-      MsgId: uuid,
-      MsgType: 'text',
-      ToUserName: args.touser,
+      CreateTime   : getTimeStampString(),
+      FromUserName : this.oaId,
+      MsgId        : uuid,
+      MsgType      : 'text',
+      ToUserName   : args.touser,
     })
     return uuid
   }
 
   async sendFile (args: {
-    file: FileBox,
-    touser: string,
-    msgtype: OAMediaType
+    file    : FileBox,
+    touser  : string,
+    msgtype : OAMediaType
   }): Promise<string> {
     log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
 
@@ -300,9 +302,9 @@ class OfficialAccount extends EventEmitter {
     }
 
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-      media_id: string,
-      created_at: string,
-      type: string,
+      media_id   : string,
+      created_at : string,
+      type       : string,
     }>(`media/upload?access_token=${this.accessToken}&type=${args.msgtype}`).attach('attachments[]', buf, info)
     // the type of result is string
     if (typeof mediaResponse.body === 'string') {
@@ -310,12 +312,12 @@ class OfficialAccount extends EventEmitter {
     }
 
     const data = {
-      image:
+      image :
       {
-        media_id: mediaResponse.body.media_id,
+        media_id : mediaResponse.body.media_id,
       },
-      msgtype: args.msgtype,
-      touser: args.touser,
+      msgtype : args.msgtype,
+      touser  : args.touser,
     }
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
@@ -325,12 +327,12 @@ class OfficialAccount extends EventEmitter {
 
     // now only support uploading image
     const messagePayload: OAMessagePayload = {
-      CreateTime: getTimeStampString(),
-      FromUserName: this.oaId,
-      MediaId: mediaResponse.body.media_id,
-      MsgId: v4(),
-      MsgType: 'image',
-      ToUserName: args.touser,
+      CreateTime   : getTimeStampString(),
+      FromUserName : this.oaId,
+      MediaId      : mediaResponse.body.media_id,
+      MsgId        : v4(),
+      MsgType      : 'image',
+      ToUserName   : args.touser,
     }
     await this.payloadStore.setMessagePayload(messagePayload.MsgId, messagePayload)
     return messagePayload.MsgId
@@ -344,12 +346,12 @@ class OfficialAccount extends EventEmitter {
 
     while (true) {
       const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
-        total: number,
-        count: number,
-        data: {
-          openid: string[]
+        total : number,
+        count : number,
+        data  : {
+          openid : string[]
         },
-        next_openid: string
+        next_openid : string
       }>(`user/get?access_token=${this.accessToken}&next_openid=${nextOpenId}`)
 
       if (req.body.errcode) {
@@ -374,23 +376,23 @@ class OfficialAccount extends EventEmitter {
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */
       const selfContactPayload: OAContactPayload = {
-        subscribe: 0,
-        openid: openId,
-        nickname: 'from official-account options ?',
-        sex: ContactGender.Unknown,
-        language: 'zh_CN',
-        city: '北京',
-        province: '北京',
-        country: '中国',
-        headimgurl: '',
-        subscribe_time: 0,
-        unionid: '0',
-        remark: '微信公众号客服',
-        groupid: 0,
-        tagid_list: [],
-        subscribe_scene: '',
-        qr_scene: 0,
-        qr_scene_str: '',
+        subscribe       : 0,
+        openid          : openId,
+        nickname        : 'from official-account options ?',
+        sex             : ContactGender.Unknown,
+        language        : 'zh_CN',
+        city            : '北京',
+        province        : '北京',
+        country         : '中国',
+        headimgurl      : '',
+        subscribe_time  : 0,
+        unionid         : '0',
+        remark          : '微信公众号客服',
+        groupid         : 0,
+        tagid_list      : [],
+        subscribe_scene : '',
+        qr_scene        : 0,
+        qr_scene_str    : '',
       }
       return selfContactPayload
     }
@@ -439,7 +441,7 @@ class OfficialAccount extends EventEmitter {
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
       tag?: {
-        id: string,
+        id : string,
       }
     }>(`tags/create?access_token=${this.accessToken}`)
     if (res.body.errcode) {
@@ -473,7 +475,7 @@ class OfficialAccount extends EventEmitter {
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/delete?access_token=${this.accessToken}`).send({
       tag: {
-        id: tagId,
+        id : tagId,
       },
     })
 
@@ -486,8 +488,8 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'addTagToMembers(%s)', JSON.stringify({ tagId, openIdList }))
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchtagging?access_token=${this.accessToken}`).send({
-      opeid_list: openIdList,
-      tag_id: tagId,
+      opeid_list : openIdList,
+      tag_id     : tagId,
     })
 
     if (res.body.errcode) {
@@ -499,8 +501,8 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'removeTagFromMembers(%s)', JSON.stringify({ tagId, openIdList }))
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchuntagging?access_token=${this.accessToken}`).send({
-      opeid_list: openIdList,
-      tag_id: tagId,
+      opeid_list : openIdList,
+      tag_id     : tagId,
     })
 
     if (res.body.errcode) {
@@ -512,9 +514,9 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getMemberTag(%s)', openid)
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-      tagid_list: number[]
+      tagid_list : number[]
     }>(`tags/getidlist?access_token=${this.accessToken}`).send({
-      openid: openid,
+      openid : openid,
     })
 
     if (res.body.errcode) {
@@ -526,8 +528,8 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'setMemberRemark(%s)', openid)
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`user/info/updateremark?access_token=${this.accessToken}`).send({
-      openid: openid,
-      remark: remark,
+      openid : openid,
+      remark : remark,
     })
 
     if (res.body.errcode) {
@@ -539,17 +541,17 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'sendBatchTextMessageByTagId(%s)', JSON.stringify({ tagId, msg }))
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-      msg_id: number,
-      msg_data_id: number,
+      msg_id      : number,
+      msg_data_id : number,
     }>(`message/mass/sendall?access_token=${this.accessToken}`).send({
       filter: {
-        is_to_all: false,
-        tag_id: tagId,
+        is_to_all : false,
+        tag_id    : tagId,
       },
       text: {
-        content: msg,
+        content : msg,
       },
-      msgtype: 'text',
+      msgtype : 'text',
     })
 
     if (res.body.errcode) {
@@ -561,12 +563,12 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'sendBatchTextMessageByOpenidList(%s)', JSON.stringify({ openidList, msg }))
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
-      msg_id: number,
-      msg_data_id: number,
+      msg_id      : number,
+      msg_data_id : number,
     }>(`message/mass/send?access_token=${this.accessToken}`).send({
-      touser: openidList,
-      msgtype: 'text',
-      text: { content: msg },
+      touser  : openidList,
+      msgtype : 'text',
+      text    : { content: msg },
     })
 
     if (res.body.errcode) {

@@ -16,7 +16,7 @@ const normalizeFileBox = async (fileBox: FileBox): Promise<{ buf: Buffer, info: 
     fileBox.name,
   )
 
-  const buf = await fileBox.toBuffer()
+  const buf    = await fileBox.toBuffer()
   const length = buf.byteLength
 
   const info: FileInfo = {
