@@ -369,8 +369,8 @@ class PuppetOA extends Puppet {
   }
 
   public async messageImage (
-    messageId: string,
-    imageType: ImageType,
+    messageId : string,
+    imageType : ImageType,
   ) : Promise<FileBox> {
     log.verbose('PuppetOA', 'messageImage(%s, %s[%s])',
       messageId,
@@ -381,7 +381,17 @@ class PuppetOA extends Puppet {
     // if (attachment instanceof FileBox) {
     //   return attachment
     // }
-    return FileBox.fromQRCode('fake-qrcode')
+    const payload: MessagePayload = await this.messagePayload(messageId)
+    let fileBox: FileBox
+    if (payload.type === MessageType.Image) {
+      if (!payload.filename) {
+        throw Error(`image message type must have filename file. <${payload}>`)
+      }
+      fileBox = FileBox.fromUrl(payload.filename)
+    } else {
+      throw Error('can"t get file from the message')
+    }
+    return fileBox
   }
 
   public async messageRecall (
@@ -392,13 +402,11 @@ class PuppetOA extends Puppet {
   }
 
   public async messageFile (id: string): Promise<FileBox> {
-    // const attachment = this.mocker.MockMessage.loadAttachment(id)
-    // if (attachment instanceof FileBox) {
-    //   return attachment
-    // }
     log.verbose('PuppetOA', 'messageFile(%s)', id)
-    const payload: MessagePayload = await this.messagePayload(id)
-    let fileBox: FileBox
+
+    const payload : MessagePayload = await this.messagePayload(id)
+    let   fileBox : FileBox
+
     if (payload.type === MessageType.Image) {
       if (!payload.filename) {
         throw Error(`image message type must have filename file. <${payload}>`)
@@ -726,6 +734,8 @@ class PuppetOA extends Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactAdd(%s)', tagId, contactId)
+
+    await this.oa?.addTagToMembers(tagId, [contactId])
   }
 
   public async tagContactRemove (
@@ -733,19 +743,36 @@ class PuppetOA extends Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactRemove(%s)', tagId, contactId)
+
+    await this.oa?.removeTagFromMembers(tagId, [contactId])
   }
 
   public async tagContactDelete (
     tagId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactDelete(%s)', tagId)
+
+    await this.oa?.deleteTag(tagId)
   }
 
   public async tagContactList (
     contactId?: string,
   ): Promise<string[]> {
     log.verbose('PuppetOA', 'tagContactList(%s)', contactId)
-    return []
+
+    if (!this.oa) {
+      throw new Error('can not find oa object')
+    }
+
+    // 1. get all of the tags
+    if (!contactId) {
+      const tagList = await this.oa.getContactList()
+      return tagList
+    }
+
+    // 2. get the member tags
+    const tagList = await this.oa.getMemberTags(contactId)
+    return tagList
   }
 
 }

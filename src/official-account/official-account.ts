@@ -326,6 +326,8 @@ class OfficialAccount extends EventEmitter {
     }
 
     // now only support uploading image
+    // Situation One: when contact user send image file to oa, there will be PicUrl & MediaId fields
+    // Situation Two: when server send file to tencent server, there is only MediaId field.
     const messagePayload: OAMessagePayload = {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
@@ -447,7 +449,7 @@ class OfficialAccount extends EventEmitter {
     if (res.body.errcode) {
       log.error('OfficialAccount', 'createTag(%s) error code : %s', name, res.body.errcode)
     } else {
-      return res.body.tag?.id
+      return name
     }
   }
 
@@ -455,7 +457,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getTagList()')
 
     const res = await this.simpleUnirest.get<Partial<ErrorPayload> & {
-      tags?: OATagPayload[]
+      tags: OATagPayload[]
     }>(`tags/get?access_token=${this.accessToken}`)
 
     if (res.body.errcode) {
@@ -470,8 +472,26 @@ class OfficialAccount extends EventEmitter {
     return res.body.tags
   }
 
-  async deleteTag (tagId: number): Promise<void> {
-    log.verbose('OfficialAccount', 'deleteTag(%s)', tagId)
+  private async getTagIdByName (tagName: string): Promise<number| null> {
+    log.verbose('OfficialAccount', 'deleteTag(%s)', tagName)
+    const tagList: OATagPayload[] = await this.getTagList()
+    const tag = tagList.filter((item) => item.name === tagName)
+    if (!tag || tag.length === 0) {
+      return null
+    }
+    return tag[0].id
+  }
+
+  async deleteTag (tagName: string): Promise<void> {
+    log.verbose('OfficialAccount', 'deleteTag(%s)', tagName)
+
+    // find tagId by tagName from tagList
+
+    const tagId = await this.getTagIdByName(tagName)
+
+    if (!tagId) {
+      throw new Error(`can not find tag(${tagName})`)
+    }
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/delete?access_token=${this.accessToken}`).send({
       tag: {
@@ -484,8 +504,14 @@ class OfficialAccount extends EventEmitter {
     }
   }
 
-  async addTagToMembers (tagId: number, openIdList: string[]): Promise<void> {
-    log.verbose('OfficialAccount', 'addTagToMembers(%s)', JSON.stringify({ tagId, openIdList }))
+  async addTagToMembers (tagName: string, openIdList: string[]): Promise<void> {
+    log.verbose('OfficialAccount', 'addTagToMembers(%s)', JSON.stringify({ tagName, openIdList }))
+
+    const tagId = await this.getTagIdByName(tagName)
+
+    if (!tagId) {
+      throw new Error(`can not find tag(${tagName})`)
+    }
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchtagging?access_token=${this.accessToken}`).send({
       opeid_list : openIdList,
@@ -497,8 +523,13 @@ class OfficialAccount extends EventEmitter {
     }
   }
 
-  async removeTagFromMembers (tagId: number, openIdList: string[]): Promise<void> {
-    log.verbose('OfficialAccount', 'removeTagFromMembers(%s)', JSON.stringify({ tagId, openIdList }))
+  async removeTagFromMembers (tagName: string, openIdList: string[]): Promise<void> {
+    log.verbose('OfficialAccount', 'removeTagFromMembers(%s)', JSON.stringify({ tagName, openIdList }))
+
+    const tagId = await this.getTagIdByName(tagName)
+    if (!tagId) {
+      throw new Error(`can not find tag(${tagName})`)
+    }
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchuntagging?access_token=${this.accessToken}`).send({
       opeid_list : openIdList,
@@ -510,8 +541,8 @@ class OfficialAccount extends EventEmitter {
     }
   }
 
-  async getMemberTag (openid: string): Promise<void> {
-    log.verbose('OfficialAccount', 'getMemberTag(%s)', openid)
+  async getMemberTags (openid: string): Promise<string[]> {
+    log.verbose('OfficialAccount', 'getMemberTags(%s)', openid)
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
       tagid_list : number[]
@@ -520,8 +551,24 @@ class OfficialAccount extends EventEmitter {
     })
 
     if (res.body.errcode) {
-      log.error('OfficialAccount', 'deleteTag() error code : %s', res.body.errcode)
+      throw new Error(`OfficialAccount deleteTag() error code : ${res.body.errcode}`)
     }
+
+    // 1. build the tag id-name map
+    const allTagList = await this.getTagList()
+    const tagIdMap = allTagList.reduce((map: any, obj) => { map[obj.id] = obj.name; return map }, {})
+
+    // 2. retrive the names from id
+    const tagNames: string[] = []
+
+    for (const tagId of res.body.tagid_list) {
+      if (tagId in tagIdMap) {
+        tagNames.push(tagIdMap[tagId])
+      }
+    }
+
+    return tagNames
+
   }
 
   async setMemberRemark (openid: string, remark: string): Promise<void> {
