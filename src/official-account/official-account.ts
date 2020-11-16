@@ -457,7 +457,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getTagList()')
 
     const res = await this.simpleUnirest.get<Partial<ErrorPayload> & {
-      tags: OATagPayload[]
+      tags : OATagPayload[]
     }>(`tags/get?access_token=${this.accessToken}`)
 
     if (res.body.errcode) {
@@ -474,8 +474,10 @@ class OfficialAccount extends EventEmitter {
 
   private async getTagIdByName (tagName: string): Promise<number| null> {
     log.verbose('OfficialAccount', 'deleteTag(%s)', tagName)
+
     const tagList: OATagPayload[] = await this.getTagList()
-    const tag = tagList.filter((item) => item.name === tagName)
+    const tag: OATagPayload[]                     = tagList.filter((item) => item.name === tagName)
+
     if (!tag || tag.length === 0) {
       return null
     }
@@ -486,7 +488,6 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'deleteTag(%s)', tagName)
 
     // find tagId by tagName from tagList
-
     const tagId = await this.getTagIdByName(tagName)
 
     if (!tagId) {
@@ -554,9 +555,9 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount deleteTag() error code : ${res.body.errcode}`)
     }
 
-    // 1. build the tag id-name map
+    // 1. build the tag id-name map to improve search efficiency
     const allTagList = await this.getTagList()
-    const tagIdMap = allTagList.reduce((map: any, obj) => { map[obj.id] = obj.name; return map }, {})
+    const tagIdMap   = allTagList.reduce((map: any, tag) => { map[tag.id] = tag.name; return map }, {})
 
     // 2. retrive the names from id
     const tagNames: string[] = []
