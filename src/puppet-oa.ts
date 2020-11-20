@@ -149,13 +149,13 @@ class PuppetOA extends Puppet {
       this.state.on('pending')
 
       this.oa = new OfficialAccount({
+        accessTokenProxyUrl : this.accessTokenProxyUrl,
         appId               : this.appId,
         appSecret           : this.appSecret,
         personalMode        : this.personalMode,
         port                : this.port,
         token               : this.token,
         webhookProxyUrl     : this.webhookProxyUrl,
-        accessTokenProxyUrl : this.accessTokenProxyUrl,
       })
 
       // FIXME: Huan(202008) find a way to get the bot user information

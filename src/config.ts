@@ -12,13 +12,13 @@ function qrCodeForChatie (): FileBox {
 
 function envOptions (): Partial<PuppetOAOptions> {
   return {
+    accessTokenProxyUrl : process.env.WECHATY_PUPPET_OA_ACCESS_TOKEN_PROXY,
     appId               : process.env.WECHATY_PUPPET_OA_APP_ID,
     appSecret           : process.env.WECHATY_PUPPET_OA_APP_SECRET,
     personalMode        : !!process.env.WECHATY_PUPPET_OA_PERSONAL_MODE,
     port                : process.env.WECHATY_PUPPET_OA_PORT ? parseInt(process.env.WECHATY_PUPPET_OA_PORT) : undefined,
     token               : process.env.WECHATY_PUPPET_OA_TOKEN,
     webhookProxyUrl     : process.env.WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL,
-    accessTokenProxyUrl : process.env.WECHATY_PUPPET_OA_ACCESS_TOKEN_PROXY,
   }
 }
 
