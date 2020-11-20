@@ -80,12 +80,13 @@ class PuppetOA extends Puppet {
 
   public static readonly VERSION = VERSION
 
-  protected appId            : string
-  protected appSecret        : string
-  protected port?            : number
-  protected token            : string
-  protected webhookProxyUrl? : string
-  protected personalMode?    : boolean
+  protected appId                : string
+  protected appSecret            : string
+  protected port?                : number
+  protected token                : string
+  protected webhookProxyUrl?     : string
+  protected personalMode?        : boolean
+  protected accessTokenProxyUrl? : string
 
   protected oa? : OfficialAccount
 
@@ -130,8 +131,9 @@ class PuppetOA extends Puppet {
       this.personalMode = false
     }
 
-    this.port            = options.port
-    this.webhookProxyUrl = options.webhookProxyUrl
+    this.port                = options.port
+    this.webhookProxyUrl     = options.webhookProxyUrl
+    this.accessTokenProxyUrl = options.accessTokenProxyUrl
   }
 
   public async start (): Promise<void> {
@@ -147,12 +149,13 @@ class PuppetOA extends Puppet {
       this.state.on('pending')
 
       this.oa = new OfficialAccount({
-        appId           : this.appId,
-        appSecret       : this.appSecret,
-        personalMode    : this.personalMode,
-        port            : this.port,
-        token           : this.token,
-        webhookProxyUrl : this.webhookProxyUrl,
+        appId               : this.appId,
+        appSecret           : this.appSecret,
+        personalMode        : this.personalMode,
+        port                : this.port,
+        token               : this.token,
+        webhookProxyUrl     : this.webhookProxyUrl,
+        accessTokenProxyUrl : this.accessTokenProxyUrl,
       })
 
       // FIXME: Huan(202008) find a way to get the bot user information
