@@ -506,7 +506,6 @@ class OfficialAccount extends EventEmitter {
     if (!tagId) {
       throw new Error(`can not find tag(${tagName})`)
     }
-
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/delete?access_token=${this.accessToken}`).send({
       tag: {
         id : tagId,
@@ -526,7 +525,6 @@ class OfficialAccount extends EventEmitter {
     if (!tagId) {
       throw new Error(`can not find tag(${tagName})`)
     }
-
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`tags/members/batchtagging?access_token=${this.accessToken}`).send({
       opeid_list : openIdList,
       tag_id     : tagId,
@@ -582,7 +580,6 @@ class OfficialAccount extends EventEmitter {
     }
 
     return tagNames
-
   }
 
   async setMemberRemark (openid: string, remark: string): Promise<void> {
