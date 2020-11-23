@@ -85,7 +85,6 @@ class OfficialAccount extends EventEmitter {
     this.payloadStore  = new PayloadStore()
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
-
   }
 
   verify (args: VerifyArgs): boolean {
@@ -155,7 +154,6 @@ class OfficialAccount extends EventEmitter {
      *  "expires_in":7200
      * }
      */
-
     const ret = await this.simpleUnirest
       .get<Partial<ErrorPayload> & {
         access_token: string

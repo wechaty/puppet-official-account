@@ -80,12 +80,12 @@ class PuppetOA extends Puppet {
 
   public static readonly VERSION = VERSION
 
-  protected appId                : string
-  protected appSecret            : string
-  protected port?                : number
-  protected token                : string
-  protected webhookProxyUrl?     : string
-  protected personalMode?        : boolean
+  protected appId            : string
+  protected appSecret        : string
+  protected port?            : number
+  protected token            : string
+  protected webhookProxyUrl? : string
+  protected personalMode?    : boolean
 
   protected oa? : OfficialAccount
 
@@ -734,7 +734,6 @@ class PuppetOA extends Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactAdd(%s)', tagId, contactId)
-
     await this.oa?.addTagToMembers(tagId, [contactId])
   }
 
@@ -743,7 +742,6 @@ class PuppetOA extends Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactRemove(%s)', tagId, contactId)
-
     await this.oa?.removeTagFromMembers(tagId, [contactId])
   }
 
@@ -751,7 +749,6 @@ class PuppetOA extends Puppet {
     tagId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactDelete(%s)', tagId)
-
     await this.oa?.deleteTag(tagId)
   }
 
@@ -759,7 +756,6 @@ class PuppetOA extends Puppet {
     contactId?: string,
   ): Promise<string[]> {
     log.verbose('PuppetOA', 'tagContactList(%s)', contactId)
-
     if (!this.oa) {
       throw new Error('can not find oa object')
     }
