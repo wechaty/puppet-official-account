@@ -86,7 +86,6 @@ class PuppetOA extends Puppet {
   protected token                : string
   protected webhookProxyUrl?     : string
   protected personalMode?        : boolean
-  protected accessTokenProxyUrl? : string
 
   protected oa? : OfficialAccount
 
@@ -133,7 +132,6 @@ class PuppetOA extends Puppet {
 
     this.port                = options.port
     this.webhookProxyUrl     = options.webhookProxyUrl
-    this.accessTokenProxyUrl = options.accessTokenProxyUrl
   }
 
   public async start (): Promise<void> {
@@ -149,7 +147,6 @@ class PuppetOA extends Puppet {
       this.state.on('pending')
 
       this.oa = new OfficialAccount({
-        accessTokenProxyUrl : this.accessTokenProxyUrl,
         appId               : this.appId,
         appSecret           : this.appSecret,
         personalMode        : this.personalMode,
