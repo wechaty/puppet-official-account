@@ -31,12 +31,12 @@ import { getTimeStampString } from './utils'
 import { normalizeFileBox }   from './normalize-file-box'
 
 export interface OfficialAccountOptions {
-  appId                : string,
-  appSecret            : string,
-  port?                : number,
-  token                : string,
-  webhookProxyUrl?     : string,
-  personalMode?        : boolean,
+  appId            : string,
+  appSecret        : string,
+  port?            : number,
+  token            : string,
+  webhookProxyUrl? : string,
+  personalMode?    : boolean,
 }
 
 export interface AccessTokenPayload {
