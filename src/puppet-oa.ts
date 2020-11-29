@@ -87,6 +87,8 @@ class PuppetOA extends Puppet {
   protected webhookProxyUrl? : string
   protected personalMode?    : boolean
 
+  protected accessTokenProxyUrl? : string
+
   protected oa? : OfficialAccount
 
   constructor (
@@ -132,6 +134,20 @@ class PuppetOA extends Puppet {
 
     this.port            = options.port
     this.webhookProxyUrl = options.webhookProxyUrl
+
+    /**
+     * NOTE: if the ip address of server is dynamic, it can't fetch the accessToken from tencent server.
+     * So, the accessTokenProxyUrl configuration is needed to fetch the accessToken from the specific endpoint.
+     *
+     * eg: accessTokenProxyUrl = 'http://your-endpoint/'
+     * puppet-oa will fetch accessToken from: http://your-endpoint/token?grant_type=client_credential&appid=${appId}&secret=${appSecret}
+     */
+    if (options.accessTokenProxyUrl) {
+      if (options.accessTokenProxyUrl.endsWith('/')) {
+        options.accessTokenProxyUrl = options.accessTokenProxyUrl.substring(0, options.accessTokenProxyUrl.length - 1)
+      }
+      this.accessTokenProxyUrl = options.accessTokenProxyUrl
+    }
   }
 
   public async start (): Promise<void> {

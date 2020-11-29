@@ -31,12 +31,13 @@ import { getTimeStampString } from './utils'
 import { normalizeFileBox }   from './normalize-file-box'
 
 export interface OfficialAccountOptions {
-  appId            : string,
-  appSecret        : string,
-  port?            : number,
-  token            : string,
-  webhookProxyUrl? : string,
-  personalMode?    : boolean,
+  appId                : string,
+  appSecret            : string,
+  port?                : number,
+  token                : string,
+  webhookProxyUrl?     : string,
+  personalMode?        : boolean,
+  accessTokenProxyUrl? : string,
 }
 
 export interface AccessTokenPayload {
@@ -58,6 +59,9 @@ class OfficialAccount extends EventEmitter {
 
   protected stopperFnList : StopperFn[]
   protected oaId          : string
+
+  // proxy of the access token center
+  protected accessTokenProxyUrl?: string
 
   get accessToken (): string {
     if (!this.accessTokenPayload) {
@@ -85,6 +89,8 @@ class OfficialAccount extends EventEmitter {
     this.payloadStore  = new PayloadStore()
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
+
+    this.accessTokenProxyUrl = options.accessTokenProxyUrl
   }
 
   verify (args: VerifyArgs): boolean {
@@ -154,10 +160,17 @@ class OfficialAccount extends EventEmitter {
      *  "expires_in":7200
      * }
      */
-    const ret = await this.simpleUnirest
+
+    let simpleUnirest: SimpleUnirest = this.simpleUnirest
+    // NOTE: it will fetch accessToken from the specific endpoint
+    if (this.accessTokenProxyUrl) {
+      simpleUnirest = getSimpleUnirest(this.accessTokenProxyUrl)
+    }
+
+    const ret = await simpleUnirest
       .get<Partial<ErrorPayload> & {
-        access_token: string
-        expires_in: number
+        access_token : string
+        expires_in   : number
       }>(`token?grant_type=client_credential&appid=${this.options.appId}&secret=${this.options.appSecret}`)
 
     log.verbose('OfficialAccount', 'updateAccessToken() %s', JSON.stringify(ret.body))
