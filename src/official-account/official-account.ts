@@ -299,9 +299,10 @@ class OfficialAccount extends EventEmitter {
   async sendFile (args: {
     file    : FileBox,
     touser  : string,
-    msgtype : OAMediaType
+    msgtype : OAMediaType,
   }): Promise<string> {
-    log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
+    // log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
+    // JSON.stringify does not support .mp3 filetype
 
     await args.file.ready()
     const { buf, info } = await normalizeFileBox(args.file)
@@ -310,6 +311,7 @@ class OfficialAccount extends EventEmitter {
     // and fetched fileBox has no name, which will cause error in upload file process.
     // this works for all of the image file
     // TODO -> should be improved later.
+
     if (args.file.type() === FileBoxType.Url && args.file.mimeType === 'image/jpeg') {
       info.filename = `${args.file.name}.jpeg`
     }
@@ -325,13 +327,14 @@ class OfficialAccount extends EventEmitter {
     }
 
     const data = {
-      image :
-      {
-        media_id : mediaResponse.body.media_id,
-      },
+      [args.msgtype] :
+        {
+          media_id : mediaResponse.body.media_id,
+        },
       msgtype : args.msgtype,
       touser  : args.touser,
-    }
+      }
+
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
       log.error('OfficialAccount', 'SendFile() can not send file to wechat user .<%s>', messageResponse.body.errmsg)
