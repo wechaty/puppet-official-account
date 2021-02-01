@@ -301,7 +301,7 @@ class OfficialAccount extends EventEmitter {
     touser  : string,
     msgtype : OAMediaType,
   }): Promise<string> {
-    // log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
+    log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
     // JSON.stringify does not support .mp3 filetype
 
     await args.file.ready()
@@ -333,7 +333,7 @@ class OfficialAccount extends EventEmitter {
         },
       msgtype : args.msgtype,
       touser  : args.touser,
-      }
+    }
 
     const messageResponse = await this.simpleUnirest.post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`).type('json').send(data)
     if (messageResponse.body.errcode) {
