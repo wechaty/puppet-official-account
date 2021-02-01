@@ -532,7 +532,7 @@ class PuppetOA extends Puppet {
     conversationId: string,
     file     : FileBox,
   ): Promise<string> {
-    let msgtype: OAMediaType 
+    let msgtype: OAMediaType
     switch (file.mimeType) {
       case 'image/jpeg': msgtype = 'image'
         break
