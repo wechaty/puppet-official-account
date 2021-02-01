@@ -534,12 +534,12 @@ class PuppetOA extends Puppet {
   ): Promise<string> {
     let msgtype: OAMediaType 
     switch (file.mimeType) {
-      case 'image/jpeg': msgtype = 'image';
-        break;
-      case 'audio/mpeg': msgtype = 'voice';
-        break;
+      case 'image/jpeg': msgtype = 'image'
+        break
+      case 'audio/mpeg': msgtype = 'voice'
+        break
       default:
-        throw new Error('Media type not supported');
+        throw new Error('Media type not supported')
     }
     return this.messageSend(conversationId, file, msgtype)
   }
