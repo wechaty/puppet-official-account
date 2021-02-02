@@ -57,6 +57,7 @@ import {
 import {
   OAContactPayload,
   OAMessagePayload,
+  OAMediaType,
 }                   from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
@@ -152,7 +153,6 @@ class PuppetOA extends Puppet {
 
   public async start (): Promise<void> {
     log.verbose('PuppetOA', 'start()')
-
     if (this.state.on()) {
       log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
       await this.state.ready('on')
@@ -161,7 +161,6 @@ class PuppetOA extends Puppet {
 
     try {
       this.state.on('pending')
-
       this.oa = new OfficialAccount({
         appId           : this.appId,
         appSecret       : this.appSecret,
@@ -170,7 +169,6 @@ class PuppetOA extends Puppet {
         token           : this.token,
         webhookProxyUrl : this.webhookProxyUrl,
       })
-
       // FIXME: Huan(202008) find a way to get the bot user information
       // Official Account Info can be customized by user, so It should be
       // configured by environment variable.
@@ -179,9 +177,7 @@ class PuppetOA extends Puppet {
       await this.oa.payloadStore.setContactPayload(this.id, { openid: this.id } as any)
 
       this.bridgeEvents(this.oa)
-
       await this.oa.start()
-
       this.state.on(true)
     } catch (e) {
       log.error('PuppetOA', 'start() rejection: %s', e)
@@ -495,6 +491,7 @@ class PuppetOA extends Puppet {
   private async messageSend (
     conversationId: string,
     something: string | FileBox, // | Attachment
+    mediatype: OAMediaType = 'image'
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSend(%s, %s)', conversationId, something)
     if (!this.id) {
@@ -516,7 +513,7 @@ class PuppetOA extends Puppet {
         msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
-      await this.oa?.sendFile({ file: something, msgtype: 'image', touser: conversationId })
+      await this.oa?.sendFile({ file: something, msgtype: mediatype, touser: conversationId })
     }
     if (!msgId) {
       throw new Error('PuppetOA messageSend() can"t get msgId response')
@@ -535,7 +532,16 @@ class PuppetOA extends Puppet {
     conversationId: string,
     file     : FileBox,
   ): Promise<string> {
-    return this.messageSend(conversationId, file)
+    let msgtype: OAMediaType
+    switch (file.mimeType) {
+      case 'image/jpeg': msgtype = 'image'
+        break
+      case 'audio/mpeg': msgtype = 'voice'
+        break
+      default:
+        throw new Error('Media type not supported')
+    }
+    return this.messageSend(conversationId, file, msgtype)
   }
 
   public async messageSendContact (
