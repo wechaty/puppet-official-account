@@ -215,7 +215,12 @@ class OfficialAccount extends EventEmitter {
     const marginSeconds = 5 * 60  // 5 minutes
     const tryAgainSeconds = 60    // 1 minute
 
-    let timer: undefined | NodeJS.Timer
+    /**
+     * Huan(202102): Why we lost `NodeJS` ?
+     *
+     *  https://stackoverflow.com/a/56239226/1123955
+     */
+    let timer: undefined | ReturnType<typeof setTimeout>
 
     const update = () => this.updateAccessToken()
       .then(succeed => succeed

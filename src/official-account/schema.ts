@@ -8,7 +8,19 @@ export type OAMessageType = 'text'
               | 'location'
               | 'link'
 
-export type OAMediaType = 'image' | 'voice' | 'video' | 'thumb'
+export type OAMediaType = 'image'
+                      | 'voice'
+                      | 'video'
+                      | 'thumb'
+
+export type Language = 'en'
+                    | 'zh_CN'
+                    | 'zh_TW'
+
+export interface ErrorPayload {
+  errcode : number,
+  errmsg  : string,
+}
 
 export interface OAMessagePayload {
   ToUserName   : string
@@ -40,13 +52,6 @@ export type OAContactPayload = Partial<ErrorPayload> & {
   subscribe_scene : string,
   qr_scene        : number,
   qr_scene_str    : string,
-}
-
-export type Language = 'zh_CN' | 'zh_TW' | 'en'
-
-export interface ErrorPayload {
-  errcode : number,
-  errmsg  : string,
 }
 
 export interface OATagPayload {

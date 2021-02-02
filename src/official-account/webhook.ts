@@ -142,7 +142,7 @@ class Webhook extends WebhookEventEmitter {
 
     const server = this.server = http.createServer(app)
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       /**
        * 1. for local port
        */
