@@ -473,6 +473,9 @@ class PuppetOA extends Puppet {
       payload.type = MessageType.Location
     } else if (rawPayload.MsgType === 'text') {
       payload.text = rawPayload.Content
+    } else if (rawPayload.MsgType === 'voice') {
+      payload.type = MessageType.Audio
+      payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
     }
     return payload
   }
@@ -488,7 +491,7 @@ class PuppetOA extends Puppet {
     return payload
   }
 
-  private async messageSend (
+  public async messageSend (
     conversationId: string,
     something: string | FileBox, // | Attachment
     mediatype: OAMediaType = 'image'
@@ -539,7 +542,7 @@ class PuppetOA extends Puppet {
       case 'audio/mpeg': msgtype = 'voice'
         break
       default:
-        throw new Error('Media type not supported')
+        throw new Error(`unsupported media type: ${file.mimeType}`)
     }
     return this.messageSend(conversationId, file, msgtype)
   }
