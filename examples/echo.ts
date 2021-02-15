@@ -31,7 +31,9 @@ import {PuppetOA} from '../src/mod'
  * 1. Declare your Bot!
  *
  */
-const puppet = new PuppetOA();
+const puppet = new PuppetOA({
+  port: 80
+});
 
 // 2. Register event handlers for Bot
 puppet
