@@ -22,8 +22,6 @@ import {
   EventLogoutPayload,
   EventMessagePayload,
   EventScanPayload,
-  FileBox,
-  MessageType
 } from 'wechaty-puppet'
 
 import {PuppetOA} from '../src/mod'
@@ -63,7 +61,7 @@ puppet.start()
  *  `scan`, `login`, `logout`, `error`, and `message`
  *
  */
-function onScan(payload: EventScanPayload) {
+function onScan (payload: EventScanPayload) {
   if (payload.qrcode) {
     // Generate a QR Code online via
     // http://goqr.me/api/doc/create-qr-code/
@@ -77,16 +75,16 @@ function onScan(payload: EventScanPayload) {
   }
 }
 
-function onLogin(payload: EventLoginPayload) {
+function onLogin (payload: EventLoginPayload) {
   console.info(`${payload.contactId} login`)
   puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
-function onLogout(payload: EventLogoutPayload) {
+function onLogout (payload: EventLogoutPayload) {
   console.info(`${payload.contactId} logouted`)
 }
 
-function onError(payload: EventErrorPayload) {
+function onError (payload: EventErrorPayload) {
   console.error('Bot error:', payload.data)
   /*
   if (bot.logonoff()) {
@@ -101,26 +99,10 @@ function onError(payload: EventErrorPayload) {
  *    dealing with Messages.
  *
  */
-async function onMessage(event: EventMessagePayload) {
-  const payload = await puppet.messagePayload(event.messageId)
-  console.info('onMessage:', JSON.stringify(payload))
-  switch (payload.type) {
-    case MessageType.Text:
-      await puppet.messageSendText(payload.fromId!, payload.text!);
-      break
-    case MessageType.Audio:
-      // Forward the received audio content back to the user.
-      // HACK(zhangfan): We use .filename to pass url to the the message audio content.
-      // Note that setting name in .fromUrl is necessary because .messageSend relies on it to
-      // infer the Content-Type to the send audio file back to users.
-      // TODO(zhangfan): This is fragile. Fix it.
-      let fileBox = FileBox.fromUrl(payload.filename!, "message.amr")
-      console.log(`file name: ${fileBox.name}; mimetype: ${fileBox.mimeType}`)
-      await puppet.messageSend(payload.fromId!, fileBox, "voice");
-      break
-    default:
-      console.info(`onMessage: unsupported message type: ${payload.type}`)
-  }
+async function onMessage (event: EventMessagePayload) {
+  const payload = await puppet.messagePayload(event.messageId);
+  const fileBox = await puppet.messageFile(event.messageId)
+  return puppet.messageSendFile(payload.fromId!, fileBox)
 }
 
 
