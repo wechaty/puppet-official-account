@@ -431,7 +431,7 @@ class PuppetOA extends Puppet {
         // payload.filename is an URL to the audio file. The name of the file is not in the URL.
         // Setting a filename with expected extension is necessary for inference of mime type in
         // FileBox.
-        return FileBox.fromUrl(payload.filename, "message.amr")
+        return FileBox.fromUrl(payload.filename, 'message.amr')
       default:
         throw Error('can"t get file from the message')
     }
