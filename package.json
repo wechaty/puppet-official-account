@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-official-account",
-  "version": "0.5.43",
+  "version": "0.5.44",
   "description": "Wechaty Puppet for WeChat Official Accounts",
   "directories": {
     "test": "tests"
@@ -16,6 +16,7 @@
     "dist": "npm run clean && tsc",
     "pack": "npm pack",
     "start": "ts-node examples/ding-dong-bot.ts",
+    "start:echo": "ts-node examples/echo.ts",
     "lint": "npm run lint:es && npm run lint:ts && npm run lint:md",
     "lint:md": "markdownlint README.md",
     "lint:ts": "tsc --noEmit",

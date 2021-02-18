@@ -241,6 +241,7 @@ class Webhook extends WebhookEventEmitter {
     const knownTypeList = [
       'text',
       'image',
+      'voice',
     ]
 
     this.userOpen[payload.FromUserName] = true

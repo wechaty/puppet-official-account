@@ -593,6 +593,22 @@ class OfficialAccount extends EventEmitter {
     return tagNames
   }
 
+  async getAudioUrl (mediaId: string): Promise<string> {
+    // NOTE(zhangfan): As per Wechat API documentation (https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_temporary_materials.html),
+    // /media/get behavior is not documented if the retrieved media content is an audio.
+    // From real world testing, we learned it returns the audio content directly.
+    // This is subject to changes.
+    //
+    // Here is an excerpt of the response header seen in tests:
+    // "connection": "close",
+    // "cache-control": "no-cache, must-revalidate",
+    // "date": "Thu, 04 Feb 2021 08:51:34 GMT",
+    // "content-disposition": "attachment; filename=\"Nz30tHrSoMhGf7FcOmddXuCIud-TP7Z71Yci6nOgYtGnLTkoD9V4yisRlj75Ghs7.amr\"",
+    // "content-type": "audio/amr",
+    // "content-length": "8630"
+    return `https://api.weixin.qq.com/cgi-bin/media/get?access_token=${this.accessToken}&media_id=${mediaId}`
+  }
+
   async setMemberRemark (openid: string, remark: string): Promise<void> {
     log.verbose('OfficialAccount', 'setMemberRemark(%s)', openid)
 

@@ -416,18 +416,25 @@ class PuppetOA extends Puppet {
   public async messageFile (id: string): Promise<FileBox> {
     log.verbose('PuppetOA', 'messageFile(%s)', id)
 
-    const payload : MessagePayload = await this.messagePayload(id)
-    let   fileBox : FileBox
+    const payload: MessagePayload = await this.messagePayload(id)
 
-    if (payload.type === MessageType.Image) {
-      if (!payload.filename) {
-        throw Error(`image message type must have filename file. <${payload}>`)
-      }
-      fileBox = FileBox.fromUrl(payload.filename)
-    } else {
-      throw Error('can"t get file from the message')
+    switch (payload.type) {
+      case MessageType.Image:
+        if (!payload.filename) {
+          throw Error(`Image message must have filename. <${payload}>`)
+        }
+        return FileBox.fromUrl(payload.filename)
+      case MessageType.Audio:
+        if (!payload.filename) {
+          throw Error(`Audio message must have filename. <${payload}>`)
+        }
+        // payload.filename is an URL to the audio file. The name of the file is not in the URL.
+        // Setting a filename with expected extension is necessary for inference of mime type in
+        // FileBox.
+        return FileBox.fromUrl(payload.filename, 'message.amr')
+      default:
+        throw Error('can"t get file from the message')
     }
-    return fileBox
   }
 
   public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
@@ -473,6 +480,9 @@ class PuppetOA extends Puppet {
       payload.type = MessageType.Location
     } else if (rawPayload.MsgType === 'text') {
       payload.text = rawPayload.Content
+    } else if (rawPayload.MsgType === 'voice') {
+      payload.type = MessageType.Audio
+      payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
     }
     return payload
   }
@@ -534,12 +544,15 @@ class PuppetOA extends Puppet {
   ): Promise<string> {
     let msgtype: OAMediaType
     switch (file.mimeType) {
-      case 'image/jpeg': msgtype = 'image'
+      case 'image/jpeg':
+        msgtype = 'image'
         break
-      case 'audio/mpeg': msgtype = 'voice'
+      case 'audio/amr':
+      case 'audio/mpeg':
+        msgtype = 'voice'
         break
       default:
-        throw new Error('Media type not supported')
+        throw new Error(`unsupported media type: ${file.mimeType}`)
     }
     return this.messageSend(conversationId, file, msgtype)
   }
