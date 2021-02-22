@@ -523,7 +523,7 @@ class PuppetOA extends Puppet {
         msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
-      await this.oa?.sendFile({ file: something, msgtype: mediatype, touser: conversationId })
+      msgId = await this.oa?.sendFile({ file: something, msgtype: mediatype, touser: conversationId })
     }
     if (!msgId) {
       throw new Error('PuppetOA messageSend() can"t get msgId response')

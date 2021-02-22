@@ -1,18 +1,18 @@
-import {EventErrorPayload, EventMessagePayload, MessageType} from 'wechaty-puppet'
+import {Message, Wechaty} from 'wechaty'
+import {EventErrorPayload, MessageType} from 'wechaty-puppet'
 
 import {PuppetOA} from '../src/mod'
 
-/**
- *
- * 1. Declare your Bot!
- *
- */
+// 1. Declare your Bot
 const puppet = new PuppetOA({
   port: 80
-});
+})
+const bot = new Wechaty({
+  puppet: puppet
+})
 
 // 2. Register event handlers for Bot
-puppet
+bot
   .on('error', onError)
   .on('message', onMessage)
 
@@ -21,25 +21,22 @@ function onError (payload: EventErrorPayload) {
   console.error('Bot error:', payload.data)
 }
 
-async function onMessage (event: EventMessagePayload) {
-  const payload = await puppet.messagePayload(event.messageId);
-  switch (payload.type) {
+async function onMessage (message: Message) {
+  switch (message.type()) {
     case MessageType.Text:
-      return puppet.messageSendText(payload.fromId!, payload.text!)
-    case MessageType.Image:
+      return message.talker().say(message.text())
     case MessageType.Audio:
-      const fileBox = await puppet.messageFile(event.messageId)
-      return puppet.messageSendFile(payload.fromId!, fileBox)
+      const fileBox = await message.toFileBox()
+      return message.talker().say(fileBox)
     default:
-      return puppet.messageSendText(payload.fromId!, `unsupported type: ${MessageType[payload.type]}`)
+      throw new Error(`Handler for message type ${message.type()} is not implemented the example`)
   }
 }
 
 // 3. Start the bot!
-puppet.start()
+bot.start()
   .catch(async e => {
     console.error('Bot start() fail:', e)
-    await puppet.stop()
     process.exit(-1)
   })
 

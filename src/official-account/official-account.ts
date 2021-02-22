@@ -346,15 +346,19 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount', 'SendFile() can not send file to wechat user .<${messageResponse.body.errmsg}>'`)
     }
 
-    // now only support uploading image
+    // Now only support uploading image or audio.
+    // Notes about image upload:
     // Situation One: when contact user send image file to oa, there will be PicUrl & MediaId fields
     // Situation Two: when server send file to tencent server, there is only MediaId field.
+    if (!(args.msgtype === 'voice' || args.msgtype === 'image')) {
+      throw new Error(`OfficialAccount, sendFile() doesn't support message type ${args.msgtype}`)
+    }
     const messagePayload: OAMessagePayload = {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
       MediaId      : mediaResponse.body.media_id,
       MsgId        : v4(),
-      MsgType      : 'image',
+      MsgType      : args.msgtype,
       ToUserName   : args.touser,
     }
     await this.payloadStore.setMessagePayload(messagePayload.MsgId, messagePayload)
