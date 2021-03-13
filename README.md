@@ -131,16 +131,14 @@ Initial version for Official Account.
 1. receive message from user
 1. reply message to user (passive mode)
 
-## AUTHOR
+## Maintainers
 
-[Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
-
-<a href="https://stackexchange.com/users/265499">
-  <img src="https://stackexchange.com/users/flair/265499.png" width="208" height="58" alt="profile for zixia on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for zixia on Stack Exchange, a network of free, community-driven Q&amp;A sites">
-</a>
+- [@huan](https://github.com/huan) Huan
+- [@wj-Mcat](https://github.com/wj-Mcat)
+- [@qhduan](https://github.com/qhduan)
 
 ## COPYRIGHT & LICENSE
 
-- Code & Docs © 2020 Huan LI \<zixia@zixia.net\>
+- Code & Docs © 2020-now Wechaty Organization
 - Code released under the Apache-2.0 License
 - Docs released under Creative Commons
