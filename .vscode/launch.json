@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "runtimeArgs": ["-r", "/usr/local/lib/node_modules/ts-node/register"],
+      "runtimeArgs": ["-r", "F:/nodejs/node_global/node_modules/ts-node/register"],
       "args": ["${relativeFile}"]​,
       "outFiles": [
         "${workspaceFolder}/**/*.js"
