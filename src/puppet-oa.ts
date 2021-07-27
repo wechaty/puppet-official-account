@@ -79,7 +79,7 @@ class PuppetOA extends Puppet {
     throw new Error('Method not implemented.')
   }
 
-  public static readonly VERSION = VERSION
+  public static override readonly VERSION = VERSION
 
   protected appId            : string
   protected appSecret        : string
@@ -151,7 +151,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  public async start (): Promise<void> {
+  public override async start (): Promise<void> {
     log.verbose('PuppetOA', 'start()')
     if (this.state.on()) {
       log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
@@ -192,7 +192,7 @@ class PuppetOA extends Puppet {
     oa.on('logout', _ => this.emit('logout', { contactId: this.id || '', data: 'logout' }))
   }
 
-  public async stop (): Promise<void> {
+  public override async stop (): Promise<void> {
     log.verbose('PuppetOA', 'stop()')
 
     if (this.state.off()) {
@@ -215,13 +215,13 @@ class PuppetOA extends Puppet {
     }
   }
 
-  public login (contactId: string): Promise<void> {
+  public override login (contactId: string): Promise<void> {
     log.verbose('PuppetOA', 'login()')
     // developer can set contactId
     return super.login(contactId)
   }
 
-  public async logout (): Promise<void> {
+  public override async logout (): Promise<void> {
     log.verbose('PuppetOA', 'logout()')
 
     if (!this.id) {
@@ -240,7 +240,7 @@ class PuppetOA extends Puppet {
     setTimeout(() => this.emit('dong', { data: data || '' }), 1000)
   }
 
-  public unref (): void {
+  public override unref (): void {
     log.verbose('PuppetOA', 'unref()')
     super.unref()
   }
@@ -586,7 +586,7 @@ class PuppetOA extends Puppet {
     // return this.messageSend(conversationId, miniProgram)
   }
 
-  public async messageForward (
+  public override async messageForward (
     conversationId: string,
     messageId : string,
   ): Promise<void> {

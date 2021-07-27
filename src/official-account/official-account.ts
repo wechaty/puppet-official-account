@@ -78,6 +78,8 @@ class OfficialAccount extends EventEmitter {
 
     // keep the official account id consist with puppet-oa
     this.oaId = `gh_${options.appId}`
+    //this.oaId = `${options.appId}`
+
 
     this.webhook = new Webhook({
       personalMode    : !!this.options.personalMode,
@@ -222,7 +224,7 @@ class OfficialAccount extends EventEmitter {
      */
     let timer: undefined | ReturnType<typeof setTimeout>
 
-    const update = () => this.updateAccessToken()
+    const update =  ():any => this.updateAccessToken()
       .then(succeed => succeed
         ? this.accessTokenPayload!.expiresIn - marginSeconds
         : tryAgainSeconds
@@ -399,6 +401,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
 
     if (openId && openId.startsWith('gh_')) {
+    //if (openId) {
 
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */

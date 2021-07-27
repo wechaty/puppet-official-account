@@ -54,20 +54,21 @@
     "@types/express": "^4.17.11",
     "@types/express-xml-bodyparser": "^0.3.2",
     "@types/localtunnel": "^2.0.0",
+    "@types/lru-cache": "^5.1.1",
+    "@types/node": "^16.4.1",
     "@types/normalize-package-data": "^2.4.0",
     "@types/quick-lru": "^3.0.0",
     "ci-info": "^3.1.0",
     "pkg-jq": "^0.2.11",
     "shx": "^0.3.3",
     "tstest": "^0.4.10",
-    "wechaty": "^0.56.5",
-    "wechaty-puppet": "^0.34.1"
+    "wechaty": "^0.56.6",
+    "wechaty-puppet": "^0.34.3"
   },
   "peerDependencies": {
     "wechaty-puppet": "*"
   },
   "dependencies": {
-    "@types/lru-cache": "^5.1.0",
     "@types/uuid": "^8.3.0",
     "cuid": "^2.1.8",
     "express": "^4.17.1",

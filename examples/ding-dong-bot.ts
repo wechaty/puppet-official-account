@@ -32,7 +32,13 @@ import { PuppetOA } from '../src/mod'
  * 1. Declare your Bot!
  *
  */
-const puppet = new PuppetOA()
+const puppet = new PuppetOA({
+    appId           : 'wx7deefc328fabc691',
+    appSecret       : '761abc880bf822082da9f41a6e3a5dd1',
+    token           : 'TOKEN',
+    webhookProxyUrl : 'https://dull-dodo-41.loca.lt',
+    //port:8080
+  })
 
 /**
  *
