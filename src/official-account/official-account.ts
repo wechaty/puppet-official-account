@@ -78,7 +78,7 @@ class OfficialAccount extends EventEmitter {
 
     // keep the official account id consist with puppet-oa
     this.oaId = `gh_${options.appId}`
-    //this.oaId = `${options.appId}`
+    // this.oaId = `${options.appId}`
 
 
     this.webhook = new Webhook({
@@ -252,11 +252,12 @@ class OfficialAccount extends EventEmitter {
     this.webhook.emit('instantReply', args)
     return 'default-custome-message-id'
   }
+
 /**
  * 获取公众号的自动回复规则
  * https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Getting_Rules_for_Auto_Replies.html
  */
-  async autoreplyCustomMessage(args:{
+  async autoreplyCustomMessage (args:{
     touser: string,
     msgtype: OAMessageType,
     content: string,
@@ -500,7 +501,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
 
     if (openId && openId.startsWith('gh_')) {
-    //if (openId) {
+    // if (openId) {
 
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */

@@ -520,7 +520,7 @@ class PuppetOA extends Puppet {
           throw new Error('can"t send personal CustomeMessage')
         }
       } else {
-        //msgId = await this.oa?.autoreplyCustomMessage(payload)
+        // msgId = await this.oa?.autoreplyCustomMessage(payload)
         msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
