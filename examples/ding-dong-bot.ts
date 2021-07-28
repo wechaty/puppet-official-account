@@ -127,6 +127,25 @@ async function onMessage (payload: EventMessagePayload) {
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
+  } else if (/获取群列表/i.test(msgPayload.text || '')) {
+    const roomList = await puppet.roomList().catch(console.error)
+    if (roomList != null) {
+      for (const i in roomList) {
+        const obj = await eval(roomList[i])
+        await puppet.messageSendText(msgPayload.fromId!, obj.openid + ':' + obj.name)
+      }
+    } else {
+      console.info('没有群聊')
+    }
+  } else if (/获取好友列表/i.test(msgPayload.text || '')) {
+    const _contactList = await puppet.contactList().catch(console.error)
+    if(_contactList != null) {
+      for (const i in _contactList) {
+        const obj = await eval(_contactList[i])
+        console.info(obj.openid)
+        await puppet.messageSendText(msgPayload.fromId!, obj.openid + ':' + obj.name)
+      }
+    }
   }
 }
 
