@@ -34,7 +34,7 @@ test('OfficialAccount smoke testing', async (t) => {
     '.localtunnel.chatie.io',
     // '.test.localhost.localdomain',
   ].join('')
-
+  console.log(WEBHOOK_PROXY_URL)
   const oa = new OfficialAccount({
     ...getOaOptions(),
     webhookProxyUrl : WEBHOOK_PROXY_URL,
