@@ -71,7 +71,7 @@ test('OfficialAccount smoke testing', async (t) => {
   try {
     await Promise.race([
       future,
-      new Promise((resolve, reject) => resolve && setTimeout(reject, 15000)),
+      new Promise((resolve, reject) => !!resolve && setTimeout(reject, 15000)),
     ])
     t.pass('should get a message emit event from oa instance')
   } catch (e) {
