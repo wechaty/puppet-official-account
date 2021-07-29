@@ -80,7 +80,6 @@ class OfficialAccount extends EventEmitter {
     this.oaId = `gh_${options.appId}`
     // this.oaId = `${options.appId}`
 
-
     this.webhook = new Webhook({
       personalMode    : !!this.options.personalMode,
       port            : this.options.port,
@@ -252,7 +251,6 @@ class OfficialAccount extends EventEmitter {
     this.webhook.emit('instantReply', args)
     return 'default-custome-message-id'
   }
-
 
   /**
    * 客服接口-发消息
