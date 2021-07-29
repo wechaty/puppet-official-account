@@ -23,6 +23,7 @@ import {
   EventErrorPayload,
   EventMessagePayload,
   FileBox,
+  MessageType,
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
@@ -119,7 +120,7 @@ async function onMessage (payload: EventMessagePayload) {
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
-  } 
+  }
   else if (/hi|hello/i.test(msgPayload.text || '')) {
     const _userinfo = await puppet.contactRawPayload(msgPayload.fromId!)
     await puppet.messageSendText(msgPayload.fromId!, 'hello,' + _userinfo.nickname + '. Thanks for your attention')
@@ -129,7 +130,18 @@ async function onMessage (payload: EventMessagePayload) {
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
-  } 
+  }
+  else if (msgPayload.type == MessageType.Image) {
+    let fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg")
+    if (msgPayload.fromId){
+      await puppet.messageSendFile(msgPayload.fromId!, fileBox)
+    }
+    // const image = await puppet.messageFile(msgPayload.fromId!)
+    // console.log(image)
+    // if(msgPayload.fromId){
+    //   await puppet.messageSendFile(msgPayload.fromId!,image)
+    // }
+  }
   else if (/获取好友列表/i.test(msgPayload.text || '')) {
     const _contactList = await puppet.contactList()
     console.log(_contactList)
