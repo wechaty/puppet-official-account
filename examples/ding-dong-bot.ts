@@ -22,7 +22,7 @@ import {
   EventScanPayload,
   EventErrorPayload,
   EventMessagePayload,
-  FileBox
+  FileBox,
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
@@ -120,30 +120,25 @@ async function onMessage (payload: EventMessagePayload) {
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
-  } else if (/hi/i.test(msgPayload.text || '')) {
-    await puppet.messageSendText(msgPayload.fromId!, 'hello')
-  } else if (/image/i.test(msgPayload.text || '')) {
+  } 
+  else if (/hi|hello/i.test(msgPayload.text || '')) {
+    const _userinfo = await puppet.contactRawPayload(msgPayload.fromId!)
+    await puppet.messageSendText(msgPayload.fromId!, 'hello,' + _userinfo.nickname + '. Thanks for your attention')
+  } 
+  else if (/image/i.test(msgPayload.text || '')) {
     let fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg")
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
-  } else if (/获取群列表/i.test(msgPayload.text || '')) {
-    const roomList = await puppet.roomList().catch(console.error)
-    if (roomList != null) {
-      for (const i in roomList) {
-        const obj = await eval(roomList[i])
-        await puppet.messageSendText(msgPayload.fromId!, obj.openid + ':' + obj.name)
-      }
-    } else {
-      console.info('没有群聊')
-    }
-  } else if (/获取好友列表/i.test(msgPayload.text || '')) {
-    const _contactList = await puppet.contactList().catch(console.error)
+  } 
+  else if (/获取好友列表/i.test(msgPayload.text || '')) {
+    const _contactList = await puppet.contactList()
+    console.log(_contactList)
     if(_contactList != null) {
       for (const i in _contactList) {
-        const obj = await eval(_contactList[i])
-        console.info(obj.openid)
-        await puppet.messageSendText(msgPayload.fromId!, obj.openid + ':' + obj.name)
+        console.info(i)
+        console.log(msgPayload.fromId)
+        await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
       }
     }
   }
