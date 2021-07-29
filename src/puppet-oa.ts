@@ -423,6 +423,7 @@ class PuppetOA extends Puppet {
         if (!payload.filename) {
           throw Error(`Image message must have filename. <${payload}>`)
         }
+        console.log(FileBox.fromUrl(payload.filename))
         return FileBox.fromUrl(payload.filename)
       case MessageType.Audio:
         if (!payload.filename) {
