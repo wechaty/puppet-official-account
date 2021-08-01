@@ -1,3 +1,8 @@
+/* eslint-disable quotes */
+/* eslint-disable eqeqeq */
+/* eslint-disable space-before-blocks */
+/* eslint-disable indent */
+/* eslint-disable no-irregular-whitespace */
 /**
  *   Wechaty - https://github.com/chatie/wechaty
  *
@@ -38,7 +43,7 @@ const puppet = new PuppetOA({
     appSecret       : '761abc880bf822082da9f41a6e3a5dd1',
     token           : 'TOKEN',
     webhookProxyUrl : 'https://dull-dodo-41.loca.lt',
-    //port:8080
+    // port:8080
   })
 
 /**
@@ -120,19 +125,16 @@ async function onMessage (payload: EventMessagePayload) {
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
-  }
-  else if (/hi|hello/i.test(msgPayload.text || '')) {
+  } else if (/hi|hello/i.test(msgPayload.text || '')) {
     const _userinfo = await puppet.contactRawPayload(msgPayload.fromId!)
     await puppet.messageSendText(msgPayload.fromId!, 'hello,' + _userinfo.nickname + '. Thanks for your attention')
-  } 
-  else if (/image/i.test(msgPayload.text || '')) {
-    let fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg")
+  } else if (/image/i.test(msgPayload.text || '')) {
+    const fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg", "ding-dong.jpg")
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
-  }
-  else if (msgPayload.type == MessageType.Image) {
-    let fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg")
+  } else if (msgPayload.type == MessageType.Image) {
+    const fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg", "ding-dong.jpg")
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
@@ -141,14 +143,11 @@ async function onMessage (payload: EventMessagePayload) {
     // if(msgPayload.fromId){
     //   await puppet.messageSendFile(msgPayload.fromId!,image)
     // }
-  }
-  else if (/获取好友列表/i.test(msgPayload.text || '')) {
+  } else if (/获取好友列表/i.test(msgPayload.text || '')) {
     const _contactList = await puppet.contactList()
-    console.log(_contactList)
-    if(_contactList != null) {
+    if (_contactList != null) {
       for (const i in _contactList) {
         console.info(i)
-        console.log(msgPayload.fromId)
         await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
       }
     }
