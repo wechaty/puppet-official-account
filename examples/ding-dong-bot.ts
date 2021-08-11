@@ -133,25 +133,28 @@ async function onMessage (payload: EventMessagePayload) {
     if (msgPayload.fromId){
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
-  } else if (msgPayload.type == MessageType.Image) {
-    const fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg", "ding-dong.jpg")
-    if (msgPayload.fromId){
-      await puppet.messageSendFile(msgPayload.fromId!, fileBox)
-    }
-    // const image = await puppet.messageFile(msgPayload.fromId!)
+  } else if (msgPayload.type == MessageType.Image){
+    // const imageFile = await puppet.messageFile(msgPayload.fromId!)
+    const imageFile = FileBox.fromUrl(msgPayload.filename + '.jpg')
     // console.log(image)
-    // if(msgPayload.fromId){
-    //   await puppet.messageSendFile(msgPayload.fromId!,image)
-    // }
-  } else if (/获取好友列表/i.test(msgPayload.text || '')) {
-    const _contactList = await puppet.contactList()
-    if (_contactList != null) {
-      for (const i in _contactList) {
-        console.info(i)
-        await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
-      }
+    if (msgPayload.fromId!){
+      await puppet.messageSendFile(msgPayload.fromId!, imageFile)
     }
   }
+  // } else if (msgPayload.type == MessageType.Image) {
+  //   const fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg", "ding-dong.jpg")
+  //   if (msgPayload.fromId){
+  //     await puppet.messageSendFile(msgPayload.fromId!, fileBox)
+  //   }
+  // }
+  // } else if (/获取好友列表/i.test(msgPayload.text || '')) {
+  //   const _contactList = await puppet.contactList()
+  //   if (_contactList != null) {
+  //     for (const i in _contactList) {
+  //       console.info(i)
+  //       await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
+  //     }
+  //   }
 }
 
 /**
