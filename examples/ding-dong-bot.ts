@@ -141,12 +141,6 @@ async function onMessage (payload: EventMessagePayload) {
       await puppet.messageSendFile(msgPayload.fromId!, imageFile)
     }
   }
-  // } else if (msgPayload.type == MessageType.Image) {
-  //   const fileBox = FileBox.fromUrl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg", "ding-dong.jpg")
-  //   if (msgPayload.fromId){
-  //     await puppet.messageSendFile(msgPayload.fromId!, fileBox)
-  //   }
-  // }
   // } else if (/获取好友列表/i.test(msgPayload.text || '')) {
   //   const _contactList = await puppet.contactList()
   //   if (_contactList != null) {
