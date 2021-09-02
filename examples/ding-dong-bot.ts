@@ -1,8 +1,3 @@
-/* eslint-disable quotes */
-/* eslint-disable eqeqeq */
-/* eslint-disable space-before-blocks */
-/* eslint-disable indent */
-/* eslint-disable no-irregular-whitespace */
 /**
  *   Wechaty - https://github.com/chatie/wechaty
  *
