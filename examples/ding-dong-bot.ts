@@ -34,10 +34,10 @@ import { PuppetOA } from '../src/mod'
  *
  */
 const puppet = new PuppetOA({
-    appId           : 'wx7deefc328fabc691',
-    appSecret       : '761abc880bf822082da9f41a6e3a5dd1',
-    token           : 'TOKEN',
-    webhookProxyUrl : 'https://dull-dodo-41.loca.lt',
+    appId           : '',
+    appSecret       : '',
+    token           : '',
+    webhookProxyUrl : '',
     // port:8080
   })
 
