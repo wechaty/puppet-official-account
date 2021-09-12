@@ -151,6 +151,10 @@ class PuppetOA extends Puppet {
     }
   }
 
+  override version (): string {
+    return VERSION
+  }
+
   override async start (): Promise<void> {
     log.verbose('PuppetOA', 'start()')
     if (this.state.on()) {
