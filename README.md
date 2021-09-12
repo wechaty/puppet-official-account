@@ -120,7 +120,11 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ## HISTORY
 
-### v0.4 master
+### master v0.7
+
+Enable ES Module support for Node.js
+
+### v0.4 (Aug 6, 2020)
 
 1. Support localtunnel service from any service provider (domains).
 

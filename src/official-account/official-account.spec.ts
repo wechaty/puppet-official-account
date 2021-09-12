@@ -1,27 +1,25 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import test from 'blue-tape'
-import cuid from 'cuid'
+import { test } from 'tstest'
+import cuid     from 'cuid'
+import ciInfo   from 'ci-info'
+import unirest  from 'unirest'
 
-import { OfficialAccount } from './official-account'
+import { getOaOptions } from '../../tests/fixtures/oa-options.js'
 
-import { getOaOptions } from '../../tests/fixtures/oa-options'
-
-const ciInfo = require('ci-info')
-
-const unirest = require('unirest')
+import { OfficialAccount } from './official-account.js'
 
 /*
  * refer to : https://github.com/wechaty/wechaty-puppet-official-account/issues/8
  * try to fix global pr runtime test
  */
-const isPR: boolean = ciInfo.isPR
+const isPR: boolean = !!(ciInfo.isPR)
 
 void cuid // for testing
 
 test('OfficialAccount smoke testing', async (t) => {
   if (isPR) {
-    t.skip('Skip for PR')
+    void t.skip('Skip for PR')
     return
   }
 
@@ -72,7 +70,7 @@ test('OfficialAccount smoke testing', async (t) => {
   try {
     await Promise.race([
       future,
-      new Promise((resolve, reject) => resolve && setTimeout(reject, 15000)),
+      new Promise<void>((resolve, reject) => { void resolve; setTimeout(reject, 15000) }),
     ])
     t.pass('should get a message emit event from oa instance')
   } catch (e) {
@@ -85,7 +83,7 @@ test('OfficialAccount smoke testing', async (t) => {
 
 test('updateAccessToken()', async t => {
   if (isPR) {
-    t.skip('Skip for PR')
+    await t.skip('Skip for PR')
     return
   }
 
@@ -107,7 +105,7 @@ test('updateAccessToken()', async t => {
 
 test('sendCustomMessage()', async t => {
   if (isPR) {
-    t.skip('Skip for PR')
+    await t.skip('Skip for PR')
     return
   }
 

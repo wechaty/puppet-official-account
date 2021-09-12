@@ -7,14 +7,14 @@ import { log } from 'wechaty-puppet'
 import { FlashStore } from 'flash-store'
 import LRU            from 'lru-cache'
 
-import {
+import type {
   OAMessagePayload,
   OAContactPayload,
-}                         from './schema'
+}                         from './schema.js'
 
 class PayloadStore {
 
-  protected cacheOAContactPayload? : FlashStore<OAContactPayload>
+  protected cacheOAContactPayload? : FlashStore<string, OAContactPayload>
   protected cacheOAMessagePayload? : LRU<string, OAMessagePayload>
 
   constructor () {

@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: package.json
 
       - name: Install Dependencies
         run: npm install
@@ -39,12 +41,14 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
+          cache: npm
+          cache-dependency-path: package.json
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Generate Version
-        run: ./scripts/generate-version.sh
+      - name: Generate Package JSON
+        run: ./scripts/generate-package-json.sh
 
       - name: Pack Testing
         run: ./scripts/npm-pack-testing.sh
@@ -65,12 +69,14 @@ jobs:
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
+          cache: npm
+          cache-dependency-path: package.json
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Generate Version
-        run: ./scripts/generate-version.sh
+      - name: Generate Package JSON
+        run: ./scripts/generate-package-json.sh
 
       - name: Set Publish Config
         run: ./scripts/package-publish-config-tag.sh
