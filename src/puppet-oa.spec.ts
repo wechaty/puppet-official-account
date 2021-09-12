@@ -1,19 +1,19 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import test  from 'blue-tape'
+import { test } from 'tstest'
 
-import { getOaOptions } from '../tests/fixtures/oa-options'
+import { getOaOptions } from '../tests/fixtures/oa-options.js'
 
-import { PuppetOA } from './puppet-oa'
+import { PuppetOA } from './puppet-oa.js'
 
-const ciInfo = require('ci-info')
+import ciInfo from 'ci-info'
 
 class PuppetOATest extends PuppetOA {
 }
 
 test('tbw', async t => {
   if (ciInfo.isPR) {
-    t.skip('Skip for PR')
+    await t.skip('Skip for PR')
     return
   }
 

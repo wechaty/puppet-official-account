@@ -4,7 +4,7 @@ import {
   FileBox,
   log,
 }                       from 'wechaty-puppet'
-import { v4 }           from 'uuid'
+import uuid           from 'uuid'
 import crypto           from 'crypto'
 import { EventEmitter } from 'events'
 import { FileBoxType }  from 'file-box'
@@ -12,12 +12,12 @@ import { FileBoxType }  from 'file-box'
 import {
   Webhook,
   VerifyArgs,
-}                             from './webhook'
+}                             from './webhook.js'
 import {
   getSimpleUnirest,
   SimpleUnirest,
-}                             from './simple-unirest'
-import {
+}                             from './simple-unirest.js'
+import type {
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
@@ -25,10 +25,10 @@ import {
   OAContactPayload,
   OATagPayload,
   OAMessagePayload,
-}                             from './schema'
-import { PayloadStore }       from './payload-store'
-import { getTimeStampString } from './utils'
-import { normalizeFileBox }   from './normalize-file-box'
+}                             from './schema.js'
+import { PayloadStore }       from './payload-store.js'
+import { getTimeStampString } from './utils.js'
+import { normalizeFileBox }   from './normalize-file-box.js'
 
 export interface OfficialAccountOptions {
   appId                : string,
@@ -222,7 +222,7 @@ class OfficialAccount extends EventEmitter {
      */
     let timer: undefined | ReturnType<typeof setTimeout>
 
-    const update = () => this.updateAccessToken()
+    const update: () => void = () => this.updateAccessToken()
       .then(succeed => succeed
         ? this.accessTokenPayload!.expiresIn - marginSeconds
         : tryAgainSeconds
@@ -290,15 +290,15 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount sendCustomMessage() can send message <${JSON.stringify(args)}>`)
     }
 
-    const uuid: string = v4()
-    await this.payloadStore.setMessagePayload(uuid, {
+    const msgId: string = uuid.v4()
+    await this.payloadStore.setMessagePayload(msgId, {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
-      MsgId        : uuid,
+      MsgId        : msgId,
       MsgType      : 'text',
       ToUserName   : args.touser,
     })
-    return uuid
+    return msgId
   }
 
   async sendFile (args: {
@@ -357,7 +357,7 @@ class OfficialAccount extends EventEmitter {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
       MediaId      : mediaResponse.body.media_id,
-      MsgId        : v4(),
+      MsgId        : uuid.v4(),
       MsgType      : args.msgtype,
       ToUserName   : args.touser,
     }
@@ -509,7 +509,7 @@ class OfficialAccount extends EventEmitter {
     if (!tag || tag.length === 0) {
       return null
     }
-    return tag[0].id
+    return tag[0]!.id
   }
 
   async deleteTag (tagName: string): Promise<void> {

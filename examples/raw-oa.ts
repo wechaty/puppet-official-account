@@ -5,7 +5,7 @@ import xmlParser    from 'express-xml-bodyparser'
 import localtunnel  from 'localtunnel'
 import crypto       from 'crypto'
 
-import { getSimpleUnirest } from '../src/official-account/simple-unirest'
+import { getSimpleUnirest } from '../src/official-account/simple-unirest.js'
 
 async function main () {
 
@@ -37,8 +37,8 @@ async function main () {
 
   const simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
 
-  const appId = process.env.APP_ID
-  const appSecret = process.env.APP_SECRET
+  const appId = process.env['APP_ID']
+  const appSecret = process.env['APP_SECRET']
 
   const ret = await simpleUnirest
     .get<{
@@ -66,7 +66,7 @@ async function main () {
     const data = [
       timestamp,
       nonce,
-      process.env.TOKEN,
+      process.env['TOKEN'],
     ].sort().join('')
 
     const digest = crypto
