@@ -7,7 +7,7 @@ import { log } from 'wechaty-puppet'
 import { FlashStore } from 'flash-store'
 import LRU            from 'lru-cache'
 
-import { VERSION } from '../config'
+import { VERSION } from '../config.js'
 
 import type {
   OAMessagePayload,
