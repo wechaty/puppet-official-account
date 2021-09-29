@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 /**
  *   Wechaty - https://github.com/chatie/wechaty
  *
@@ -29,7 +28,6 @@ import {
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
-// const { Console } = require('console')
 /**
  *
  * 1. Declare your Bot!
