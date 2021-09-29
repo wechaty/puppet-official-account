@@ -1,5 +1,5 @@
-import { VERSION }    from './config.js'
-import { PuppetOA }   from './puppet-oa.js'
+import { VERSION }    from './version'
+import { PuppetOA }   from './puppet-oa'
 
 export {
   VERSION,

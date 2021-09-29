@@ -1,25 +1,27 @@
-#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+#!/usr/bin/env ts-node
 
-import { test } from 'tstest'
-import cuid     from 'cuid'
-import ciInfo   from 'ci-info'
-import unirest  from 'unirest'
+import test from 'blue-tape'
+import cuid from 'cuid'
 
-import { getOaOptions } from '../../tests/fixtures/oa-options.js'
+import { OfficialAccount } from './official-account'
 
-import { OfficialAccount } from './official-account.js'
+import { getOaOptions } from '../../tests/fixtures/oa-options'
+
+const ciInfo = require('ci-info')
+
+const unirest = require('unirest')
 
 /*
  * refer to : https://github.com/wechaty/wechaty-puppet-official-account/issues/8
  * try to fix global pr runtime test
  */
-const isPR: boolean = !!(ciInfo.isPR)
+const isPR: boolean = ciInfo.isPR
 
 void cuid // for testing
 
 test('OfficialAccount smoke testing', async (t) => {
   if (isPR) {
-    void t.skip('Skip for PR')
+    t.skip('Skip for PR')
     return
   }
 
@@ -32,7 +34,6 @@ test('OfficialAccount smoke testing', async (t) => {
     '.localtunnel.chatie.io',
     // '.test.localhost.localdomain',
   ].join('')
-
   const oa = new OfficialAccount({
     ...getOaOptions(),
     webhookProxyUrl : WEBHOOK_PROXY_URL,
@@ -70,7 +71,7 @@ test('OfficialAccount smoke testing', async (t) => {
   try {
     await Promise.race([
       future,
-      new Promise<void>((resolve, reject) => { void resolve; setTimeout(reject, 15000) }),
+      new Promise((resolve, reject) => !!resolve && setTimeout(reject, 15000)),
     ])
     t.pass('should get a message emit event from oa instance')
   } catch (e) {
@@ -83,7 +84,7 @@ test('OfficialAccount smoke testing', async (t) => {
 
 test('updateAccessToken()', async t => {
   if (isPR) {
-    await t.skip('Skip for PR')
+    t.skip('Skip for PR')
     return
   }
 
@@ -105,7 +106,7 @@ test('updateAccessToken()', async t => {
 
 test('sendCustomMessage()', async t => {
   if (isPR) {
-    await t.skip('Skip for PR')
+    t.skip('Skip for PR')
     return
   }
 

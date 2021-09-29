@@ -1,20 +1,21 @@
-import { Message, Wechaty } from 'wechaty'
-import { EventErrorPayload, MessageType } from 'wechaty-puppet'
+import {Message, Wechaty} from 'wechaty'
+import {EventErrorPayload, MessageType} from 'wechaty-puppet'
 
-import { PuppetOA } from '../src/mod.js'
+import {PuppetOA} from '../src/mod'
 
 // 1. Declare your Bot
 const puppet = new PuppetOA({
-  port: 80,
+  port: 80
 })
 const bot = new Wechaty({
-  puppet: puppet,
+  puppet: puppet
 })
 
 // 2. Register event handlers for Bot
 bot
   .on('error', onError)
   .on('message', onMessage)
+
 
 function onError (payload: EventErrorPayload) {
   console.error('Bot error:', payload.data)
@@ -25,7 +26,8 @@ async function onMessage (message: Message) {
     case MessageType.Text:
       return message.talker().say(message.text())
     case MessageType.Audio:
-      return message.talker().say(await message.toFileBox())
+      const fileBox = await message.toFileBox()
+      return message.talker().say(fileBox)
     default:
       throw new Error(`Handler for message type ${message.type()} is not implemented the example`)
   }

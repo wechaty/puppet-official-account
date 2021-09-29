@@ -3,7 +3,6 @@
 [![NPM Version](https://badge.fury.io/js/wechaty-puppet-official-account.svg)](https://badge.fury.io/js/wechaty-puppet-official-account)
 [![npm (tag)](https://img.shields.io/npm/v/wechaty-puppet-official-account/next.svg)](https://www.npmjs.com/package/wechaty-puppet-official-account?activeTab=versions)
 [![NPM](https://github.com/wechaty/wechaty-puppet-official-account/workflows/NPM/badge.svg)](https://github.com/wechaty/wechaty-puppet-official-account/actions?query=workflow%3ANPM)
-[![ES Modules](https://img.shields.io/badge/ES-Modules-brightgreen)](https://github.com/Chatie/tsconfig/issues/16)
 
 ![WeChat Official Account Puppet for Wechaty](docs/images/wechaty-puppet-official-account.png)
 
@@ -121,11 +120,7 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ## HISTORY
 
-### master v0.7
-
-Enable ES Module support for Node.js
-
-### v0.4 (Aug 6, 2020)
+### v0.4 master
 
 1. Support localtunnel service from any service provider (domains).
 

@@ -5,12 +5,12 @@ import localtunnel  from 'localtunnel'
 
 import { log }            from 'wechaty-puppet'
 import { EventEmitter }   from 'events'
-import type TypedEventEmitter  from 'typed-emitter'
+import TypedEventEmitter  from 'typed-emitter'
 
-import type {
+import {
   OAMessagePayload,
   OAMessageType,
-}                           from './schema.js'
+}     from './schema'
 
 const WebhookEventEmitter = EventEmitter as new () => TypedEventEmitter<{
   message: (message: OAMessagePayload) => void,
@@ -84,8 +84,6 @@ class Webhook extends WebhookEventEmitter {
     /**
      * Huan(20208): see webhook.spec.ts unit tests.
      *  server: https://github.com/localtunnel/server
-     *
-     * Huan(202109): TODO: use URL for this?
      */
     const URL_RE = /(https?):\/\/([^.]+)\.(.+)/i
 
@@ -108,10 +106,6 @@ class Webhook extends WebhookEventEmitter {
       name,
       host,
     )
-
-    if (!host || !name || !schema) {
-      return undefined
-    }
 
     return {
       host,
@@ -192,7 +186,6 @@ class Webhook extends WebhookEventEmitter {
       port,
       subdomain: this.webhookProxySubDomain,
     })
-
     log.verbose('Webhook', 'setupTunnel() created at %s', tunnel.url)
 
     if (tunnel.url !== this.options.webhookProxyUrl) {
@@ -221,10 +214,10 @@ class Webhook extends WebhookEventEmitter {
       echostr,
     }             = req.query as { [key: string]: string }
 
-    if (nonce && signature && this.options.verify({
+    if (this.options.verify({
       nonce,
       signature,
-      timestamp: timestamp!,
+      timestamp,
     })) {
       log.verbose('Webhook', 'appGet() verify() succeed')
       res.end(echostr)

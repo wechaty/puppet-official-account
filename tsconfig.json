@@ -1,7 +1,8 @@
 {
   "extends": "@chatie/tsconfig",
   "compilerOptions": {
-    "outDir": "dist/esm",
+    "outDir": "dist",
+    "lib": ["DOM","es5", "es2015.promise" ,"es2015", "es2017"]
   },
   "exclude": [
     "node_modules/",
@@ -9,7 +10,9 @@
     "tests/fixtures/",
   ],
   "include": [
+    "app/**/*.ts",
     "bin/*.ts",
+    "bot/**/*.ts",
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "src/**/*.ts",

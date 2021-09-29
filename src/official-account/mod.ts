@@ -1,1 +1,1 @@
-export { OfficialAccount } from './official-account.js'
+export { OfficialAccount } from './official-account'

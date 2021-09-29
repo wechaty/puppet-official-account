@@ -1,8 +1,8 @@
-#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+#!/usr/bin/env ts-node
 
-import { test } from 'tstest'
+import test from 'blue-tape'
 
-import { Webhook } from './webhook.js'
+import { Webhook } from './webhook'
 
 test('Webhook parseWehhookProxyUrl()', async (t) => {
   const WEBHOOK_PROXY_URL_LIST = [

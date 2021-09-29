@@ -1,4 +1,4 @@
-import type { ContactGender } from 'wechaty-puppet'
+import { ContactGender } from 'wechaty-puppet'
 
 export type OAMessageType = 'text'
               | 'image'
@@ -7,6 +7,7 @@ export type OAMessageType = 'text'
               | 'shortvideo'
               | 'location'
               | 'link'
+              | 'miniprogrampage'
 
 export type OAMediaType = 'image'
                       | 'voice'
@@ -30,6 +31,7 @@ export interface OAMessagePayload {
   MsgId        : string
   Content?     : string
   PicUrl?      : string
+  AudioUrl?    : string
   MediaId?     : string
 }
 

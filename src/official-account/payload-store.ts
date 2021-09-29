@@ -7,25 +7,18 @@ import { log } from 'wechaty-puppet'
 import { FlashStore } from 'flash-store'
 import LRU            from 'lru-cache'
 
-import { VERSION } from '../config.js'
-
-import type {
+import {
   OAMessagePayload,
   OAContactPayload,
-}                         from './schema.js'
-
-import semverPkg from 'semver'
-const { major, minor } = semverPkg
+}                         from './schema'
 
 class PayloadStore {
 
-  protected cacheOAContactPayload? : FlashStore<string, OAContactPayload>
+  protected cacheOAContactPayload? : FlashStore<OAContactPayload>
   protected cacheOAMessagePayload? : LRU<string, OAMessagePayload>
 
-  constructor (
-    public appId: string,
-  ) {
-    log.verbose('PayloadStore', 'constructor(%s)', appId)
+  constructor () {
+    log.verbose('PayloadStore', 'constructor()')
   }
 
   async start () {
@@ -42,8 +35,7 @@ class PayloadStore {
       os.homedir(),
       '.wechaty',
       'wechaty-puppet-official-account',
-      `v${major(VERSION)}.${minor(VERSION)}`,
-      this.appId,
+      'flash-store-v0.20',
     )
     if (!fs.existsSync(baseDir)) {
       fs.mkdirSync(baseDir, { recursive: true })

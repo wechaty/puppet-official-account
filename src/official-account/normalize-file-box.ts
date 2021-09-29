@@ -6,9 +6,9 @@ import {
   log,
 }               from 'wechaty-puppet'
 
-import type {
+import {
   FileInfo,
-}                     from './simple-unirest.js'
+}                     from './simple-unirest'
 
 const normalizeFileBox = async (fileBox: FileBox): Promise<{ buf: Buffer, info: FileInfo}> => {
   log.verbose('WechatyPluginFreshdesk', 'normalizeFileBox({type: "%s", name: "%s"})',

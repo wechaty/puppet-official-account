@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+#!/usr/bin/env ts-node
 
 import { test }  from 'tstest'
 
@@ -6,15 +6,15 @@ import { Wechaty } from 'wechaty'
 
 import {
   PuppetOA,
-}                         from '../src/mod.js'
+}                         from '../src/mod'
 
-import { getOaOptions } from './fixtures/oa-options.js'
+import { getOaOptions } from './fixtures/oa-options'
 
-import ciInfo from 'ci-info'
+const ciInfo = require('ci-info')
 
 test('integration testing', async t => {
   if (ciInfo.isPR) {
-    void t.skip('Skip for PR')
+    t.skip('Skip for PR')
     return
   }
 
@@ -28,7 +28,7 @@ test('integration testing', async t => {
 
 test('PuppetOA perfect restart testing', async (t) => {
   if (ciInfo.isPR) {
-    void t.skip('Skip for PR')
+    t.skip('Skip for PR')
     return
   }
 
@@ -52,6 +52,6 @@ test('PuppetOA perfect restart testing', async (t) => {
 
     t.pass('PuppetOA() perfect restart pass.')
   } catch (e) {
-    t.fail(e as any)
+    t.fail(e)
   }
 })
