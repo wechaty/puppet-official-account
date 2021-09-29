@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 /**
  *   Wechaty - https://github.com/chatie/wechaty
  *
@@ -29,18 +28,17 @@ import {
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
-// const { Console } = require('console')
 /**
  *
  * 1. Declare your Bot!
  *
  */
 const puppet = new PuppetOA({
-  appId           : 'wx7deefc328fabc691',
-  appSecret       : '761abc880bf822082da9f41a6e3a5dd1',
+  appId           : '',
+  appSecret       : '',
   // port:8000,
-  token           : 'TOKEN',
-  webhookProxyUrl : 'https://dull-dodo-41.loca.lt',
+  token           : '',
+  webhookProxyUrl : '',
 })
 
 /**
