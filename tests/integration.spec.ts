@@ -51,7 +51,7 @@ test('PuppetOA perfect restart testing', async (t) => {
     }
 
     t.pass('PuppetOA() perfect restart pass.')
-  } catch (e) {
+  } catch (e:any) {
     t.fail(e)
   }
 })
