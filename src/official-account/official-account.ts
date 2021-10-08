@@ -592,7 +592,7 @@ class OfficialAccount extends EventEmitter {
     if (!tag || tag.length === 0) {
       return null
     }
-    return tag[0]！.id
+    return tag[0]!.id
   }
 
   async deleteTag (tagName: string): Promise<void> {
