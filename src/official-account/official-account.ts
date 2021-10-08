@@ -6,7 +6,7 @@ import {
   MiniProgramPayload,
   UrlLinkPayload,
 }                       from 'wechaty-puppet'
-import { v4 }           from 'uuid'
+import pkg from 'uuid'
 import crypto           from 'crypto'
 import { EventEmitter } from 'events'
 import { FileBoxType }  from 'file-box'
@@ -14,11 +14,11 @@ import { FileBoxType }  from 'file-box'
 import {
   Webhook,
   VerifyArgs,
-}                             from './webhook'
+}                             from './webhook.js'
 import {
   getSimpleUnirest,
   SimpleUnirest,
-}                             from './simple-unirest'
+}                             from './simple-unirest.js'
 import type{
   OAMessageType,
   // OAMediaPayload,
@@ -27,10 +27,10 @@ import type{
   OAContactPayload,
   OATagPayload,
   OAMessagePayload,
-}                             from './schema'
-import { PayloadStore }       from './payload-store'
-import { getTimeStampString } from './utils'
-import { normalizeFileBox }   from './normalize-file-box'
+}                             from './schema.js'
+import { PayloadStore }       from './payload-store.js'
+import { getTimeStampString } from './utils.js'
+import { normalizeFileBox }   from './normalize-file-box.js'
 
 export interface OfficialAccountOptions {
   appId                : string,
@@ -47,7 +47,7 @@ export interface AccessTokenPayload {
   timestamp : number,
   token     : string,
 }
-
+const { v4 } = pkg
 type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
