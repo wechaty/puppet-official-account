@@ -1,4 +1,4 @@
-import { ContactGender } from 'wechaty-puppet'
+import type{ ContactGender } from 'wechaty-puppet'
 
 export type OAMessageType = 'text'
               | 'image'

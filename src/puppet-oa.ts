@@ -17,7 +17,7 @@
  *
  */
 
- import {
+import {
   ContactPayload,
 
   FileBox,
@@ -42,9 +42,9 @@
   MessageType,
   ContactType,
   PayloadType,
+  LocationPayload,
 }                           from 'wechaty-puppet'
 
-import { VERSION }  from './version'
 import {
   qrCodeForChatie,
   envOptions,
@@ -54,7 +54,7 @@ import {
   OfficialAccountOptions,
   OfficialAccount,
 }                   from './official-account/official-account'
-import {
+import type{
   OAContactPayload,
   OAMessagePayload,
   OAMediaType,
@@ -63,6 +63,18 @@ import {
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
 class PuppetOA extends Puppet {
+
+  conversationReadMark (_conversationId: string, _hasRead?: boolean): Promise<boolean | void> {
+    throw new Error('Method not implemented.')
+  }
+
+  messageLocation (_messageId: string): Promise<LocationPayload> {
+    throw new Error('Method not implemented.')
+  }
+
+  messageSendLocation (_conversationId: string, _locationPayload: LocationPayload): Promise<string | void> {
+    throw new Error('Method not implemented.')
+  }
 
   contactPhone (contactId: string, phoneList: string[]): Promise<void> {
     log.info('contactPhone(%s, %s)', contactId, phoneList)
@@ -78,8 +90,6 @@ class PuppetOA extends Puppet {
     log.info('contactDescription(%s, %s)', contactId, description)
     throw new Error('Method not implemented.')
   }
-
-  public static override readonly VERSION = VERSION
 
   protected appId            : string
   protected appSecret        : string

@@ -19,7 +19,7 @@ import {
   getSimpleUnirest,
   SimpleUnirest,
 }                             from './simple-unirest'
-import {
+import type{
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
@@ -89,7 +89,7 @@ class OfficialAccount extends EventEmitter {
       webhookProxyUrl : this.options.webhookProxyUrl,
     })
 
-    this.payloadStore  = new PayloadStore()
+    this.payloadStore  = new PayloadStore(this.oaId)
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
 
