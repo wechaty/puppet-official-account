@@ -1,5 +1,5 @@
 {
-  "extends": "node_modules/@chatie/tsconfig",
+  "extends": "/@chatie/tsconfig/tsconfig",
   "compilerOptions": {
     "outDir": "dist/esm",
   },
