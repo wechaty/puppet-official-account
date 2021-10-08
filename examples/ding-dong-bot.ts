@@ -34,6 +34,7 @@ import { PuppetOA } from '../src/mod'
  * 1. Declare your Bot!
  *
  */
+
 const puppet = new PuppetOA({
   appId:'',
   appSecret:'',
