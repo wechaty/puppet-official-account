@@ -587,7 +587,7 @@ class OfficialAccount extends EventEmitter {
      * TODO: this is not a frequent interface, So I don't cache the taglist
      */
     const tagList: OATagPayload[] = await this.getTagList()
-    const tag: OATagPayload[]     = tagList.filter((item) => item.name === tagName)
+    const  tag: OATagPayload[]    = tagList.filter((item) => item.name === tagName)
 
     if (!tag || tag.length === 0) {
       return null
