@@ -48,7 +48,7 @@ import {
 import {
   qrCodeForChatie,
   envOptions,
-}                   from './config'
+}                   from './config.ts'
 
 import {
   OfficialAccountOptions,
