@@ -89,7 +89,7 @@ class OfficialAccount extends EventEmitter {
       webhookProxyUrl : this.options.webhookProxyUrl,
     })
 
-    this.payloadStore  = new PayloadStore(this.oaId)
+    this.payloadStore  = new PayloadStore(options.appId)
     this.simpleUnirest = getSimpleUnirest('https://api.weixin.qq.com/cgi-bin/')
     this.stopperFnList = []
 
