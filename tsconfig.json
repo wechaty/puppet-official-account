@@ -1,5 +1,5 @@
 {
-  "extends": "@chatie/tsconfig",
+  "extends": "node_modules/@chatie/tsconfig",
   "compilerOptions": {
     "outDir": "dist/esm",
   },
@@ -15,4 +15,5 @@
     "src/**/*.ts",
     "tests/**/*.spec.ts",
   ],
+  
 }
