@@ -17,7 +17,7 @@
  *
  */
 
-import {
+ import {
   ContactPayload,
 
   FileBox,
@@ -44,21 +44,21 @@ import {
   PayloadType,
 }                           from 'wechaty-puppet'
 
+import { VERSION }  from './version'
 import {
-  VERSION,
   qrCodeForChatie,
   envOptions,
-}                   from './config.js'
+}                   from './config'
 
 import {
   OfficialAccountOptions,
   OfficialAccount,
-}                   from './official-account/official-account.js'
-import type {
+}                   from './official-account/official-account'
+import {
   OAContactPayload,
   OAMessagePayload,
   OAMediaType,
-}                   from './official-account/schema.js'
+}                   from './official-account/schema'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
@@ -79,7 +79,7 @@ class PuppetOA extends Puppet {
     throw new Error('Method not implemented.')
   }
 
-  static override readonly VERSION = VERSION
+  public static override readonly VERSION = VERSION
 
   protected appId            : string
   protected appSecret        : string
@@ -151,11 +151,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override version (): string {
-    return VERSION
-  }
-
-  override async start (): Promise<void> {
+  public override async start (): Promise<void> {
     log.verbose('PuppetOA', 'start()')
     if (this.state.on()) {
       log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
@@ -196,7 +192,7 @@ class PuppetOA extends Puppet {
     oa.on('logout', _ => this.emit('logout', { contactId: this.id || '', data: 'logout' }))
   }
 
-  override async stop (): Promise<void> {
+  public override async stop (): Promise<void> {
     log.verbose('PuppetOA', 'stop()')
 
     if (this.state.off()) {
@@ -219,13 +215,13 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override login (contactId: string): Promise<void> {
+  public override login (contactId: string): Promise<void> {
     log.verbose('PuppetOA', 'login()')
     // developer can set contactId
     return super.login(contactId)
   }
 
-  override async logout (): Promise<void> {
+  public override async logout (): Promise<void> {
     log.verbose('PuppetOA', 'logout()')
 
     if (!this.id) {
@@ -239,12 +235,12 @@ class PuppetOA extends Puppet {
     await this.oa?.stop()
   }
 
-  ding (data?: string): void {
+  public ding (data?: string): void {
     log.silly('PuppetOA', 'ding(%s)', data || '')
     setTimeout(() => this.emit('dong', { data: data || '' }), 1000)
   }
 
-  override unref (): void {
+  public override unref (): void {
     log.verbose('PuppetOA', 'unref()')
     super.unref()
   }
@@ -255,16 +251,16 @@ class PuppetOA extends Puppet {
    *
    *
    */
-  async contactSelfQRCode (): Promise<string> {
+  public async contactSelfQRCode (): Promise<string> {
     log.verbose('PuppetOA', 'contactSelfQRCode()')
     return 'qrcode in the future ;^)'
   }
 
-  async contactSelfName (name: string): Promise<void> {
+  public async contactSelfName (name: string): Promise<void> {
     log.verbose('PuppetOA', 'contactSelfName(%s)', name)
   }
 
-  async contactSelfSignature (signature: string): Promise<void> {
+  public async contactSelfSignature (signature: string): Promise<void> {
     log.verbose('PuppetOA', 'contactSelfSignature(%s)', signature)
   }
 
@@ -273,10 +269,10 @@ class PuppetOA extends Puppet {
    * Contact
    *
    */
-  contactAlias (contactId: string)                      : Promise<string>
-  contactAlias (contactId: string, alias: string | null): Promise<void>
+  public contactAlias (contactId: string)                      : Promise<string>
+  public contactAlias (contactId: string, alias: string | null): Promise<void>
 
-  async contactAlias (contactId: string, alias?: string | null): Promise<void | string> {
+  public async contactAlias (contactId: string, alias?: string | null): Promise<void | string> {
     log.verbose('PuppetOA', 'contactAlias(%s, %s)', contactId, alias)
 
     /**
@@ -297,7 +293,7 @@ class PuppetOA extends Puppet {
     return contactPayload.alias
   }
 
-  async contactList (): Promise<string[]> {
+  public async contactList (): Promise<string[]> {
     log.verbose('PuppetOA', 'contactList()')
     const contactIdList = await this.oa?.getContactList()
 
@@ -307,7 +303,7 @@ class PuppetOA extends Puppet {
     return contactIdList
   }
 
-  async contactQRCode (contactId: string): Promise<string> {
+  public async contactQRCode (contactId: string): Promise<string> {
     log.verbose('PuppetOA', 'contactQRCode(%s)', contactId)
     if (contactId !== this.selfId()) {
       throw new Error('can not set avatar for others')
@@ -317,10 +313,10 @@ class PuppetOA extends Puppet {
     // return await this.bridge.WXqr
   }
 
-  async contactAvatar (contactId: string)                : Promise<FileBox>
-  async contactAvatar (contactId: string, file: FileBox) : Promise<void>
+  public async contactAvatar (contactId: string)                : Promise<FileBox>
+  public async contactAvatar (contactId: string, file: FileBox) : Promise<void>
 
-  async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
+  public async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
     log.verbose('PuppetOA', 'contactAvatar(%s)', contactId)
 
     /**
@@ -373,7 +369,7 @@ class PuppetOA extends Puppet {
    * Message
    *
    */
-  async messageContact (
+  public async messageContact (
     messageId: string,
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageContact(%s)', messageId)
@@ -384,7 +380,7 @@ class PuppetOA extends Puppet {
     return ''
   }
 
-  async messageImage (
+  public async messageImage (
     messageId : string,
     imageType : ImageType,
   ) : Promise<FileBox> {
@@ -410,14 +406,14 @@ class PuppetOA extends Puppet {
     return fileBox
   }
 
-  async messageRecall (
+  public async messageRecall (
     messageId: string,
   ): Promise<boolean> {
     log.verbose('PuppetOA', 'messageRecall(%s)', messageId)
     return false
   }
 
-  async messageFile (id: string): Promise<FileBox> {
+  public async messageFile (id: string): Promise<FileBox> {
     log.verbose('PuppetOA', 'messageFile(%s)', id)
 
     const payload: MessagePayload = await this.messagePayload(id)
@@ -441,7 +437,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
+  public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
     log.verbose('PuppetOA', 'messageUrl(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof UrlLink) {
@@ -453,7 +449,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
+  public async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
     log.verbose('PuppetOA', 'messageMiniProgram(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof MiniProgram) {
@@ -464,7 +460,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<MessagePayload> {
+  public async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<MessagePayload> {
     const payload: MessagePayload = {
       fromId    : rawPayload.FromUserName,
       id        : rawPayload.MsgId,
@@ -487,11 +483,12 @@ class PuppetOA extends Puppet {
     } else if (rawPayload.MsgType === 'voice') {
       payload.type = MessageType.Audio
       payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
+      // payload.filename = rawPayload.AudioUrl
     }
     return payload
   }
 
-  async messageRawPayload (id: string): Promise<OAMessagePayload> {
+  public async messageRawPayload (id: string): Promise<OAMessagePayload> {
     log.verbose('PuppetOA', 'messageRawPayload(%s)', id)
 
     const payload = await this.oa?.payloadStore.getMessagePayload(id)
@@ -524,6 +521,7 @@ class PuppetOA extends Puppet {
           throw new Error('can"t send personal CustomeMessage')
         }
       } else {
+        // msgId = await this.oa?.autoreplyCustomMessage(payload)
         msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
@@ -535,14 +533,14 @@ class PuppetOA extends Puppet {
     return msgId
   }
 
-  async messageSendText (
+  public async messageSendText (
     conversationId: string,
     text     : string,
   ): Promise<string> {
     return this.messageSend(conversationId, text)
   }
 
-  async messageSendFile (
+  public async messageSendFile (
     conversationId: string,
     file     : FileBox,
   ): Promise<string> {
@@ -555,13 +553,16 @@ class PuppetOA extends Puppet {
       case 'audio/mpeg':
         msgtype = 'voice'
         break
+      case 'video/mp4':
+        msgtype = 'video'
+        break
       default:
         throw new Error(`unsupported media type: ${file.mimeType}`)
     }
     return this.messageSend(conversationId, file, msgtype)
   }
 
-  async messageSendContact (
+  public async messageSendContact (
     conversationId: string,
     contactId : string,
   ): Promise<void> {
@@ -571,26 +572,39 @@ class PuppetOA extends Puppet {
     // return this.messageSend(conversationId, contact)
   }
 
-  async messageSendUrl (
+  public async messageSendUrl (
     conversationId: string,
-    urlLinkPayload: UrlLinkPayload,
-  ) : Promise<void> {
-    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, JSON.stringify(urlLinkPayload))
-
-    // const url = new UrlLink(urlLinkPayload)
-    // return this.messageSend(conversationId, url)
+    link : UrlLinkPayload,
+  ) : Promise<string> {
+    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, link)
+    if (!this.id) {
+      throw new Error('no this.id')
+    }
+    let msgId = null
+    msgId = await this.oa?.sendCustomLink({ link: link, touser: conversationId })
+    if (!msgId) {
+      throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
+    }
+    return msgId
   }
 
-  async messageSendMiniProgram (
+  public async messageSendMiniProgram (
     conversationId: string,
     miniProgramPayload: MiniProgramPayload,
-  ): Promise<void> {
+  ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
-    // const miniProgram = new MiniProgram(miniProgramPayload)
-    // return this.messageSend(conversationId, miniProgram)
+    if (!this.id) {
+      throw new Error('no this id')
+    }
+    let msgId = null
+    msgId = await this.oa?.sendCustomMiniProgram({ miniProgram:miniProgramPayload, touser: conversationId })
+    if (!msgId) {
+      throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
+    }
+    return msgId
   }
 
-  override async messageForward (
+  public override async messageForward (
     conversationId: string,
     messageId : string,
   ): Promise<void> {
@@ -600,40 +614,30 @@ class PuppetOA extends Puppet {
     )
   }
 
-  override async conversationReadMark (
-    conversationId: string,
-    hasRead?: boolean
-  ): Promise<void | boolean> {
-    log.verbose('PuppetOA', 'conversationReadMark(%s, %s)',
-      conversationId,
-      hasRead,
-    )
-  }
-
   /**
    *
    * Room
    *
    */
-  async roomRawPayloadParser (payload: RoomPayload) { return payload }
-  async roomRawPayload (id: string): Promise<RoomPayload> {
+  public async roomRawPayloadParser (payload: RoomPayload) { return payload }
+  public async roomRawPayload (id: string): Promise<RoomPayload> {
     log.verbose('PuppetOA', 'roomRawPayload(%s)', id)
     return {} as any
   }
 
-  async roomList (): Promise<string[]> {
+  public async roomList (): Promise<string[]> {
     log.verbose('PuppetOA', 'roomList()')
     return []
   }
 
-  async roomDel (
+  public async roomDel (
     roomId    : string,
     contactId : string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'roomDel(%s, %s)', roomId, contactId)
   }
 
-  async roomAvatar (roomId: string): Promise<FileBox> {
+  public async roomAvatar (roomId: string): Promise<FileBox> {
     log.verbose('PuppetOA', 'roomAvatar(%s)', roomId)
 
     const payload = await this.roomPayload(roomId)
@@ -645,17 +649,17 @@ class PuppetOA extends Puppet {
     return qrCodeForChatie()
   }
 
-  async roomAdd (
+  public async roomAdd (
     roomId    : string,
     contactId : string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'roomAdd(%s, %s)', roomId, contactId)
   }
 
-  async roomTopic (roomId: string)                : Promise<string>
-  async roomTopic (roomId: string, topic: string) : Promise<void>
+  public async roomTopic (roomId: string)                : Promise<string>
+  public async roomTopic (roomId: string, topic: string) : Promise<void>
 
-  async roomTopic (
+  public async roomTopic (
     roomId: string,
     topic?: string,
   ): Promise<void | string> {
@@ -667,7 +671,7 @@ class PuppetOA extends Puppet {
     await this.dirtyPayload(PayloadType.Room, roomId)
   }
 
-  async roomCreate (
+  public async roomCreate (
     contactIdList : string[],
     topic         : string,
   ): Promise<string> {
@@ -676,21 +680,21 @@ class PuppetOA extends Puppet {
     return 'mock_room_id'
   }
 
-  async roomQuit (roomId: string): Promise<void> {
+  public async roomQuit (roomId: string): Promise<void> {
     log.verbose('PuppetOA', 'roomQuit(%s)', roomId)
   }
 
-  async roomQRCode (roomId: string): Promise<string> {
+  public async roomQRCode (roomId: string): Promise<string> {
     log.verbose('PuppetOA', 'roomQRCode(%s)', roomId)
     return roomId + ' mock qrcode'
   }
 
-  async roomMemberList (roomId: string) : Promise<string[]> {
+  public async roomMemberList (roomId: string) : Promise<string[]> {
     log.verbose('PuppetOA', 'roomMemberList(%s)', roomId)
     return []
   }
 
-  async roomMemberRawPayload (roomId: string, contactId: string): Promise<RoomMemberPayload>  {
+  public async roomMemberRawPayload (roomId: string, contactId: string): Promise<RoomMemberPayload>  {
     log.verbose('PuppetOA', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
     return {
       avatar    : 'mock-avatar-data',
@@ -700,15 +704,15 @@ class PuppetOA extends Puppet {
     }
   }
 
-  async roomMemberRawPayloadParser (rawPayload: RoomMemberPayload): Promise<RoomMemberPayload>  {
+  public async roomMemberRawPayloadParser (rawPayload: RoomMemberPayload): Promise<RoomMemberPayload>  {
     log.verbose('PuppetOA', 'roomMemberRawPayloadParser(%s)', rawPayload)
     return rawPayload
   }
 
-  async roomAnnounce (roomId: string)                : Promise<string>
-  async roomAnnounce (roomId: string, text: string)  : Promise<void>
+  public async roomAnnounce (roomId: string)                : Promise<string>
+  public async roomAnnounce (roomId: string, text: string)  : Promise<void>
 
-  async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
+  public async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
     if (text) {
       return
     }
@@ -720,15 +724,15 @@ class PuppetOA extends Puppet {
    * Room Invitation
    *
    */
-  async roomInvitationAccept (roomInvitationId: string): Promise<void> {
+  public async roomInvitationAccept (roomInvitationId: string): Promise<void> {
     log.verbose('PuppetOA', 'roomInvitationAccept(%s)', roomInvitationId)
   }
 
-  async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
+  public async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
     log.verbose('PuppetOA', 'roomInvitationRawPayload(%s)', roomInvitationId)
   }
 
-  async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
+  public async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
     log.verbose('PuppetOA', 'roomInvitationRawPayloadParser(%s)', JSON.stringify(rawPayload))
     return rawPayload
   }
@@ -738,36 +742,36 @@ class PuppetOA extends Puppet {
    * Friendship
    *
    */
-  async friendshipRawPayload (id: string): Promise<any> {
+  public async friendshipRawPayload (id: string): Promise<any> {
     return { id } as any
   }
 
-  async friendshipRawPayloadParser (rawPayload: any): Promise<FriendshipPayload> {
+  public async friendshipRawPayloadParser (rawPayload: any): Promise<FriendshipPayload> {
     return rawPayload
   }
 
-  async friendshipSearchPhone (
+  public async friendshipSearchPhone (
     phone: string,
   ): Promise<null | string> {
     log.verbose('PuppetOA', 'friendshipSearchPhone(%s)', phone)
     return null
   }
 
-  async friendshipSearchWeixin (
+  public async friendshipSearchWeixin (
     weixin: string,
   ): Promise<null | string> {
     log.verbose('PuppetOA', 'friendshipSearchWeixin(%s)', weixin)
     return null
   }
 
-  async friendshipAdd (
+  public async friendshipAdd (
     contactId : string,
     hello     : string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'friendshipAdd(%s, %s)', contactId, hello)
   }
 
-  async friendshipAccept (
+  public async friendshipAccept (
     friendshipId : string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'friendshipAccept(%s)', friendshipId)
@@ -778,7 +782,7 @@ class PuppetOA extends Puppet {
    * Tag
    *
    */
-  async tagContactAdd (
+  public async tagContactAdd (
     tagId: string,
     contactId: string,
   ): Promise<void> {
@@ -786,7 +790,7 @@ class PuppetOA extends Puppet {
     await this.oa?.addTagToMembers(tagId, [contactId])
   }
 
-  async tagContactRemove (
+  public async tagContactRemove (
     tagId: string,
     contactId: string,
   ): Promise<void> {
@@ -794,14 +798,14 @@ class PuppetOA extends Puppet {
     await this.oa?.removeTagFromMembers(tagId, [contactId])
   }
 
-  async tagContactDelete (
+  public async tagContactDelete (
     tagId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactDelete(%s)', tagId)
     await this.oa?.deleteTag(tagId)
   }
 
-  async tagContactList (
+  public async tagContactList (
     contactId?: string,
   ): Promise<string[]> {
     log.verbose('PuppetOA', 'tagContactList(%s)', contactId)

@@ -1,4 +1,4 @@
-import unirest from 'unirest'
+const unirest = require('unirest')
 
 export interface FileInfo {
   contentType?: string,

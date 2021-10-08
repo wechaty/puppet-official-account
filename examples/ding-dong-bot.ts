@@ -23,16 +23,24 @@ import {
   EventErrorPayload,
   EventMessagePayload,
   FileBox,
+  MessageType,
+  UrlLinkPayload,
 }                         from 'wechaty-puppet'
 
-import { PuppetOA } from '../src/mod.js'
-
+import { PuppetOA } from '../src/mod'
+// const { Console } = require('console')
 /**
  *
  * 1. Declare your Bot!
  *
  */
-const puppet = new PuppetOA()
+const puppet = new PuppetOA({
+  appId           : '',
+  appSecret       : '',
+  // port:8000,
+  token           : '',
+  webhookProxyUrl : '',
+})
 
 /**
  *
@@ -86,7 +94,7 @@ function onScan (payload: EventScanPayload) {
 
 function onLogin (payload: EventLoginPayload) {
   console.info(`${payload.contactId} login`)
-  puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
+  // puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
 function onLogout (payload: EventLogoutPayload) {
@@ -110,15 +118,42 @@ function onError (payload: EventErrorPayload) {
  */
 async function onMessage (payload: EventMessagePayload) {
   const msgPayload = await puppet.messagePayload(payload.messageId)
+  // console.info(msgPayload, payload)
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
+  } else if (/hi|hello/i.test(msgPayload.text || '')) {
+    const _userinfo = await puppet.contactRawPayload(msgPayload.fromId!)
+    await puppet.messageSendText(msgPayload.fromId!, 'hello,' + _userinfo.nickname + '. Thanks for your attention')
   } else if (/image/i.test(msgPayload.text || '')) {
-    const fileBox = FileBox.fromUrl('https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg","ding-dong.jpg')
+    const fileBox = FileBox.fromUrl('https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1116676390,2305043183&fm=26&gp=0.jpg', 'ding-dong.jpg')
     if (msgPayload.fromId) {
       await puppet.messageSendFile(msgPayload.fromId!, fileBox)
     }
+  } else if (/link/i.test(msgPayload.text || '')) {
+    const imagePath = 'http://mmbiz.qpic.cn/mmbiz_jpg/lOBFkCyo4n9Qhricg66uEO2Ycn9hcCibauvalenRUeMzsRia2VjLok4Gd1iaeuKiarVggr4apCEUNiamIM4FLkpxgurw/0'
+    const wechatyLink: UrlLinkPayload = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
+    await puppet.messageSendUrl(msgPayload.fromId!, wechatyLink,)
+  } else if (msgPayload.type === MessageType.Image) {
+    const imageFile = FileBox.fromUrl(msgPayload.filename + '.jpg')
+    if (msgPayload.fromId!) {
+      await puppet.messageSendFile(msgPayload.fromId!, imageFile)
+    }
+  } else if (msgPayload.type === MessageType.Audio) {
+    const audioFile = FileBox.fromUrl(msgPayload.filename + '', 'message.amr')
+    console.info(audioFile)
+    if (msgPayload.fromId!) {
+      await puppet.messageSendFile(msgPayload.fromId!, audioFile)
+    }
   }
+  // } else if (/获取好友列表/i.test(msgPayload.text || '')) {
+  //   const _contactList = await puppet.contactList()
+  //   if (_contactList != null) {
+  //     for (const i in _contactList) {
+  //       console.info(i)
+  //       await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
+  //     }
+  //   }
 }
 
 /**
