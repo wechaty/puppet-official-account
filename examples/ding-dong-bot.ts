@@ -34,12 +34,12 @@ import { PuppetOA } from '../src/mod'
  * 1. Declare your Bot!
  *
  */
-const puppet = new PuppetOA({
-  appId           : '',
-  appSecret       : '',
+const puppet = new PuppetOA ({
+  appId: '',
+  appSecret: '',
   // port:8000,
-  token           : '',
-  webhookProxyUrl : '',
+  token: '',
+  webhookProxyUrl: '',
 })
 
 /**
