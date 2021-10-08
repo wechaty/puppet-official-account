@@ -28,7 +28,6 @@ import {
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
-// const { Console } = require('console')
 /**
  *
  * 1. Declare your Bot!
@@ -95,7 +94,7 @@ function onScan (payload: EventScanPayload) {
 
 function onLogin (payload: EventLoginPayload) {
   console.info(`${payload.contactId} login`)
-  // puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
+  puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
 function onLogout (payload: EventLogoutPayload) {
@@ -119,7 +118,6 @@ function onError (payload: EventErrorPayload) {
  */
 async function onMessage (payload: EventMessagePayload) {
   const msgPayload = await puppet.messagePayload(payload.messageId)
-  // console.info(msgPayload, payload)
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
     await puppet.messageSendText(msgPayload.fromId!, 'dong')
@@ -147,14 +145,6 @@ async function onMessage (payload: EventMessagePayload) {
       await puppet.messageSendFile(msgPayload.fromId!, audioFile)
     }
   }
-  // } else if (/获取好友列表/i.test(msgPayload.text || '')) {
-  //   const _contactList = await puppet.contactList()
-  //   if (_contactList != null) {
-  //     for (const i in _contactList) {
-  //       console.info(i)
-  //       await puppet.messageSendText(msgPayload.fromId!, _contactList[i])
-  //     }
-  //   }
 }
 
 /**
