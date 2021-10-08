@@ -48,17 +48,17 @@ import {
 import {
   qrCodeForChatie,
   envOptions,
-}                   from './config.ts'
+}                   from './config.js'
 
 import {
   OfficialAccountOptions,
   OfficialAccount,
-}                   from './official-account/official-account'
+}                   from './official-account/official-account.js'
 import type{
   OAContactPayload,
   OAMessagePayload,
   OAMediaType,
-}                   from './official-account/schema'
+}                   from './official-account/schema.js'
 
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
