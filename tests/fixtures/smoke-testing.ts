@@ -1,7 +1,8 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
-
-import { VERSION }  from 'wechaty-puppet'
-import { PuppetOA } from '../../src/puppet-oa'
+import{
+  PuppetOA,
+  VERSION,
+}             from 'wechaty-puppet-official-account'
 async function main () {
   if (VERSION === '0.0.0') {
     throw new Error('version should not be 0.0.0 when prepare for publishing')
