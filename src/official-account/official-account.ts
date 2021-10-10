@@ -314,15 +314,15 @@ class OfficialAccount extends EventEmitter {
       .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
       .type('json')
       .send({
-        msgtype : 'link',
+        msgtype    : 'link',
         [msgtype]  :
         {
-          description:args.link.description,
-          thumb_url:args.link.thumbnailUrl,
-          title : args.link.title,
-          url:args.link.url,
+          description: args.link.description,
+          thumb_url  : args.link.thumbnailUrl,
+          title      : args.link.title,
+          url        : args.link.url,
         },
-        touser : args.touser,
+        touser    : args.touser,
       })
 
     if (ret.body.errcode) {
@@ -350,15 +350,15 @@ class OfficialAccount extends EventEmitter {
       .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
       .type('json')
       .send({
-        msgtype : 'miniprogrampage',
+        msgtype    : 'miniprogrampage',
         [msgtype]  :
         {
-          appid: args.miniProgram.appid,
-          pagepath: args.miniProgram.pagePath,
+          appid         : args.miniProgram.appid,
+          pagepath      : args.miniProgram.pagePath,
           thumb_media_id: args.miniProgram.thumbKey,
-          title: args.miniProgram.title,
+          title         : args.miniProgram.title,
         },
-        touser : args.touser,
+        touser     : args.touser,
       })
 
     if (ret.body.errcode) {
