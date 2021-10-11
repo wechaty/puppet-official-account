@@ -397,7 +397,7 @@ class OfficialAccount extends EventEmitter {
     }
 
     if (args.file.type() === FileBoxType.Url && args.file.mimeType === 'audio/amr') {
-      info.filename = `${args.file.name}.mp3`
+      info.filename = `${args.file.name}`
     }
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
       media_id   : string,
