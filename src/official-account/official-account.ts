@@ -304,7 +304,7 @@ class OfficialAccount extends EventEmitter {
   }
 
   async sendCustomLink (args: {
-    link:UrlLinkPayload
+    urlLinkPayload:UrlLinkPayload
     touser: string,
   }): Promise<string> {
     log.verbose('OfficialAccount', 'sendCustomLink(%s)', JSON.stringify(args))
