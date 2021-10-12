@@ -80,7 +80,6 @@ class OfficialAccount extends EventEmitter {
 
     // keep the official account id consist with puppet-oa
     this.oaId = `gh_${options.appId}`
-    // this.oaId = `${options.appId}`
 
     this.webhook = new Webhook({
       personalMode    : !!this.options.personalMode,
