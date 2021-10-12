@@ -54,7 +54,7 @@ import {
   OfficialAccountOptions,
   OfficialAccount,
 }                   from './official-account/official-account.js'
-import type{
+import type {
   OAContactPayload,
   OAMessagePayload,
   OAMediaType,
