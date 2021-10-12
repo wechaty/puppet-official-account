@@ -34,13 +34,7 @@ import { PuppetOA } from '../src/mod'
  *
  */
 
-const puppet = new PuppetOA({
-  appId:'',
-  appSecret:'',
-  // port:8000,
-  token:'',
-  webhookProxyUrl:'',
-})
+const puppet = new PuppetOA()
 
 /**
  *
