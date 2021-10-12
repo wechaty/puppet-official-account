@@ -19,7 +19,7 @@ import {
   getSimpleUnirest,
   SimpleUnirest,
 }                             from './simple-unirest.js'
-import type{
+import type {
   OAMessageType,
   // OAMediaPayload,
   OAMediaType,
