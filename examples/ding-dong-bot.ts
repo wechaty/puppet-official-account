@@ -125,7 +125,7 @@ async function onMessage (payload: EventMessagePayload) {
     }
   } else if (/link/i.test(msgPayload.text || '')) {
     const imagePath = 'http://mmbiz.qpic.cn/mmbiz_jpg/lOBFkCyo4n9Qhricg66uEO2Ycn9hcCibauvalenRUeMzsRia2VjLok4Gd1iaeuKiarVggr4apCEUNiamIM4FLkpxgurw/0'
-    const wechatyLink: UrlLinkPayload = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
+    const wechatyLink: urlLinkPayload = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
     await puppet.messageSendUrl(msgPayload.fromId!, wechatyLink,)
   } else if (msgPayload.type === MessageType.Image) {
     const imageFile = FileBox.fromUrl(msgPayload.filename + '.jpg')
