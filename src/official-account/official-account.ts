@@ -304,8 +304,8 @@ class OfficialAccount extends EventEmitter {
   }
 
   async sendCustomLink (args: {
+    touser: string
     urlLinkPayload:UrlLinkPayload
-    touser: string,
   }): Promise<string> {
     log.verbose('OfficialAccount', 'sendCustomLink(%s)', JSON.stringify(args))
     const msgtype: OAMessageType = 'link'
