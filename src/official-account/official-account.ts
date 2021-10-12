@@ -224,7 +224,7 @@ class OfficialAccount extends EventEmitter {
      */
     let timer: undefined | ReturnType<typeof setTimeout>
 
-    const update =  ():any => this.updateAccessToken()
+    const update: () => void = () => this.updateAccessToken()
       .then(succeed => succeed
         ? this.accessTokenPayload!.expiresIn - marginSeconds
         : tryAgainSeconds
