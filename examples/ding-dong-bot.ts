@@ -24,7 +24,7 @@ import {
   EventMessagePayload,
   FileBox,
   MessageType,
-  UrlLinkPayload,
+  urlLinkPayload,
 }                         from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod'
