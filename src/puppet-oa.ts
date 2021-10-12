@@ -589,7 +589,7 @@ class PuppetOA extends Puppet {
       throw new Error('no this.id')
     }
     let msgId = null
-    msgId = await this.oa?.sendCustomLink({ UrlLinkPayload: UrlLinkPayload, touser: conversationId })
+    msgId = await this.oa?.sendCustomLink({ urlLinkPayload: UrlLinkPayload, touser: conversationId })
     if (!msgId) {
       throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
     }
