@@ -584,7 +584,7 @@ class PuppetOA extends Puppet {
     conversationId: string,
     urlLinkPayload : UrlLinkPayload,
   ) : Promise<string> {
-    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, link)
+    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
     if (!this.id) {
       throw new Error('no this.id')
     }
