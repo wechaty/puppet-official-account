@@ -161,7 +161,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  public override async start (): Promise<void> {
+  override async start (): Promise<void> {
     log.verbose('PuppetOA', 'start()')
     if (this.state.on()) {
       log.warn('PuppetOA', 'start() is called on a ON puppet. await ready(on) and return.')
@@ -493,7 +493,6 @@ class PuppetOA extends Puppet {
     } else if (rawPayload.MsgType === 'voice') {
       payload.type = MessageType.Audio
       payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
-      // payload.filename = rawPayload.AudioUrl
     }
     return payload
   }
@@ -531,7 +530,6 @@ class PuppetOA extends Puppet {
           throw new Error('can"t send personal CustomeMessage')
         }
       } else {
-        // msgId = await this.oa?.autoreplyCustomMessage(payload)
         msgId = await this.oa?.sendCustomMessage(payload)
       }
     } else if (something instanceof FileBox) {
@@ -584,7 +582,7 @@ class PuppetOA extends Puppet {
 
   async messageSendUrl (
     conversationId: string,
-    link : UrlLinkPayload,
+    link : urlLinkPayload,
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, link)
     if (!this.id) {
