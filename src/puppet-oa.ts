@@ -582,14 +582,14 @@ class PuppetOA extends Puppet {
 
   async messageSendUrl (
     conversationId: string,
-    link : urlLinkPayload,
+    urlLinkPayload : UrlLinkPayload,
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, link)
     if (!this.id) {
       throw new Error('no this.id')
     }
     let msgId = null
-    msgId = await this.oa?.sendCustomLink({ link: link, touser: conversationId })
+    msgId = await this.oa?.sendCustomLink({ UrlLinkPayload: UrlLinkPayload, touser: conversationId })
     if (!msgId) {
       throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
     }
@@ -607,7 +607,7 @@ class PuppetOA extends Puppet {
     let msgId = null
     msgId = await this.oa?.sendCustomMiniProgram({ miniProgram:miniProgramPayload, touser: conversationId })
     if (!msgId) {
-      throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
+      throw new Error('PuppetOA messageSendMiniProgram() can"t get msgId response')
     }
     return msgId
   }
