@@ -316,10 +316,10 @@ class OfficialAccount extends EventEmitter {
         msgtype    : 'link',
         [msgtype]  :
         {
-          description: args.link.description,
-          thumb_url  : args.link.thumbnailUrl,
-          title      : args.link.title,
-          url        : args.link.url,
+          description: args.urlLinkPayload.description,
+          thumb_url  : args.urlLinkPayload.thumbnailUrl,
+          title      : args.urlLinkPayload.title,
+          url        : args.urlLinkPayload.url,
         },
         touser    : args.touser,
       })
