@@ -133,9 +133,11 @@ async function onMessage (payload: EventMessagePayload) {
       await puppet.messageSendFile(msgPayload.fromId!, imageFile)
     }
   } else if (msgPayload.type === MessageType.Audio) {
-    const audioFile = FileBox.fromUrl(msgPayload.filename + '', 'message.amr')
-    if (msgPayload.fromId!) {
-      await puppet.messageSendFile(msgPayload.fromId!, audioFile)
+    if (msgPayload.filename) {
+      const audioFile = FileBox.fromUrl(msgPayload.filename, 'message.amr')
+      if (msgPayload.fromId!) {
+        await puppet.messageSendFile(msgPayload.fromId!, audioFile)
+      }
     }
   }
 }
