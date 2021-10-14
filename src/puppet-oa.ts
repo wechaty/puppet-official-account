@@ -46,6 +46,7 @@ import {
 }                           from 'wechaty-puppet'
 
 import {
+  VERSION,
   qrCodeForChatie,
   envOptions,
 }                   from './config.js'
@@ -90,6 +91,8 @@ class PuppetOA extends Puppet {
     log.info('contactDescription(%s, %s)', contactId, description)
     throw new Error('Method not implemented.')
   }
+
+  static override readonly VERSION = VERSION
 
   protected appId            : string
   protected appSecret        : string
@@ -159,6 +162,10 @@ class PuppetOA extends Puppet {
       }
       this.accessTokenProxyUrl = options.accessTokenProxyUrl
     }
+  }
+
+  override version (): string {
+    return VERSION
   }
 
   override async start (): Promise<void> {
@@ -601,6 +608,7 @@ class PuppetOA extends Puppet {
     miniProgramPayload: MiniProgramPayload,
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
+    // TODO: to be test under official account
     if (!this.id) {
       throw new Error('no this id')
     }
