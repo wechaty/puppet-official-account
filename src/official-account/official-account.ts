@@ -3,8 +3,10 @@ import {
   ContactGender,
   FileBox,
   log,
+  MiniProgramPayload,
+  UrlLinkPayload,
 }                       from 'wechaty-puppet'
-import uuid           from 'uuid'
+import pkg from 'uuid'
 import crypto           from 'crypto'
 import { EventEmitter } from 'events'
 import { FileBoxType }  from 'file-box'
@@ -45,7 +47,7 @@ export interface AccessTokenPayload {
   timestamp : number,
   token     : string,
 }
-
+const { v4 } = pkg
 type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
@@ -290,15 +292,87 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount sendCustomMessage() can send message <${JSON.stringify(args)}>`)
     }
 
-    const msgId: string = uuid.v4()
-    await this.payloadStore.setMessagePayload(msgId, {
+    const uuid: string = v4()
+    await this.payloadStore.setMessagePayload(uuid, {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
-      MsgId        : msgId,
+      MsgId        : uuid,
       MsgType      : 'text',
       ToUserName   : args.touser,
     })
-    return msgId
+    return uuid
+  }
+
+  async sendCustomLink (args: {
+    touser: string
+    urlLinkPayload:UrlLinkPayload
+  }): Promise<string> {
+    log.verbose('OfficialAccount', 'sendCustomLink(%s)', JSON.stringify(args))
+    const msgtype: OAMessageType = 'link'
+    const ret = await this.simpleUnirest
+      .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
+      .type('json')
+      .send({
+        msgtype    : 'link',
+        [msgtype]  :
+        {
+          description: args.urlLinkPayload.description,
+          thumb_url  : args.urlLinkPayload.thumbnailUrl,
+          title      : args.urlLinkPayload.title,
+          url        : args.urlLinkPayload.url,
+        },
+        touser    : args.touser,
+      })
+
+    if (ret.body.errcode) {
+      throw new Error(`OfficialAccount sendCustomLink() can send link <${JSON.stringify(args)}>`)
+    }
+
+    const uuid: string = v4()
+    await this.payloadStore.setMessagePayload(uuid, {
+      CreateTime   : getTimeStampString(),
+      FromUserName : this.oaId,
+      MsgId        : uuid,
+      MsgType      : 'link',
+      ToUserName   : args.touser,
+    })
+    return uuid
+  }
+
+  async sendCustomMiniProgram (args: {
+    miniProgram:MiniProgramPayload
+    touser: string,
+  }): Promise<string> {
+    log.verbose('OfficialAccount', 'sendCustomMiniProgram(%s)', JSON.stringify(args))
+    const msgtype:OAMessageType = 'miniprogrampage'
+    const ret = await this.simpleUnirest
+      .post<ErrorPayload>(`message/custom/send?access_token=${this.accessToken}`)
+      .type('json')
+      .send({
+        msgtype    : 'miniprogrampage',
+        [msgtype]  :
+        {
+          appid         : args.miniProgram.appid,
+          pagepath      : args.miniProgram.pagePath,
+          thumb_media_id: args.miniProgram.thumbKey,
+          title         : args.miniProgram.title,
+        },
+        touser     : args.touser,
+      })
+
+    if (ret.body.errcode) {
+      throw new Error(`OfficialAccount sendCustomMiniProgram can send miniProgram <${JSON.stringify(args)}>`)
+    }
+
+    const uuid: string = v4()
+    await this.payloadStore.setMessagePayload(uuid, {
+      CreateTime   : getTimeStampString(),
+      FromUserName : this.oaId,
+      MsgId        : uuid,
+      MsgType      : 'miniprogrampage',
+      ToUserName   : args.touser,
+    })
+    return uuid
   }
 
   async sendFile (args: {
@@ -321,6 +395,9 @@ class OfficialAccount extends EventEmitter {
       info.filename = `${args.file.name}.jpeg`
     }
 
+    if (args.file.type() === FileBoxType.Url && args.file.mimeType === 'audio/amr') {
+      info.filename = `${args.file.name}`
+    }
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
       media_id   : string,
       created_at : string,
@@ -350,14 +427,14 @@ class OfficialAccount extends EventEmitter {
     // Notes about image upload:
     // Situation One: when contact user send image file to oa, there will be PicUrl & MediaId fields
     // Situation Two: when server send file to tencent server, there is only MediaId field.
-    if (!(args.msgtype === 'voice' || args.msgtype === 'image')) {
+    if (!(args.msgtype === 'voice' || args.msgtype === 'image' || args.msgtype === 'video')) {
       throw new Error(`OfficialAccount, sendFile() doesn't support message type ${args.msgtype}`)
     }
     const messagePayload: OAMessagePayload = {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
       MediaId      : mediaResponse.body.media_id,
-      MsgId        : uuid.v4(),
+      MsgId        : v4(),
       MsgType      : args.msgtype,
       ToUserName   : args.touser,
     }
@@ -399,6 +476,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getContactPayload(%s)', openId)
 
     if (openId && openId.startsWith('gh_')) {
+    // if (openId) {
 
       // wechaty load the SelfContact object, so just return it.
       /* eslint-disable sort-keys */
@@ -504,7 +582,7 @@ class OfficialAccount extends EventEmitter {
      * TODO: this is not a frequent interface, So I don't cache the taglist
      */
     const tagList: OATagPayload[] = await this.getTagList()
-    const tag: OATagPayload[]     = tagList.filter((item) => item.name === tagName)
+    const  tag: OATagPayload[]    = tagList.filter((item) => item.name === tagName)
 
     if (!tag || tag.length === 0) {
       return null
