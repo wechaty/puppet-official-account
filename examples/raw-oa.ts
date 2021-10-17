@@ -82,7 +82,7 @@ async function main () {
 
   })
 
-  app.post('/', async (req, res) => {
+  app.post('/', (req, res) => {
     const payload = req.body.xml
 
     console.info(payload)
@@ -92,7 +92,7 @@ async function main () {
       return
     }
 
-    const ret = await simpleUnirest
+    simpleUnirest
       .post<any>(`message/custom/send?access_token=${accessToken.token}`)
       .type('json')
       .send({
@@ -103,9 +103,13 @@ async function main () {
         },
         touser: payload.FromUserName,
       })
+      .then(ret => {
+        console.info(ret.body)
+        res.end('success')
+        return undefined
+      })
+      .catch(console.error)
 
-    console.info(ret.body)
-    res.end('success')
   })
 }
 

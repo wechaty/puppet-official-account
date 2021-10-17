@@ -131,8 +131,12 @@ class Webhook extends WebhookEventEmitter {
       trim          : true,
     }))
 
-    app.get('/',  this.appGet.bind(this))
-    app.post('/', this.appPost.bind(this))
+    app.get('/',  (req, res) => this.appGet(req, res))
+    app.post('/', (req, res) => {
+      ;(
+        async () => this.appPost(req, res)
+      )().catch(console.error)
+    })
 
     this.on('instantReply', (msg: {
       msgtype: OAMessageType,
@@ -208,10 +212,10 @@ class Webhook extends WebhookEventEmitter {
     this.tunnel = tunnel
   }
 
-  async appGet (
+  appGet (
     req : express.Request,
     res : express.Response,
-  ): Promise<void> {
+  ): void {
     log.verbose('Webhook', 'appGet({url: %s})', req.url)
 
     const {
@@ -241,7 +245,7 @@ class Webhook extends WebhookEventEmitter {
     const payload = req.body.xml as OAMessagePayload
     log.verbose('Webhook', 'appPost({url: %s} with payload: %s',
       req.url,
-      JSON.stringify(payload)
+      JSON.stringify(payload),
     )
 
     const knownTypeList = [

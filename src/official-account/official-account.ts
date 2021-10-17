@@ -113,9 +113,10 @@ class OfficialAccount extends EventEmitter {
   async start () {
     log.verbose('OfficialAccount', 'start()')
 
-    this.webhook.on('message', async message => {
-      await this.payloadStore.setMessagePayload(message.MsgId, message)
-      this.emit('message', message)
+    this.webhook.on('message', message => {
+      this.payloadStore.setMessagePayload(message.MsgId, message)
+        .then(message => this.emit('message', message))
+        .catch(console.error)
     })
 
     await this.payloadStore.start()
@@ -145,9 +146,7 @@ class OfficialAccount extends EventEmitter {
       }
     }
 
-    if (this.webhook) {
-      await this.webhook.stop()
-    }
+    await this.webhook.stop()
     await this.payloadStore.stop()
   }
 
@@ -225,7 +224,7 @@ class OfficialAccount extends EventEmitter {
     const update: () => void = () => this.updateAccessToken()
       .then(succeed => succeed
         ? this.accessTokenPayload!.expiresIn - marginSeconds
-        : tryAgainSeconds
+        : tryAgainSeconds,
       )
       .then(seconds => setTimeout(update, seconds * 1000))
       // eslint-disable-next-line no-return-assign
@@ -317,7 +316,7 @@ class OfficialAccount extends EventEmitter {
     // this works for all of the image file
     // TODO -> should be improved later.
 
-    if (args.file.type() === FileBoxType.Url && args.file.mimeType === 'image/jpeg') {
+    if (args.file.type === FileBoxType.Url && args.file.mimeType === 'image/jpeg') {
       info.filename = `${args.file.name}.jpeg`
     }
 
@@ -371,6 +370,7 @@ class OfficialAccount extends EventEmitter {
     let openIdList: string[] = []
     let nextOpenId = ''
 
+    // eslint-disable-next-line
     while (true) {
       const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
         total : number,
@@ -482,7 +482,7 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'getTagList()')
 
     const res = await this.simpleUnirest.get<Partial<ErrorPayload> & {
-      tags : OATagPayload[]
+      tags? : OATagPayload[]
     }>(`tags/get?access_token=${this.accessToken}`)
 
     if (res.body.errcode) {
@@ -506,7 +506,7 @@ class OfficialAccount extends EventEmitter {
     const tagList: OATagPayload[] = await this.getTagList()
     const tag: OATagPayload[]     = tagList.filter((item) => item.name === tagName)
 
-    if (!tag || tag.length === 0) {
+    if (tag.length === 0) {
       return null
     }
     return tag[0]!.id

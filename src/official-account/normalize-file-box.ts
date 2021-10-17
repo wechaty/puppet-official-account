@@ -12,7 +12,7 @@ import type {
 
 const normalizeFileBox = async (fileBox: FileBox): Promise<{ buf: Buffer, info: FileInfo}> => {
   log.verbose('WechatyPluginFreshdesk', 'normalizeFileBox({type: "%s", name: "%s"})',
-    FileBoxType[fileBox.type()],
+    FileBoxType[fileBox.type],
     fileBox.name,
   )
 
