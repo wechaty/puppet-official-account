@@ -42,6 +42,7 @@ import {
   MessageType,
   ContactType,
   PayloadType,
+  LocationPayload,
 }                           from 'wechaty-puppet'
 
 import {
@@ -63,6 +64,14 @@ import type {
 export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
 
 class PuppetOA extends Puppet {
+
+  override messageLocation (_messageId: string): Promise<LocationPayload> {
+    throw new Error('Method not implemented.')
+  }
+
+  override messageSendLocation (_conversationId: string, _locationPayload: LocationPayload): Promise<string | void> {
+    throw new Error('Method not implemented.')
+  }
 
   override contactPhone (contactId: string, phoneList: string[]): Promise<void> {
     log.info('contactPhone(%s, %s)', contactId, phoneList)
@@ -496,6 +505,9 @@ class PuppetOA extends Puppet {
       case 'audio/mpeg':
         msgtype = 'voice'
         break
+      case 'video/mp4':
+        msgtype = 'video'
+        break
       default:
         throw new Error(`unsupported media type: ${file.mimeType}`)
     }
@@ -514,21 +526,35 @@ class PuppetOA extends Puppet {
 
   override async messageSendUrl (
     conversationId: string,
-    urlLinkPayload: UrlLinkPayload,
-  ) : Promise<void> {
-    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, JSON.stringify(urlLinkPayload))
-
-    // const url = new UrlLink(urlLinkPayload)
-    // return this.messageSend(conversationId, url)
+    urlLinkPayload : UrlLinkPayload,
+  ) : Promise<string> {
+    log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
+    if (!this.id) {
+      throw new Error('no this.id')
+    }
+    let msgId = null
+    msgId = await this.oa?.sendCustomLink({ touser: conversationId, urlLinkPayload: urlLinkPayload })
+    if (!msgId) {
+      throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
+    }
+    return msgId
   }
 
   override async messageSendMiniProgram (
     conversationId: string,
     miniProgramPayload: MiniProgramPayload,
-  ): Promise<void> {
+  ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
-    // const miniProgram = new MiniProgram(miniProgramPayload)
-    // return this.messageSend(conversationId, miniProgram)
+    // TODO: to be test under official account
+    if (!this.id) {
+      throw new Error('no this id')
+    }
+    let msgId = null
+    msgId = await this.oa?.sendCustomMiniProgram({ miniProgram:miniProgramPayload, touser: conversationId })
+    if (!msgId) {
+      throw new Error('PuppetOA messageSendMiniProgram() can"t get msgId response')
+    }
+    return msgId
   }
 
   override async messageForward (

@@ -7,6 +7,7 @@ export type OAMessageType = 'text'
               | 'shortvideo'
               | 'location'
               | 'link'
+              | 'miniprogrampage'
 
 export type OAMediaType = 'image'
                       | 'voice'
