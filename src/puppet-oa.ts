@@ -179,7 +179,7 @@ class PuppetOA extends Puppet {
     // Official Account Info can be customized by user, so It should be
     // configured by environment variable.
     // set gh_ prefix to identify the official-account
-    await this.oa.payloadStore.setContactPayload(this.id, { openid: this.id } as any)
+    await this.oa.payloadStore.setContactPayload(this.currentUserId, { openid: this.currentUserId } as any)
     this.login(`gh_${this.appId}`)
 
     this.bridgeEvents(this.oa)
@@ -188,9 +188,9 @@ class PuppetOA extends Puppet {
 
   protected bridgeEvents (oa: OfficialAccount) {
     oa.on('message', msg => this.emit('message', { messageId: msg.MsgId }))
-    oa.on('login', _ => this.emit('login', { contactId: this.id || '' }))
+    oa.on('login', _ => this.login(this.currentUserId))
     oa.on('ready', _ => this.emit('ready', { data: 'ready' }))
-    oa.on('logout', _ => this.emit('logout', { contactId: this.id || '', data: 'logout' }))
+    oa.on('logout', _ => this.logout('oa.on(logout)'))
   }
 
   override async onStop (): Promise<void> {
@@ -458,9 +458,6 @@ class PuppetOA extends Puppet {
     mediatype: OAMediaType = 'image',
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSend(%s, %s)', conversationId, something)
-    if (!this.id) {
-      throw new Error('no this.id')
-    }
     let msgId = null
     if (typeof something === 'string') {
       const payload = {
@@ -529,9 +526,6 @@ class PuppetOA extends Puppet {
     urlLinkPayload : UrlLinkPayload,
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
-    if (!this.id) {
-      throw new Error('no this.id')
-    }
     let msgId = null
     msgId = await this.oa?.sendCustomLink({ touser: conversationId, urlLinkPayload: urlLinkPayload })
     if (!msgId) {
@@ -545,10 +539,6 @@ class PuppetOA extends Puppet {
     miniProgramPayload: MiniProgramPayload,
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
-    // TODO: to be test under official account
-    if (!this.id) {
-      throw new Error('no this id')
-    }
     let msgId = null
     msgId = await this.oa?.sendCustomMiniProgram({ miniProgram:miniProgramPayload, touser: conversationId })
     if (!msgId) {
