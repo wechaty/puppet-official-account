@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+import 'dotenv/config.js'
 
 import { test }  from 'tstest'
 
@@ -42,10 +43,10 @@ test('PuppetOA perfect restart testing', async (t) => {
     for (let i = 0; i < 3; i++) {
 
       await puppet.start()
-      t.true(puppet.state.on())
+      t.ok(puppet.state.on())
 
       await puppet.stop()
-      t.true(puppet.state.off())
+      t.ok(puppet.state.off())
 
       t.pass('start/stop-ed at #' + i)
     }

@@ -175,15 +175,17 @@ class PuppetOA extends Puppet {
       token           : this.token,
       webhookProxyUrl : this.webhookProxyUrl,
     })
+
+    this.bridgeEvents(this.oa)
+    await this.oa.start()
+
     // FIXME: Huan(202008) find a way to get the bot user information
     // Official Account Info can be customized by user, so It should be
     // configured by environment variable.
     // set gh_ prefix to identify the official-account
     await this.oa.payloadStore.setContactPayload(this.currentUserId, { openid: this.currentUserId } as any)
     this.login(`gh_${this.appId}`)
-
-    this.bridgeEvents(this.oa)
-    await this.oa.start()
+    this.emit('ready', { data: 'ready' })
   }
 
   protected bridgeEvents (oa: OfficialAccount) {
