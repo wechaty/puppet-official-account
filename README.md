@@ -121,9 +121,11 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ## HISTORY
 
-### master v0.7
+### master v0.9 (Oct, 2021)
 
-Enable ES Module support for Node.js
+Puppet API v0.51
+
+1. v0.7 (Sep 2021): Enable ES Module support for Node.js
 
 ### v0.4 (Aug 6, 2020)
 

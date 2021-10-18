@@ -183,8 +183,9 @@ class PuppetOA extends Puppet {
     // Official Account Info can be customized by user, so It should be
     // configured by environment variable.
     // set gh_ prefix to identify the official-account
-    await this.oa.payloadStore.setContactPayload(this.currentUserId, { openid: this.currentUserId } as any)
-    this.login(`gh_${this.appId}`)
+    const currentUserId = `gh_${this.appId}`
+    await this.oa.payloadStore.setContactPayload(currentUserId, { openid: currentUserId } as any)
+    this.login(currentUserId)
     this.emit('ready', { data: 'ready' })
   }
 

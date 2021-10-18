@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+import 'dotenv/config.js'
 
 import { test } from 'tstest'
 import cuid     from 'cuid'
