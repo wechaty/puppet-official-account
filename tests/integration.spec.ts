@@ -3,7 +3,7 @@ import 'dotenv/config.js'
 
 import { test }  from 'tstest'
 
-import { Wechaty } from 'wechaty'
+import { WechatyBuilder } from 'wechaty'
 
 import {
   PuppetOA,
@@ -22,7 +22,7 @@ test('integration testing', async t => {
   const puppet = new PuppetOA({
     ...getOaOptions(),
   })
-  const wechaty = new Wechaty({ puppet })
+  const wechaty = WechatyBuilder.build({ puppet })
 
   t.ok(wechaty, 'should instantiate wechaty with puppet official account')
 })
@@ -43,10 +43,10 @@ test('PuppetOA perfect restart testing', async (t) => {
     for (let i = 0; i < 3; i++) {
 
       await puppet.start()
-      t.ok(puppet.state.on())
+      t.ok(puppet.state.active())
 
       await puppet.stop()
-      t.ok(puppet.state.off())
+      t.ok(puppet.state.inactive())
 
       t.pass('start/stop-ed at #' + i)
     }

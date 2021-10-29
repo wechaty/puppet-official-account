@@ -16,16 +16,8 @@
  *   limitations under the License.
  *
  */
-import {
-  EventLogoutPayload,
-  EventLoginPayload,
-  EventScanPayload,
-  EventErrorPayload,
-  EventMessagePayload,
-  FileBox,
-  MessageType,
-  UrlLinkPayload,
-}                         from 'wechaty-puppet'
+import * as PUPPET from 'wechaty-puppet'
+import { FileBox } from 'file-box'
 
 import { PuppetOA } from '../src/mod.js'
 /**
@@ -72,7 +64,7 @@ puppet.start()
  *  `scan`, `login`, `logout`, `error`, and `message`
  *
  */
-function onScan (payload: EventScanPayload) {
+function onScan (payload: PUPPET.payload.EventScan) {
   if (payload.qrcode) {
     // Generate a QR Code online via
     // http://goqr.me/api/doc/create-qr-code/
@@ -86,16 +78,16 @@ function onScan (payload: EventScanPayload) {
   }
 }
 
-function onLogin (payload: EventLoginPayload) {
+function onLogin (payload: PUPPET.payload.EventLogin) {
   console.info(`${payload.contactId} login`)
   puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
-function onLogout (payload: EventLogoutPayload) {
+function onLogout (payload: PUPPET.payload.EventLogout) {
   console.info(`${payload.contactId} logouted`)
 }
 
-function onError (payload: EventErrorPayload) {
+function onError (payload: PUPPET.payload.EventError) {
   console.error('Bot error:', payload.data)
   /*
   if (bot.logonoff()) {
@@ -110,7 +102,7 @@ function onError (payload: EventErrorPayload) {
  *    dealing with Messages.
  *
  */
-async function onMessage (payload: EventMessagePayload) {
+async function onMessage (payload: PUPPET.payload.EventMessage) {
   const msgPayload = await puppet.messagePayload(payload.messageId)
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
@@ -125,14 +117,14 @@ async function onMessage (payload: EventMessagePayload) {
     }
   } else if (/link/i.test(msgPayload.text || '')) {
     const imagePath = 'http://mmbiz.qpic.cn/mmbiz_jpg/lOBFkCyo4n9Qhricg66uEO2Ycn9hcCibauvalenRUeMzsRia2VjLok4Gd1iaeuKiarVggr4apCEUNiamIM4FLkpxgurw/0'
-    const wechatyLink: UrlLinkPayload = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
+    const wechatyLink: PUPPET.payload.UrlLink = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
     await puppet.messageSendUrl(msgPayload.fromId!, wechatyLink)
-  } else if (msgPayload.type === MessageType.Image) {
+  } else if (msgPayload.type === PUPPET.type.Message.Image) {
     const imageFile = FileBox.fromUrl(msgPayload.filename + '.jpg')
     if (msgPayload.fromId!) {
       await puppet.messageSendFile(msgPayload.fromId!, imageFile)
     }
-  } else if (msgPayload.type === MessageType.Audio) {
+  } else if (msgPayload.type === PUPPET.type.Message.Audio) {
     if (msgPayload.filename) {
       const audioFile = FileBox.fromUrl(msgPayload.filename, 'message.amr')
       if (msgPayload.fromId!) {

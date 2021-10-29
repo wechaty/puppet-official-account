@@ -7,7 +7,7 @@ import { getOaOptions } from '../tests/fixtures/oa-options.js'
 
 import { PuppetOA } from './puppet-oa.js'
 
-import ciInfo from 'ci-info'
+import * as ciInfo from 'ci-info'
 
 class PuppetOATest extends PuppetOA {
 }

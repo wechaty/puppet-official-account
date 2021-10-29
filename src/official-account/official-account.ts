@@ -1,15 +1,22 @@
 /* eslint-disable camelcase */
 import {
-  ContactGender,
-  FileBox,
   log,
-  MiniProgramPayload,
-  UrlLinkPayload,
 }                       from 'wechaty-puppet'
-import pkg from 'uuid'
-import crypto           from 'crypto'
-import { EventEmitter } from 'events'
+import {
+  ContactGender,
+}                       from 'wechaty-puppet/types'
+import type {
+  MiniProgram,
+  UrlLink,
+}                       from 'wechaty-puppet/payloads'
+import type {
+  FileBoxInterface,
+}                       from 'file-box'
 import { FileBoxType }  from 'file-box'
+
+import * as UUID from 'uuid'
+import * as crypto           from 'crypto'
+import { EventEmitter } from 'events'
 
 import {
   Webhook,
@@ -47,7 +54,6 @@ export interface AccessTokenPayload {
   timestamp : number,
   token     : string,
 }
-const { v4 } = pkg
 type StopperFn = () => void
 
 class OfficialAccount extends EventEmitter {
@@ -287,7 +293,7 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount sendCustomMessage() can send message <${JSON.stringify(args)}>`)
     }
 
-    const uuid: string = v4()
+    const uuid: string = UUID.v4()
     await this.payloadStore.setMessagePayload(uuid, {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
@@ -300,7 +306,7 @@ class OfficialAccount extends EventEmitter {
 
   async sendCustomLink (args: {
     touser: string
-    urlLinkPayload:UrlLinkPayload
+    urlLinkPayload:UrlLink
   }): Promise<string> {
     log.verbose('OfficialAccount', 'sendCustomLink(%s)', JSON.stringify(args))
     const msgtype: OAMessageType = 'link'
@@ -323,7 +329,7 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount sendCustomLink() can send link <${JSON.stringify(args)}>`)
     }
 
-    const uuid: string = v4()
+    const uuid: string = UUID.v4()
     await this.payloadStore.setMessagePayload(uuid, {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
@@ -335,7 +341,7 @@ class OfficialAccount extends EventEmitter {
   }
 
   async sendCustomMiniProgram (args: {
-    miniProgram:MiniProgramPayload
+    miniProgram:MiniProgram
     touser: string,
   }): Promise<string> {
     log.verbose('OfficialAccount', 'sendCustomMiniProgram(%s)', JSON.stringify(args))
@@ -359,7 +365,7 @@ class OfficialAccount extends EventEmitter {
       throw new Error(`OfficialAccount sendCustomMiniProgram can send miniProgram <${JSON.stringify(args)}>`)
     }
 
-    const uuid: string = v4()
+    const uuid: string = UUID.v4()
     await this.payloadStore.setMessagePayload(uuid, {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
@@ -371,7 +377,7 @@ class OfficialAccount extends EventEmitter {
   }
 
   async sendFile (args: {
-    file    : FileBox,
+    file    : FileBoxInterface,
     touser  : string,
     msgtype : OAMediaType,
   }): Promise<string> {
@@ -429,7 +435,7 @@ class OfficialAccount extends EventEmitter {
       CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
       MediaId      : mediaResponse.body.media_id,
-      MsgId        : v4(),
+      MsgId        : UUID.v4(),
       MsgType      : args.msgtype,
       ToUserName   : args.touser,
     }

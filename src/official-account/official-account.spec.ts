@@ -18,7 +18,7 @@ const isPR: boolean = !!(ciInfo.isPR)
 
 void cuid // for testing
 
-test('OfficialAccount smoke testing', async (t) => {
+test('OfficialAccount smoke testing', async t => {
   if (isPR) {
     void t.skip('Skip for PR')
     return
@@ -96,7 +96,7 @@ test('updateAccessToken()', async t => {
   await oa.start()
 
   try {
-    t.true(oa.accessToken, 'should get access token')
+    t.ok(oa.accessToken, 'should get access token')
   } catch (e) {
     t.fail('should not be rejected')
   }
@@ -123,8 +123,9 @@ test('sendCustomMessage()', async t => {
       msgtype: 'text',
       touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
     })
-    t.isNot(ret, null, 'should get messageId')
+    t.not(ret, null, 'should get messageId')
   } catch (e) {
+    console.error(e)
     t.fail('should not be rejected')
   } finally {
     await oa.stop()

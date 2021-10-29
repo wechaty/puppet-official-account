@@ -1,5 +1,6 @@
-import { Message, Wechaty } from 'wechaty'
-import { EventErrorPayload, MessageType } from 'wechaty-puppet'
+import type { Message } from 'wechaty'
+import { WechatyBuilder } from 'wechaty'
+import * as PUPPET from 'wechaty-puppet'
 
 import { PuppetOA } from '../src/mod.js'
 
@@ -7,7 +8,7 @@ import { PuppetOA } from '../src/mod.js'
 const puppet = new PuppetOA({
   port: 80,
 })
-const bot = new Wechaty({
+const bot = WechatyBuilder.build({
   puppet: puppet,
 })
 
@@ -16,16 +17,18 @@ bot
   .on('error', onError)
   .on('message', onMessage)
 
-function onError (payload: EventErrorPayload) {
-  console.error('Bot error:', payload.data)
+function onError (error: Error) {
+  console.error('Bot error:', error)
 }
 
 async function onMessage (message: Message) {
   switch (message.type()) {
-    case MessageType.Text:
-      return message.talker().say(message.text())
-    case MessageType.Audio:
-      return message.talker().say(await message.toFileBox())
+    case PUPPET.type.Message.Text:
+      await message.talker().say(message.text())
+      break
+    case PUPPET.type.Message.Audio:
+      await message.talker().say(await message.toFileBox())
+      break
     default:
       throw new Error(`Handler for message type ${message.type()} is not implemented the example`)
   }

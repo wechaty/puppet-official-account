@@ -2,7 +2,9 @@
 
 import {
   FileBox,
-}             from 'wechaty-puppet'
+}             from 'file-box'
+
+import { log } from 'wechaty-puppet'
 
 import type { PuppetOAOptions } from './puppet-oa.js'
 import { packageJson } from './package-json.js'
@@ -31,5 +33,6 @@ function envOptions (): Partial<PuppetOAOptions> {
 export {
   qrCodeForChatie,
   envOptions,
+  log,
   VERSION,
 }

@@ -17,38 +17,17 @@
  *
  */
 
+import * as PUPPET from 'wechaty-puppet'
 import {
-  ContactPayload,
-
   FileBox,
-
-  FriendshipPayload,
-
-  ImageType,
-
-  MessagePayload,
-
-  Puppet,
-  PuppetOptions,
-
-  RoomInvitationPayload,
-  RoomMemberPayload,
-  RoomPayload,
-
-  UrlLinkPayload,
-  MiniProgramPayload,
-
-  log,
-  MessageType,
-  ContactType,
-  PayloadType,
-  LocationPayload,
-}                           from 'wechaty-puppet'
+  FileBoxInterface,
+}                   from 'file-box'
 
 import {
   VERSION,
   qrCodeForChatie,
   envOptions,
+  log,
 }                   from './config.js'
 
 import {
@@ -61,15 +40,15 @@ import type {
   OAMediaType,
 }                   from './official-account/schema.js'
 
-export type PuppetOAOptions = PuppetOptions & Partial<OfficialAccountOptions>
+export type PuppetOAOptions = PUPPET.PuppetOptions & Partial<OfficialAccountOptions>
 
-class PuppetOA extends Puppet {
+class PuppetOA extends PUPPET.Puppet {
 
-  override messageLocation (_messageId: string): Promise<LocationPayload> {
+  override messageLocation (_messageId: string): Promise<PUPPET.payload.Location> {
     throw new Error('Method not implemented.')
   }
 
-  override messageSendLocation (_conversationId: string, _locationPayload: LocationPayload): Promise<string | void> {
+  override messageSendLocation (_conversationId: string, _locationPayload: PUPPET.payload.Location): Promise<string | void> {
     throw new Error('Method not implemented.')
   }
 
@@ -270,10 +249,10 @@ class PuppetOA extends Puppet {
     return contactIdList
   }
 
-  override async contactAvatar (contactId: string)                : Promise<FileBox>
-  override async contactAvatar (contactId: string, file: FileBox) : Promise<void>
+  override async contactAvatar (contactId: string)                : Promise<FileBoxInterface>
+  override async contactAvatar (contactId: string, file: FileBoxInterface) : Promise<void>
 
-  override async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
+  override async contactAvatar (contactId: string, file?: FileBoxInterface): Promise<void | FileBoxInterface> {
     log.verbose('PuppetOA', 'contactAvatar(%s)', contactId)
 
     /**
@@ -292,8 +271,8 @@ class PuppetOA extends Puppet {
     return fileBox
   }
 
-  override async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<ContactPayload> {
-    const payload: ContactPayload = {
+  override async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<PUPPET.payload.Contact> {
+    const payload: PUPPET.payload.Contact = {
       alias     : oaPayload.remark,
       avatar    : oaPayload.headimgurl,
       city      : oaPayload.city,
@@ -305,7 +284,7 @@ class PuppetOA extends Puppet {
       province  : oaPayload.province,
       signature : '',
       star      : false,
-      type      : ContactType.Individual,
+      type      : PUPPET.type.Contact.Individual,
       weixin    : oaPayload.unionid,
     }
     return payload
@@ -316,7 +295,7 @@ class PuppetOA extends Puppet {
 
     const contactInfoPayload = await this.oa?.getContactPayload(id)
     if (!contactInfoPayload) {
-      throw new Error(`can not get ContactPayload(${id})`)
+      throw new Error(`can not get PUPPET.payload.Contact(${id})`)
     }
     return contactInfoPayload
   }
@@ -339,20 +318,20 @@ class PuppetOA extends Puppet {
 
   override async messageImage (
     messageId : string,
-    imageType : ImageType,
-  ) : Promise<FileBox> {
+    imageType : PUPPET.type.Image,
+  ) : Promise<FileBoxInterface> {
     log.verbose('PuppetOA', 'messageImage(%s, %s[%s])',
       messageId,
       imageType,
-      ImageType[imageType],
+      PUPPET.type.Image[imageType],
     )
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof FileBox) {
     //   return attachment
     // }
-    const payload: MessagePayload = await this.messagePayload(messageId)
-    let fileBox: FileBox
-    if (payload.type === MessageType.Image) {
+    const payload: PUPPET.payload.Message = await this.messagePayload(messageId)
+    let fileBox: FileBoxInterface
+    if (payload.type === PUPPET.type.Message.Image) {
       if (!payload.filename) {
         throw Error(`image message type must have filename file. <${payload}>`)
       }
@@ -370,18 +349,18 @@ class PuppetOA extends Puppet {
     return false
   }
 
-  override async messageFile (id: string): Promise<FileBox> {
+  override async messageFile (id: string): Promise<FileBoxInterface> {
     log.verbose('PuppetOA', 'messageFile(%s)', id)
 
-    const payload: MessagePayload = await this.messagePayload(id)
+    const payload: PUPPET.payload.Message = await this.messagePayload(id)
 
     switch (payload.type) {
-      case MessageType.Image:
+      case PUPPET.type.Message.Image:
         if (!payload.filename) {
           throw Error(`Image message must have filename. <${payload}>`)
         }
         return FileBox.fromUrl(payload.filename)
-      case MessageType.Audio:
+      case PUPPET.type.Message.Audio:
         if (!payload.filename) {
           throw Error(`Audio message must have filename. <${payload}>`)
         }
@@ -394,7 +373,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
+  override async messageUrl (messageId: string)  : Promise<PUPPET.payload.UrlLink> {
     log.verbose('PuppetOA', 'messageUrl(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof UrlLink) {
@@ -406,7 +385,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
+  override async messageMiniProgram (messageId: string): Promise<PUPPET.payload.MiniProgram> {
     log.verbose('PuppetOA', 'messageMiniProgram(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof MiniProgram) {
@@ -417,28 +396,28 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<MessagePayload> {
-    const payload: MessagePayload = {
+  override async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<PUPPET.payload.Message> {
+    const payload: PUPPET.payload.Message = {
       fromId    : rawPayload.FromUserName,
       id        : rawPayload.MsgId,
       timestamp : parseInt(rawPayload.CreateTime),
       toId      : rawPayload.ToUserName,
-      type      : MessageType.Text,
+      type      : PUPPET.type.Message.Text,
     }
     if (rawPayload.MsgType === 'image') {
-      payload.type = MessageType.Image
+      payload.type = PUPPET.type.Message.Image
       if (!rawPayload.PicUrl) {
         throw Error(`Image Payload must has PicUrl field :<${JSON.stringify(rawPayload)}>`)
       }
       payload.filename = rawPayload.PicUrl
     } else if (rawPayload.MsgType === 'video') {
-      payload.type = MessageType.Video
+      payload.type = PUPPET.type.Message.Video
     } else if (rawPayload.MsgType === 'location') {
-      payload.type = MessageType.Location
+      payload.type = PUPPET.type.Message.Location
     } else if (rawPayload.MsgType === 'text') {
       payload.text = rawPayload.Content
     } else if (rawPayload.MsgType === 'voice') {
-      payload.type = MessageType.Audio
+      payload.type = PUPPET.type.Message.Audio
       payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
     }
     return payload
@@ -526,7 +505,7 @@ class PuppetOA extends Puppet {
 
   override async messageSendUrl (
     conversationId: string,
-    urlLinkPayload : UrlLinkPayload,
+    urlLinkPayload : PUPPET.payload.UrlLink,
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
     let msgId = null
@@ -539,7 +518,7 @@ class PuppetOA extends Puppet {
 
   override async messageSendMiniProgram (
     conversationId: string,
-    miniProgramPayload: MiniProgramPayload,
+    miniProgramPayload: PUPPET.payload.MiniProgram,
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
     let msgId = null
@@ -575,8 +554,8 @@ class PuppetOA extends Puppet {
    * Room
    *
    */
-  override async roomRawPayloadParser (payload: RoomPayload) { return payload }
-  override async roomRawPayload (id: string): Promise<RoomPayload> {
+  override async roomRawPayloadParser (payload: PUPPET.payload.Room) { return payload }
+  override async roomRawPayload (id: string): Promise<PUPPET.payload.Room> {
     log.verbose('PuppetOA', 'roomRawPayload(%s)', id)
     return {} as any
   }
@@ -593,7 +572,7 @@ class PuppetOA extends Puppet {
     log.verbose('PuppetOA', 'roomDel(%s, %s)', roomId, contactId)
   }
 
-  override async roomAvatar (roomId: string): Promise<FileBox> {
+  override async roomAvatar (roomId: string): Promise<FileBoxInterface> {
     log.verbose('PuppetOA', 'roomAvatar(%s)', roomId)
 
     const payload = await this.roomPayload(roomId)
@@ -624,7 +603,7 @@ class PuppetOA extends Puppet {
     if (typeof topic === 'undefined') {
       return 'mock room topic'
     }
-    await this.dirtyPayload(PayloadType.Room, roomId)
+    await this.dirtyPayload(PUPPET.type.Payload.Room, roomId)
   }
 
   override async roomCreate (
@@ -650,7 +629,7 @@ class PuppetOA extends Puppet {
     return []
   }
 
-  override async roomMemberRawPayload (roomId: string, contactId: string): Promise<RoomMemberPayload>  {
+  override async roomMemberRawPayload (roomId: string, contactId: string): Promise<PUPPET.payload.RoomMember>  {
     log.verbose('PuppetOA', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
     return {
       avatar    : 'mock-avatar-data',
@@ -660,7 +639,7 @@ class PuppetOA extends Puppet {
     }
   }
 
-  override async roomMemberRawPayloadParser (rawPayload: RoomMemberPayload): Promise<RoomMemberPayload>  {
+  override async roomMemberRawPayloadParser (rawPayload: PUPPET.payload.RoomMember): Promise<PUPPET.payload.RoomMember>  {
     log.verbose('PuppetOA', 'roomMemberRawPayloadParser(%s)', rawPayload)
     return rawPayload
   }
@@ -688,7 +667,7 @@ class PuppetOA extends Puppet {
     log.verbose('PuppetOA', 'roomInvitationRawPayload(%s)', roomInvitationId)
   }
 
-  override async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
+  override async roomInvitationRawPayloadParser (rawPayload: any): Promise<PUPPET.payload.RoomInvitation> {
     log.verbose('PuppetOA', 'roomInvitationRawPayloadParser(%s)', JSON.stringify(rawPayload))
     return rawPayload
   }
@@ -702,7 +681,7 @@ class PuppetOA extends Puppet {
     return { id } as any
   }
 
-  override async friendshipRawPayloadParser (rawPayload: any): Promise<FriendshipPayload> {
+  override async friendshipRawPayloadParser (rawPayload: any): Promise<PUPPET.payload.Friendship> {
     return rawPayload
   }
 
