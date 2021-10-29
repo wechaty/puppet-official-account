@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-official-account",
-  "version": "0.11.1",
+  "version": "1.0.0",
   "description": "Wechaty Puppet for WeChat Official Accounts",
   "type": "module",
   "exports": {
@@ -11,7 +11,7 @@
   },
   "typings": "./dist/esm/src/mod.d.ts",
   "engines": {
-    "wechaty": ">=0.77"
+    "wechaty": ">=1.0"
   },
   "scripts": {
     "clean": "shx rm -fr dist/*",
@@ -63,10 +63,10 @@
     "ci-info": "^3.2.0",
     "dotenv": "^10.0.0",
     "tstest": "^1.0.1",
-    "wechaty": "^0.79"
+    "wechaty": "^1.0.1"
   },
   "peerDependencies": {
-    "wechaty-puppet": "^0.53.10"
+    "wechaty-puppet": "^1.0.1"
   },
   "dependencies": {
     "cuid": "^2.1.8",
