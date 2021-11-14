@@ -455,7 +455,8 @@ class PuppetOA extends PUPPET.Puppet {
       } else {
         msgId = await this.oa?.sendCustomMessage(payload)
       }
-    } else if (something instanceof FileBox) {
+    } else if (FileBox.valid(something)) {
+      await something.ready()
       msgId = await this.oa?.sendFile({ file: something, msgtype: mediatype, touser: conversationId })
     }
     if (!msgId) {

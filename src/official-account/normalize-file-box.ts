@@ -1,16 +1,16 @@
 import {
-  FileBox,
+  FileBoxInterface,
   FileBoxType,
-}               from 'file-box'
+}                     from 'file-box'
 import {
   log,
-}               from 'wechaty-puppet'
+}                     from 'wechaty-puppet'
 
 import type {
   FileInfo,
 }                     from './simple-unirest.js'
 
-const normalizeFileBox = async (fileBox: FileBox): Promise<{ buf: Buffer, info: FileInfo}> => {
+const normalizeFileBox = async (fileBox: FileBoxInterface): Promise<{ buf: Buffer, info: FileInfo}> => {
   log.verbose('WechatyPluginFreshdesk', 'normalizeFileBox({type: "%s", name: "%s"})',
     FileBoxType[fileBox.type],
     fileBox.name,
@@ -20,7 +20,7 @@ const normalizeFileBox = async (fileBox: FileBox): Promise<{ buf: Buffer, info: 
   const length = buf.byteLength
 
   const info: FileInfo = {
-    contentType : fileBox.mimeType,
+    contentType : fileBox.mediaType,
     filename    : fileBox.name.trim(),
     knownLength : length,
   }

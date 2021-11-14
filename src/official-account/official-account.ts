@@ -384,7 +384,6 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'sendFile(%s)', JSON.stringify(args))
     // JSON.stringify does not support .mp3 filetype
 
-    await args.file.ready()
     const { buf, info } = await normalizeFileBox(args.file)
 
     // all of the image file are compressed into image/jpeg type
@@ -392,11 +391,11 @@ class OfficialAccount extends EventEmitter {
     // this works for all of the image file
     // TODO -> should be improved later.
 
-    if (args.file.type === FileBoxType.Url && args.file.mimeType === 'image/jpeg') {
+    if (args.file.type === FileBoxType.Url && args.file.mediaType === 'image/jpeg') {
       info.filename = `${args.file.name}.jpeg`
     }
 
-    if (args.file.type === FileBoxType.Url && args.file.mimeType === 'audio/amr') {
+    if (args.file.type === FileBoxType.Url && args.file.mediaType === 'audio/amr') {
       info.filename = `${args.file.name}`
     }
     const mediaResponse = await this.simpleUnirest.post<Partial<ErrorPayload> & {
