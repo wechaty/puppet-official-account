@@ -64,7 +64,7 @@ puppet.start()
  *  `scan`, `login`, `logout`, `error`, and `message`
  *
  */
-function onScan (payload: PUPPET.payload.EventScan) {
+function onScan (payload: PUPPET.payloads.EventScan) {
   if (payload.qrcode) {
     // Generate a QR Code online via
     // http://goqr.me/api/doc/create-qr-code/
@@ -78,16 +78,16 @@ function onScan (payload: PUPPET.payload.EventScan) {
   }
 }
 
-function onLogin (payload: PUPPET.payload.EventLogin) {
+function onLogin (payload: PUPPET.payloads.EventLogin) {
   console.info(`${payload.contactId} login`)
   puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
-function onLogout (payload: PUPPET.payload.EventLogout) {
+function onLogout (payload: PUPPET.payloads.EventLogout) {
   console.info(`${payload.contactId} logouted`)
 }
 
-function onError (payload: PUPPET.payload.EventError) {
+function onError (payload: PUPPET.payloads.EventError) {
   console.error('Bot error:', payload.data)
   /*
   if (bot.logonoff()) {
@@ -102,7 +102,7 @@ function onError (payload: PUPPET.payload.EventError) {
  *    dealing with Messages.
  *
  */
-async function onMessage (payload: PUPPET.payload.EventMessage) {
+async function onMessage (payload: PUPPET.payloads.EventMessage) {
   const msgPayload = await puppet.messagePayload(payload.messageId)
   console.info('onMessage:', JSON.stringify(msgPayload))
   if (/ding/i.test(msgPayload.text || '')) {
@@ -117,14 +117,14 @@ async function onMessage (payload: PUPPET.payload.EventMessage) {
     }
   } else if (/link/i.test(msgPayload.text || '')) {
     const imagePath = 'http://mmbiz.qpic.cn/mmbiz_jpg/lOBFkCyo4n9Qhricg66uEO2Ycn9hcCibauvalenRUeMzsRia2VjLok4Gd1iaeuKiarVggr4apCEUNiamIM4FLkpxgurw/0'
-    const wechatyLink: PUPPET.payload.UrlLink = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
+    const wechatyLink: PUPPET.payloads.UrlLink = ({ description: 'this is wechaty', thumbnailUrl: imagePath, title: 'WECHATY', url:'https://wechaty.js.org/' })
     await puppet.messageSendUrl(msgPayload.fromId!, wechatyLink)
-  } else if (msgPayload.type === PUPPET.type.Message.Image) {
+  } else if (msgPayload.type === PUPPET.types.Message.Image) {
     const imageFile = FileBox.fromUrl(msgPayload.filename + '.jpg')
     if (msgPayload.fromId!) {
       await puppet.messageSendFile(msgPayload.fromId!, imageFile)
     }
-  } else if (msgPayload.type === PUPPET.type.Message.Audio) {
+  } else if (msgPayload.type === PUPPET.types.Message.Audio) {
     if (msgPayload.filename) {
       const audioFile = FileBox.fromUrl(msgPayload.filename, 'message.amr')
       if (msgPayload.fromId!) {

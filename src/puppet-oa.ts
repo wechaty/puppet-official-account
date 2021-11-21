@@ -44,11 +44,11 @@ export type PuppetOAOptions = PUPPET.PuppetOptions & Partial<OfficialAccountOpti
 
 class PuppetOA extends PUPPET.Puppet {
 
-  override messageLocation (_messageId: string): Promise<PUPPET.payload.Location> {
+  override messageLocation (_messageId: string): Promise<PUPPET.payloads.Location> {
     throw new Error('Method not implemented.')
   }
 
-  override messageSendLocation (_conversationId: string, _locationPayload: PUPPET.payload.Location): Promise<string | void> {
+  override messageSendLocation (_conversationId: string, _locationPayload: PUPPET.payloads.Location): Promise<string | void> {
     throw new Error('Method not implemented.')
   }
 
@@ -172,7 +172,7 @@ class PuppetOA extends PUPPET.Puppet {
     oa.on('message', msg => this.emit('message', { messageId: msg.MsgId }))
     oa.on('login', _ => this.login(this.currentUserId))
     oa.on('ready', _ => this.emit('ready', { data: 'ready' }))
-    oa.on('logout', _ => this.logout('oa.on(logout)'))
+    oa.on('logout', _ => this.wrapAsync(this.logout('oa.on(logout)')))
   }
 
   override async onStop (): Promise<void> {
@@ -271,8 +271,8 @@ class PuppetOA extends PUPPET.Puppet {
     return fileBox
   }
 
-  override async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<PUPPET.payload.Contact> {
-    const payload: PUPPET.payload.Contact = {
+  override async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<PUPPET.payloads.Contact> {
+    const payload: PUPPET.payloads.Contact = {
       alias     : oaPayload.remark,
       avatar    : oaPayload.headimgurl,
       city      : oaPayload.city,
@@ -284,7 +284,7 @@ class PuppetOA extends PUPPET.Puppet {
       province  : oaPayload.province,
       signature : '',
       star      : false,
-      type      : PUPPET.type.Contact.Individual,
+      type      : PUPPET.types.Contact.Individual,
       weixin    : oaPayload.unionid,
     }
     return payload
@@ -295,7 +295,7 @@ class PuppetOA extends PUPPET.Puppet {
 
     const contactInfoPayload = await this.oa?.getContactPayload(id)
     if (!contactInfoPayload) {
-      throw new Error(`can not get PUPPET.payload.Contact(${id})`)
+      throw new Error(`can not get PUPPET.payloads.Contact(${id})`)
     }
     return contactInfoPayload
   }
@@ -318,20 +318,20 @@ class PuppetOA extends PUPPET.Puppet {
 
   override async messageImage (
     messageId : string,
-    imageType : PUPPET.type.Image,
+    imageType : PUPPET.types.Image,
   ) : Promise<FileBoxInterface> {
     log.verbose('PuppetOA', 'messageImage(%s, %s[%s])',
       messageId,
       imageType,
-      PUPPET.type.Image[imageType],
+      PUPPET.types.Image[imageType],
     )
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof FileBox) {
     //   return attachment
     // }
-    const payload: PUPPET.payload.Message = await this.messagePayload(messageId)
+    const payload: PUPPET.payloads.Message = await this.messagePayload(messageId)
     let fileBox: FileBoxInterface
-    if (payload.type === PUPPET.type.Message.Image) {
+    if (payload.type === PUPPET.types.Message.Image) {
       if (!payload.filename) {
         throw Error(`image message type must have filename file. <${payload}>`)
       }
@@ -352,15 +352,15 @@ class PuppetOA extends PUPPET.Puppet {
   override async messageFile (id: string): Promise<FileBoxInterface> {
     log.verbose('PuppetOA', 'messageFile(%s)', id)
 
-    const payload: PUPPET.payload.Message = await this.messagePayload(id)
+    const payload: PUPPET.payloads.Message = await this.messagePayload(id)
 
     switch (payload.type) {
-      case PUPPET.type.Message.Image:
+      case PUPPET.types.Message.Image:
         if (!payload.filename) {
           throw Error(`Image message must have filename. <${payload}>`)
         }
         return FileBox.fromUrl(payload.filename)
-      case PUPPET.type.Message.Audio:
+      case PUPPET.types.Message.Audio:
         if (!payload.filename) {
           throw Error(`Audio message must have filename. <${payload}>`)
         }
@@ -373,7 +373,7 @@ class PuppetOA extends PUPPET.Puppet {
     }
   }
 
-  override async messageUrl (messageId: string)  : Promise<PUPPET.payload.UrlLink> {
+  override async messageUrl (messageId: string)  : Promise<PUPPET.payloads.UrlLink> {
     log.verbose('PuppetOA', 'messageUrl(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof UrlLink) {
@@ -385,7 +385,7 @@ class PuppetOA extends PUPPET.Puppet {
     }
   }
 
-  override async messageMiniProgram (messageId: string): Promise<PUPPET.payload.MiniProgram> {
+  override async messageMiniProgram (messageId: string): Promise<PUPPET.payloads.MiniProgram> {
     log.verbose('PuppetOA', 'messageMiniProgram(%s)', messageId)
     // const attachment = this.mocker.MockMessage.loadAttachment(messageId)
     // if (attachment instanceof MiniProgram) {
@@ -396,28 +396,28 @@ class PuppetOA extends PUPPET.Puppet {
     }
   }
 
-  override async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<PUPPET.payload.Message> {
-    const payload: PUPPET.payload.Message = {
+  override async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<PUPPET.payloads.Message> {
+    const payload: PUPPET.payloads.Message = {
       fromId    : rawPayload.FromUserName,
       id        : rawPayload.MsgId,
       timestamp : parseInt(rawPayload.CreateTime),
       toId      : rawPayload.ToUserName,
-      type      : PUPPET.type.Message.Text,
+      type      : PUPPET.types.Message.Text,
     }
     if (rawPayload.MsgType === 'image') {
-      payload.type = PUPPET.type.Message.Image
+      payload.type = PUPPET.types.Message.Image
       if (!rawPayload.PicUrl) {
         throw Error(`Image Payload must has PicUrl field :<${JSON.stringify(rawPayload)}>`)
       }
       payload.filename = rawPayload.PicUrl
     } else if (rawPayload.MsgType === 'video') {
-      payload.type = PUPPET.type.Message.Video
+      payload.type = PUPPET.types.Message.Video
     } else if (rawPayload.MsgType === 'location') {
-      payload.type = PUPPET.type.Message.Location
+      payload.type = PUPPET.types.Message.Location
     } else if (rawPayload.MsgType === 'text') {
       payload.text = rawPayload.Content
     } else if (rawPayload.MsgType === 'voice') {
-      payload.type = PUPPET.type.Message.Audio
+      payload.type = PUPPET.types.Message.Audio
       payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)
     }
     return payload
@@ -506,7 +506,7 @@ class PuppetOA extends PUPPET.Puppet {
 
   override async messageSendUrl (
     conversationId: string,
-    urlLinkPayload : PUPPET.payload.UrlLink,
+    urlLinkPayload : PUPPET.payloads.UrlLink,
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
     let msgId = null
@@ -519,7 +519,7 @@ class PuppetOA extends PUPPET.Puppet {
 
   override async messageSendMiniProgram (
     conversationId: string,
-    miniProgramPayload: PUPPET.payload.MiniProgram,
+    miniProgramPayload: PUPPET.payloads.MiniProgram,
   ): Promise<string> {
     log.verbose('PuppetOA', 'messageSendMiniProgram(%s, %s)', conversationId, JSON.stringify(miniProgramPayload))
     let msgId = null
@@ -555,8 +555,8 @@ class PuppetOA extends PUPPET.Puppet {
    * Room
    *
    */
-  override async roomRawPayloadParser (payload: PUPPET.payload.Room) { return payload }
-  override async roomRawPayload (id: string): Promise<PUPPET.payload.Room> {
+  override async roomRawPayloadParser (payload: PUPPET.payloads.Room) { return payload }
+  override async roomRawPayload (id: string): Promise<PUPPET.payloads.Room> {
     log.verbose('PuppetOA', 'roomRawPayload(%s)', id)
     return {} as any
   }
@@ -604,7 +604,7 @@ class PuppetOA extends PUPPET.Puppet {
     if (typeof topic === 'undefined') {
       return 'mock room topic'
     }
-    await this.dirtyPayload(PUPPET.type.Payload.Room, roomId)
+    await this.dirtyPayload(PUPPET.types.Payload.Room, roomId)
   }
 
   override async roomCreate (
@@ -630,7 +630,7 @@ class PuppetOA extends PUPPET.Puppet {
     return []
   }
 
-  override async roomMemberRawPayload (roomId: string, contactId: string): Promise<PUPPET.payload.RoomMember>  {
+  override async roomMemberRawPayload (roomId: string, contactId: string): Promise<PUPPET.payloads.RoomMember>  {
     log.verbose('PuppetOA', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
     return {
       avatar    : 'mock-avatar-data',
@@ -640,7 +640,7 @@ class PuppetOA extends PUPPET.Puppet {
     }
   }
 
-  override async roomMemberRawPayloadParser (rawPayload: PUPPET.payload.RoomMember): Promise<PUPPET.payload.RoomMember>  {
+  override async roomMemberRawPayloadParser (rawPayload: PUPPET.payloads.RoomMember): Promise<PUPPET.payloads.RoomMember>  {
     log.verbose('PuppetOA', 'roomMemberRawPayloadParser(%s)', rawPayload)
     return rawPayload
   }
@@ -668,7 +668,7 @@ class PuppetOA extends PUPPET.Puppet {
     log.verbose('PuppetOA', 'roomInvitationRawPayload(%s)', roomInvitationId)
   }
 
-  override async roomInvitationRawPayloadParser (rawPayload: any): Promise<PUPPET.payload.RoomInvitation> {
+  override async roomInvitationRawPayloadParser (rawPayload: any): Promise<PUPPET.payloads.RoomInvitation> {
     log.verbose('PuppetOA', 'roomInvitationRawPayloadParser(%s)', JSON.stringify(rawPayload))
     return rawPayload
   }
@@ -682,7 +682,7 @@ class PuppetOA extends PUPPET.Puppet {
     return { id } as any
   }
 
-  override async friendshipRawPayloadParser (rawPayload: any): Promise<PUPPET.payload.Friendship> {
+  override async friendshipRawPayloadParser (rawPayload: any): Promise<PUPPET.payloads.Friendship> {
     return rawPayload
   }
 

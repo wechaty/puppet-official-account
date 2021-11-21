@@ -23,10 +23,10 @@ function onError (error: Error) {
 
 async function onMessage (message: Message) {
   switch (message.type()) {
-    case PUPPET.type.Message.Text:
+    case PUPPET.types.Message.Text:
       await message.talker().say(message.text())
       break
-    case PUPPET.type.Message.Audio:
+    case PUPPET.types.Message.Audio:
       await message.talker().say(await message.toFileBox())
       break
     default:
