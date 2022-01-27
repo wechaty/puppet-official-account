@@ -434,7 +434,7 @@ class PuppetOA extends PUPPET.Puppet {
     return payload
   }
 
-  private async messageSend (
+  private async _messageSend (
     conversationId: string,
     something: string | FileBox, // | Attachment
     mediatype: OAMediaType = 'image',
@@ -469,7 +469,7 @@ class PuppetOA extends PUPPET.Puppet {
     conversationId: string,
     text     : string,
   ): Promise<string> {
-    return this.messageSend(conversationId, text)
+    return this._messageSend(conversationId, text)
   }
 
   override async messageSendFile (
@@ -491,7 +491,7 @@ class PuppetOA extends PUPPET.Puppet {
       default:
         throw new Error(`unsupported media type: ${file.mimeType}`)
     }
-    return this.messageSend(conversationId, file, msgtype)
+    return this._messageSend(conversationId, file, msgtype)
   }
 
   override async messageSendContact (
