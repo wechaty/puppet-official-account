@@ -64,3 +64,5 @@ typings/
 .DS_Store
 t/
 t.*
+
+.idea

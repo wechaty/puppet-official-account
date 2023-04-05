@@ -123,7 +123,7 @@ class OfficialAccount extends EventEmitter {
 
     this.webhook.on('message', message => {
       this.payloadStore.setMessagePayload(message.MsgId, message)
-        .then(message => this.emit('message', message))
+        .then(() => this.emit('message', message))
         .catch(console.error)
     })
 
@@ -225,6 +225,7 @@ class OfficialAccount extends EventEmitter {
      */
     let timer: undefined | ReturnType<typeof setTimeout>
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const update: () => void = () => this.updateAccessToken()
       .then(succeed => succeed
         ? this.accessTokenPayload!.expiresIn - marginSeconds

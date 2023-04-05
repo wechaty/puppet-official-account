@@ -267,8 +267,10 @@ class PuppetOA extends PUPPET.Puppet {
      */
 
     const contactPayload = await this.contactPayload(contactId)
-    const fileBox = FileBox.fromUrl(contactPayload.avatar)
-    return fileBox
+    const fileBox = contactPayload.avatar ? FileBox.fromUrl(contactPayload.avatar) : undefined
+    if (fileBox) {
+      return fileBox
+    }
   }
 
   override async contactRawPayloadParser (oaPayload: OAContactPayload): Promise<PUPPET.payloads.Contact> {
@@ -398,10 +400,10 @@ class PuppetOA extends PUPPET.Puppet {
 
   override async messageRawPayloadParser (rawPayload: OAMessagePayload): Promise<PUPPET.payloads.Message> {
     const payload: PUPPET.payloads.Message = {
-      fromId    : rawPayload.FromUserName,
       id        : rawPayload.MsgId,
+      listenerId: rawPayload.ToUserName,
+      talkerId  : rawPayload.FromUserName,
       timestamp : parseInt(rawPayload.CreateTime),
-      toId      : rawPayload.ToUserName,
       type      : PUPPET.types.Message.Text,
     }
     if (rawPayload.MsgType === 'image') {
@@ -723,7 +725,7 @@ class PuppetOA extends PUPPET.Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactAdd(%s)', tagId, contactId)
-    await this.oa?.addTagToMembers(tagId, [contactId])
+    await this.oa?.addTagToMembers(tagId, [ contactId ])
   }
 
   override async tagContactRemove (
@@ -731,7 +733,7 @@ class PuppetOA extends PUPPET.Puppet {
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetOA', 'tagContactRemove(%s)', tagId, contactId)
-    await this.oa?.removeTagFromMembers(tagId, [contactId])
+    await this.oa?.removeTagFromMembers(tagId, [ contactId ])
   }
 
   override async tagContactDelete (
