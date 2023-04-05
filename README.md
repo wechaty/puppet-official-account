@@ -140,6 +140,7 @@ Initial version for Official Account.
 ## Maintainers
 
 - [@huan](https://github.com/huan) Huan
+- [@leochen-g](https://wechaty.js.org/contributors/leochen-g/) Leo chen
 - [@wj-Mcat](https://github.com/wj-Mcat)
 - [@qhduan](https://github.com/qhduan)
 
