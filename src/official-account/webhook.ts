@@ -294,7 +294,7 @@ class Webhook extends WebhookEventEmitter {
       }
       if (reply) {
         this.userOpen[payload.FromUserName] = undefined
-        return res.end(reply)
+        res.end(reply)
       }
     }
     this.userOpen[payload.FromUserName] = undefined
