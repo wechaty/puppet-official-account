@@ -182,6 +182,7 @@ class PuppetOA extends PUPPET.Puppet {
       this.oa.removeAllListeners()
       await this.oa.stop()
       this.oa = undefined
+      await this.logout('oa.on(logout)')
     }
   }
 
