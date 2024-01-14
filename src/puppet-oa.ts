@@ -480,8 +480,13 @@ class PuppetOA extends PUPPET.Puppet {
     file     : FileBox,
   ): Promise<string> {
     let msgtype: OAMediaType
-    switch (file.mimeType) {
+    const mimeType = file.mediaType
+    switch (mimeType) {
       case 'image/jpeg':
+      case 'image/jpg':
+      case 'image/png':
+      case 'image/webp':
+      case 'image/gif':
         msgtype = 'image'
         break
       case 'audio/amr':
