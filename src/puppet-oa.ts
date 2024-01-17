@@ -485,7 +485,6 @@ class PuppetOA extends PUPPET.Puppet {
       case 'image/jpeg':
       case 'image/jpg':
       case 'image/png':
-      case 'image/webp':
       case 'image/gif':
         msgtype = 'image'
         break
