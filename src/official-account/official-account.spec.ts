@@ -45,10 +45,10 @@ test('OfficialAccount smoke testing', async t => {
   const PAYLOAD = {
     Content      : 'testing123',
     CreateTime   : '1596436942',
-    FromUserName : 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
+    FromUserName : 'oMlUq6kYAV9o4PM53mFEDs95Y6wk',
     MsgId        : '22855481560378379',
     MsgType      : 'text',
-    ToUserName   : 'gh_d06c5c4a0126',
+    ToUserName   : 'gh_1f352e1e8f1a',
   }
 
   const XML = `
@@ -121,7 +121,7 @@ test('sendCustomMessage()', async t => {
     const ret = await oa.sendCustomMessage({
       content: 'wechaty-puppet-official-account CI testing',
       msgtype: 'text',
-      touser: 'ooEEu1Pdb4otFUedqOx_LP1p8sSQ',
+      touser: 'oMlUq6kYAV9o4PM53mFEDs95Y6wk',
     })
     t.not(ret, null, 'should get messageId')
   } catch (e) {
