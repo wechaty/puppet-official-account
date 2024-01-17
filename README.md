@@ -14,18 +14,18 @@ Wechaty Puppet for WeChat Official Accounts helps you use Wechaty to manage your
 
 ## FEATURES
 
-1. Provide web hook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel))
+1. Provide webhook proxy out-of-the-box (powered by [localtunnel](https://github.com/localtunnel/localtunnel))
 
 ## USAGE
 
-This documentation assume that you are familiar with Wechaty already.
+This documentation assumes that you are familiar with Wechaty already.
 
-If you are newbie to Wechaty, please read the following two links first:
+If you are a newbie to Wechaty, please read the following two links first:
 
 1. [Wechaty WebSite](https://wechaty.js.org)
 1. [Wechaty Getting Started](https://github.com/wechaty/wechaty-getting-started)
 
-In order to use `wechaty-puppet-official-account` with Wechaty, just like other puppets as well:
+To use `wechaty-puppet-official-account` with Wechaty, just like other puppets as well:
 
 ```ts
 import { Wechaty }  from 'wechaty'
@@ -61,27 +61,27 @@ You can use environment variables to configure all of the WeChat Official Accoun
 
 ### `WECHATY_PUPPET_OA_APP_ID`: `appId`
 
-Developer ID(AppID) is the developer ID, Official Account identification code, which can call Official Account API with developer's password.
+Developer ID(AppID) is the developer ID, Official Account identification code, which can call Official Account API with the developer's password.
 
 ### `WECHATY_PUPPET_OA_APP_SECRET`: `appSecret`
 
-Developer Password(AppSecret) is the one with high security to verify the identity of Official Account developer.
+The Developer Password(AppSecret) is the one with high security to verify the identity of the Official Account developer.
 
 ### `WECHATY_PUPPET_OA_TOKEN`: `token`
 
-Token is set by you for your server(URL) configuration.
+The token is set by you for your server(URL) configuration.
 
 ### `WECHATY_PUPPET_OA_PORT`
 
-Set `WECHATY_PUPPET_OA_PORT` to your local HTTP Server port number if you have a public server that can be visit from the internet.
+Set `WECHATY_PUPPET_OA_PORT` to your local HTTP Server port number if you have a public server that can be visited from the internet.
 
-After set ``WECHATY_PUPPET_OA_PORT`, the puppet will expose itself to the internet with this port for providing the HTTP service.
+After setting ``WECHATY_PUPPET_OA_PORT`, the puppet will expose itself to the internet with this port for providing the HTTP service.
 
 ### `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
 
 Set `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL` to a `localtunnel` supported address so that you will be able to provide the Server Address(URL) for WebHook usage with this URL.
 
-This is the most convenience way to use this puppet, because you can always provide the same URL to WeChat Official Account platform no matter where your program are running of.
+This is the most convenient way to use this puppet because you can always provide the same URL to the WeChat Official Account platform no matter where your program is running.
 
 Currently, you can generate this URL by yourself by:
 
@@ -90,16 +90,16 @@ Currently, you can generate this URL by yourself by:
 
 For example, if your UUID is `aeb082b9-14da-4c91-bdef-90a6d17a4z98`, then you can use `https://aeb082b9-14da-4c91-bdef-90a6d17a4z98.localtunnel.me` as `WECHATY_PUPPET_OA_WEBHOOK_PROXY_URL`
 
-Learn more from: [localtunnel](https://localtunnel.github.io/www/)
+Learn more from [localtunnel](https://localtunnel.github.io/www/)
 
 ## DEVELOPMENT
 
 When you start developing the WeChat Official Account, it will be very helpful with the following tools provided by Tencent:
 
 1. Apply a test Official Account with full privileges for developing
-1. Simulate the API calls in a online simulation tool.
+1. Simulate the API calls in an online simulation tool.
 
-### 1 Apply a Official Account for developing/testing
+### 1 Apply an Official Account for developing/testing
 
 测试号是扫码即可获得的微信公众号，拥有所有完整高级接口权限，测试专用。
 
@@ -123,7 +123,7 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 ### master v1.0 Release (Oct 29, 2021)
 
-1. v0.9 (Oct, 2021): Puppet API v0.51
+1. v0.9 (Oct 2021): Puppet API v0.51
 1. v0.7 (Sep 2021): Enable ES Module support for Node.js
 
 ### v0.4 (Aug 6, 2020)
@@ -134,15 +134,17 @@ Address: <https://mp.weixin.qq.com/debug/>
 
 Initial version for Official Account.
 
-1. receive message from user
-1. reply message to user (passive mode)
+1. receive messages from users
+1. reply message to a user (passive mode)
 
 ## Maintainers
 
-- [@huan](https://github.com/huan) Huan
-- [@leochen-g](https://wechaty.js.org/contributors/leochen-g/) Leo chen
-- [@wj-Mcat](https://github.com/wj-Mcat)
-- [@qhduan](https://github.com/qhduan)
+- Admins
+  - [@huan](https://github.com/huan) Huan
+  - [@leochen-g](https://wechaty.js.org/contributors/leochen-g/) Leo chen
+- Contributors
+  - [@wj-Mcat](https://github.com/wj-Mcat)
+  - [@qhduan](https://github.com/qhduan)
 
 ## COPYRIGHT & LICENSE
 
