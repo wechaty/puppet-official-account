@@ -255,10 +255,10 @@ class OfficialAccount extends EventEmitter {
     const uuid: string = UUID.v4()
     await this.payloadStore.setMessagePayload(uuid, {
       CreateTime   : getTimeStampString(),
+      Content      : args.content,
       FromUserName : this.oaId,
       MsgId        : uuid,
       MsgType      : 'text',
-      Content      : args.content,
       ToUserName   : args.touser,
     })
     return uuid
@@ -459,7 +459,7 @@ class OfficialAccount extends EventEmitter {
     let nextOpenId = ''
 
     // Individual subscription accounts and unverified accounts cannot access user information.
-    if (!!this.options.personalMode) {
+    if (this.options.personalMode) {
       return openIdList
     }
 
@@ -540,7 +540,7 @@ class OfficialAccount extends EventEmitter {
         qr_scene        : 0,
         qr_scene_str    : '',
       }
-      return subscribeContactPayload;
+      return subscribeContactPayload
     }
 
     const res = await this.simpleUnirest.get<OAContactPayload>(`user/info?access_token=${this.accessToken}&openid=${openId}&lang=zh_CN`)
