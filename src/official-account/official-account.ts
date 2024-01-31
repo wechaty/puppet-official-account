@@ -254,8 +254,8 @@ class OfficialAccount extends EventEmitter {
     this.webhook.emit('instantReply', args)
     const uuid: string = UUID.v4()
     await this.payloadStore.setMessagePayload(uuid, {
-      CreateTime   : getTimeStampString(),
       Content      : args.content,
+      CreateTime   : getTimeStampString(),
       FromUserName : this.oaId,
       MsgId        : uuid,
       MsgType      : 'text',
