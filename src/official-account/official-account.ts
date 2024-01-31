@@ -252,7 +252,16 @@ class OfficialAccount extends EventEmitter {
     content: string,
   }): Promise<string> {
     this.webhook.emit('instantReply', args)
-    return 'default-custome-message-id'
+    const uuid: string = UUID.v4()
+    await this.payloadStore.setMessagePayload(uuid, {
+      CreateTime   : getTimeStampString(),
+      FromUserName : this.oaId,
+      MsgId        : uuid,
+      MsgType      : 'text',
+      Content      : args.content,
+      ToUserName   : args.touser,
+    })
+    return uuid
   }
 
   /**
@@ -449,6 +458,11 @@ class OfficialAccount extends EventEmitter {
     let openIdList: string[] = []
     let nextOpenId = ''
 
+    // Individual subscription accounts and unverified accounts cannot access user information.
+    if (!!this.options.personalMode) {
+      return openIdList
+    }
+
     // eslint-disable-next-line
     while (true) {
       const req = await this.simpleUnirest.get<Partial<ErrorPayload> & {
@@ -502,6 +516,31 @@ class OfficialAccount extends EventEmitter {
         qr_scene_str    : '',
       }
       return selfContactPayload
+    }
+
+    if (openId && !!this.options.personalMode) {
+      // Individual subscription accounts and unverified accounts cannot access user information.
+      /* eslint-disable sort-keys */
+      const subscribeContactPayload: OAContactPayload = {
+        subscribe       : 1,
+        openid          : openId,
+        nickname        : '订阅者',
+        sex             : ContactGender.Unknown,
+        language        : 'zh_CN',
+        city            : '北京',
+        province        : '北京',
+        country         : '中国',
+        headimgurl      : '',
+        subscribe_time  : 0,
+        unionid         : '0',
+        remark          : '订阅者',
+        groupid         : 0,
+        tagid_list      : [],
+        subscribe_scene : '',
+        qr_scene        : 0,
+        qr_scene_str    : '',
+      }
+      return subscribeContactPayload;
     }
 
     const res = await this.simpleUnirest.get<OAContactPayload>(`user/info?access_token=${this.accessToken}&openid=${openId}&lang=zh_CN`)
