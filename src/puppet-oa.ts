@@ -183,6 +183,16 @@ class PuppetOA extends PUPPET.Puppet {
     }, 15 * 1000) // 15s
   }
 
+  // 停止监听心跳
+  private _stopPuppetHeart () {
+    if (!this._heartBeatTimer) {
+      return
+    }
+
+    clearTimeout(this._heartBeatTimer)
+    this._heartBeatTimer = undefined
+  }
+
   protected bridgeEvents (oa: OfficialAccount) {
     oa.on('message', msg => this.emit('message', { messageId: msg.MsgId }))
     oa.on('login', _ => this.login(this.currentUserId))
@@ -199,6 +209,7 @@ class PuppetOA extends PUPPET.Puppet {
       this.oa = undefined
       await this.logout('oa.on(logout)')
     }
+    this._stopPuppetHeart()
   }
 
   override ding (data?: string): void {
