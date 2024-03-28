@@ -9,7 +9,7 @@ const puppet = new PuppetOA({
   port: 80,
 })
 const bot = WechatyBuilder.build({
-  puppet: puppet,
+  puppet,
 })
 
 // 2. Register event handlers for Bot

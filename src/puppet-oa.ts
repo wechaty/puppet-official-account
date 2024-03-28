@@ -532,7 +532,7 @@ class PuppetOA extends PUPPET.Puppet {
   ) : Promise<string> {
     log.verbose('PuppetOA', 'messageSendUrl(%s, %s)', conversationId, urlLinkPayload)
     let msgId = null
-    msgId = await this.oa?.sendCustomLink({ touser: conversationId, urlLinkPayload: urlLinkPayload })
+    msgId = await this.oa?.sendCustomLink({ touser: conversationId, urlLinkPayload })
     if (!msgId) {
       throw new Error('PuppetOA messageSendUrl() can"t get msgId response')
     }

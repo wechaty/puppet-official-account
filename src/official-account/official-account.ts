@@ -693,7 +693,7 @@ class OfficialAccount extends EventEmitter {
     const res = await this.simpleUnirest.post<Partial<ErrorPayload> & {
       tagid_list : number[]
     }>(`tags/getidlist?access_token=${this.accessToken}`).send({
-      openid : openid,
+      openid,
     })
 
     if (res.body.errcode) {
@@ -736,8 +736,8 @@ class OfficialAccount extends EventEmitter {
     log.verbose('OfficialAccount', 'setMemberRemark(%s)', openid)
 
     const res = await this.simpleUnirest.post<Partial<ErrorPayload>>(`user/info/updateremark?access_token=${this.accessToken}`).send({
-      openid : openid,
-      remark : remark,
+      openid,
+      remark,
     })
 
     if (res.body.errcode) {
