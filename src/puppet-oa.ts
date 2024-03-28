@@ -79,6 +79,7 @@ class PuppetOA extends PUPPET.Puppet {
   protected accessTokenProxyUrl? : string
 
   protected oa? : OfficialAccount
+  private _heartBeatTimer?: ReturnType<typeof setTimeout>
 
   constructor (
     options: PuppetOAOptions = {},
@@ -158,6 +159,7 @@ class PuppetOA extends PUPPET.Puppet {
     this.bridgeEvents(this.oa)
     await this.oa.start()
 
+    await this._startPuppetHeart(true)
     // FIXME: Huan(202008) find a way to get the bot user information
     // Official Account Info can be customized by user, so It should be
     // configured by environment variable.
@@ -166,6 +168,19 @@ class PuppetOA extends PUPPET.Puppet {
     await this.oa.payloadStore.setContactPayload(currentUserId, { openid: currentUserId } as any)
     this.login(currentUserId)
     this.emit('ready', { data: 'ready' })
+  }
+
+  private async _startPuppetHeart (firstTime: boolean = true) {
+    if (firstTime && this._heartBeatTimer) {
+      return
+    }
+
+    this.emit('heartbeat', { data: 'heartbeat@office: live' })
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this._heartBeatTimer = setTimeout(async (): Promise<void> => {
+      await this._startPuppetHeart(false)
+      return undefined
+    }, 15 * 1000) // 15s
   }
 
   protected bridgeEvents (oa: OfficialAccount) {
