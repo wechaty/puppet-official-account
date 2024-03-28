@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-official-account",
-  "version": "1.10.9",
+  "version": "1.10.10",
   "description": "Wechaty Puppet for WeChat Official Accounts",
   "type": "module",
   "exports": {
