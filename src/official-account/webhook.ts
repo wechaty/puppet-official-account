@@ -2,7 +2,7 @@ import http         from 'http'
 import express      from 'express'
 import xmlParser    from 'express-xml-bodyparser'
 import localtunnel  from 'localtunnel'
-
+import * as UUID from 'uuid'
 import { log }            from 'wechaty-puppet'
 import { EventEmitter }   from 'events'
 import type TypedEventEmitter  from 'typed-emitter'
@@ -259,6 +259,9 @@ class Webhook extends WebhookEventEmitter {
     /**
      * TODO: support more MsgType
      */
+    if (payload.MsgType === 'event') {
+      payload.MsgId = UUID.v4()
+    }
     if (knownTypeList.includes(payload.MsgType)) {
       if (payload.MsgType === 'event' && payload.Event !== 'CLICK') return
       this.emit('message', payload)
