@@ -8,11 +8,14 @@ export type OAMessageType = 'text'
               | 'location'
               | 'link'
               | 'miniprogrampage'
+              | 'event'
 
 export type OAMediaType = 'image'
                       | 'voice'
                       | 'video'
                       | 'thumb'
+
+export type OAEventType = 'subscribe' | 'unsubscribe' | 'SCAN' | 'LOCATION' | 'CLICK'
 
 export type Language = 'en'
                     | 'zh_CN'
@@ -32,6 +35,8 @@ export interface OAMessagePayload {
   Content?     : string
   PicUrl?      : string
   MediaId?     : string
+  Event?       : OAEventType
+  EventKey?    : string
 }
 
 /* eslint-disable camelcase */

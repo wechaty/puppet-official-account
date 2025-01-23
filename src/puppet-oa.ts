@@ -445,6 +445,8 @@ class PuppetOA extends PUPPET.Puppet {
       payload.type = PUPPET.types.Message.Location
     } else if (rawPayload.MsgType === 'text') {
       payload.text = rawPayload.Content
+    } else if (rawPayload.MsgType === 'event') {
+      payload.text = rawPayload.EventKey
     } else if (rawPayload.MsgType === 'voice') {
       payload.type = PUPPET.types.Message.Audio
       payload.filename = await this.oa?.getAudioUrl(rawPayload.MediaId!)

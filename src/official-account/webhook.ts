@@ -252,6 +252,7 @@ class Webhook extends WebhookEventEmitter {
       'text',
       'image',
       'voice',
+      'event',
     ]
 
     this.userOpen[payload.FromUserName] = true
@@ -259,6 +260,7 @@ class Webhook extends WebhookEventEmitter {
      * TODO: support more MsgType
      */
     if (knownTypeList.includes(payload.MsgType)) {
+      if (payload.MsgType === 'event' && payload.Event !== 'CLICK') return
       this.emit('message', payload)
     }
 
